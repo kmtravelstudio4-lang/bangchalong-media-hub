@@ -215,11 +215,20 @@ export const TeacherProfileModal: React.FC = () => {
         {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-slate-100 pb-4 shrink-0">
           <div className="flex items-center space-x-3">
-            <img 
-              src={form.photo || currentTeacher.photo || 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=400&auto=format&fit=crop'} 
-              alt={form.name} 
-              className="w-12 h-12 rounded-2xl object-cover border-2 border-[#005BAC] shadow-xs shrink-0" 
-            />
+            <div
+              onClick={() => setActiveTab('profile')}
+              className="relative group cursor-pointer shrink-0"
+              title="คลิกเพื่อเปลี่ยนรูปโปรไฟล์"
+            >
+              <img 
+                src={form.photo || currentTeacher.photo || 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=400&auto=format&fit=crop'} 
+                alt={form.name} 
+                className="w-12 h-12 rounded-2xl object-cover border-2 border-[#005BAC] shadow-xs group-hover:opacity-80 transition" 
+              />
+              <div className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white">
+                <Camera className="w-4 h-4" />
+              </div>
+            </div>
             <div>
               <div className="inline-flex items-center space-x-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full mb-0.5">
                 {isPaDone ? (
@@ -492,31 +501,14 @@ export const TeacherProfileModal: React.FC = () => {
         {activeTab === 'profile' && (
           <form id="teacher-profile-form" onSubmit={handleProfileSubmit} className="overflow-y-auto space-y-4 pr-1 text-xs max-h-[55vh]">
             {/* Section 1: Profile Photo Uploader with Auto Compression */}
-            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
               <ImageUploadCompressor
                 value={form.photo}
                 onChange={(newPhoto) => setForm({ ...form, photo: newPhoto })}
-                label="รูปโปรไฟล์ครู (บีบอัดอัตโนมัติ ไม่กินพื้นที่ DB)"
-                helpText="ระบบย่อภาพอัตโนมัติเหลือ ~15-30 KB ปลอดภัย ไม่เปลืองโควตาฐานข้อมูล"
+                mode="profile"
+                label="รูปโปรไฟล์ครู (บีบอัดจัตุรัส 1:1 อัตโนมัติ)"
+                helpText="ระบบย่อรูปถ่ายเหลือ ~15-25 KB ตัดขอบจัตุรัสพอดี โหลดไวและประหยัดพื้นที่ฐานข้อมูล 99%"
               />
-
-              <div className="pt-2 border-t border-slate-200/80">
-                <span className="text-[10px] text-slate-500 font-bold block mb-1.5">หรือเลือกรูปตัวอย่าง:</span>
-                <div className="flex items-center space-x-1.5 overflow-x-auto pb-1">
-                  {AVATAR_PRESETS.map((pUrl, idx) => (
-                    <button
-                      type="button"
-                      key={idx}
-                      onClick={() => setForm({ ...form, photo: pUrl })}
-                      className={`w-8 h-8 rounded-xl overflow-hidden border-2 transition shrink-0 ${
-                        form.photo === pUrl ? 'border-[#005BAC] scale-105 shadow-sm ring-2 ring-[#005BAC]/30' : 'border-slate-200 opacity-70 hover:opacity-100'
-                      }`}
-                    >
-                      <img src={pUrl} alt={`Preset ${idx + 1}`} className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
 
             {/* General Information */}

@@ -8,7 +8,8 @@ import {
   RefreshCw, 
   Layers, 
   ExternalLink,
-  Zap
+  Camera,
+  User
 } from 'lucide-react';
 import { compressImageFile, CompressionResult } from '../utils/imageCompressor';
 
@@ -64,6 +65,17 @@ export const EDUCATIONAL_COVER_PRESETS = [
   }
 ];
 
+export const TEACHER_AVATAR_PRESETS = [
+  'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1580894732413-802c676d0811?q=80&w=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop'
+];
+
 interface ImageUploadCompressorProps {
   value: string;
   onChange: (dataUrlOrUrl: string) => void;
@@ -72,17 +84,30 @@ interface ImageUploadCompressorProps {
   maxWidth?: number;
   maxHeight?: number;
   quality?: number;
+  mode?: 'profile' | 'thumbnail' | 'exam_cover' | 'custom';
 }
 
 export const ImageUploadCompressor: React.FC<ImageUploadCompressorProps> = ({
   value,
   onChange,
-  label = 'รูปภาพหน้าปกสื่อการสอน (Cover Image)',
-  helpText = 'ระบบจะบีบอัดภาพอัตโนมัติให้เหลือเพียง 20-40 KB ประหยัดพื้นที่ฐานข้อมูลและโหลดรวดเร็ว',
-  maxWidth = 640,
-  maxHeight = 640,
-  quality = 0.72
+  label,
+  helpText,
+  maxWidth,
+  maxHeight,
+  quality,
+  mode = 'thumbnail'
 }) => {
+  const isProfileMode = mode === 'profile';
+  
+  const displayLabel = label || (isProfileMode ? 'รูปภาพโปรไฟล์ (Profile Photo)' : 'รูปภาพหน้าปกสื่อการสอน (Cover Image)');
+  const displayHelpText = helpText || (isProfileMode 
+    ? 'ระบบจะบีบอัดรูปถ่ายและตัดขอบจัตุรัส 1:1 อัตโนมัติ เหลือเพียง ~15-25 KB ประหยัดพื้นที่ฐานข้อมูล 99%' 
+    : 'ระบบจะบีบอัดภาพอัตโนมัติให้เหลือเพียง 20-40 KB ประหยัดพื้นที่ฐานข้อมูลและโหลดรวดเร็ว');
+
+  const finalMaxW = maxWidth || (isProfileMode ? 320 : 640);
+  const finalMaxH = maxHeight || (isProfileMode ? 320 : 640);
+  const finalQuality = quality || (isProfileMode ? 0.75 : 0.72);
+
   const [activeTab, setActiveTab] = useState<'upload' | 'presets' | 'url'>('upload');
   const [isCompressing, setIsCompressing] = useState(false);
   const [compressionStats, setCompressionStats] = useState<CompressionResult | null>(null);
@@ -92,7 +117,7 @@ export const ImageUploadCompressor: React.FC<ImageUploadCompressorProps> = ({
 
   const handleFile = async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      setErrorMessage('กรุณาเลือกไฟล์รูปภาพเท่านั้น (JPEG, PNG, WebP)');
+      setErrorMessage('กรุณาเลือกไฟล์รูปภาพเท่านั้น (JPEG, PNG, WebP, GIF)');
       return;
     }
 
@@ -101,9 +126,10 @@ export const ImageUploadCompressor: React.FC<ImageUploadCompressorProps> = ({
 
     try {
       const result = await compressImageFile(file, {
-        maxWidth,
-        maxHeight,
-        quality,
+        maxWidth: finalMaxW,
+        maxHeight: finalMaxH,
+        quality: finalQuality,
+        mode: mode as ('profile' | 'thumbnail' | 'exam_cover' | 'custom'),
         mimeType: 'image/webp'
       });
 
@@ -156,18 +182,21 @@ export const ImageUploadCompressor: React.FC<ImageUploadCompressorProps> = ({
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       <div className="flex items-center justify-between">
-        <label className="block font-bold text-xs text-slate-700">
-          {label}
+        <label className="block font-bold text-slate-700 text-xs flex items-center space-x-1.5">
+          {isProfileMode ? <Camera className="w-3.5 h-3.5 text-[#005BAC]" /> : <ImageIcon className="w-3.5 h-3.5 text-[#005BAC]" />}
+          <span>{displayLabel}</span>
         </label>
-        <span className="text-[11px] text-emerald-600 font-semibold flex items-center">
-          <Zap className="w-3 h-3 mr-0.5 text-emerald-500" /> บีบอัดจิ๋ว ไม่กินพื้นที่ DB
+
+        <span className="text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-bold flex items-center space-x-1">
+          <Sparkles className="w-3 h-3 text-emerald-600" />
+          <span>WebP บีบอัดขั้นสุด</span>
         </span>
       </div>
 
-      {/* Mode Selector Tabs */}
-      <div className="flex items-center space-x-1 p-1 bg-slate-100 rounded-xl text-xs font-semibold text-slate-600">
+      {/* Mode Switcher Tabs */}
+      <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl text-xs text-slate-600">
         <button
           type="button"
           onClick={() => setActiveTab('upload')}
@@ -176,7 +205,7 @@ export const ImageUploadCompressor: React.FC<ImageUploadCompressorProps> = ({
           }`}
         >
           <Upload className="w-3.5 h-3.5" />
-          <span>อัปโหลดจากเครื่อง (บีบอัดอัตโนมัติ)</span>
+          <span>{isProfileMode ? 'อัปโหลดรูปถ่าย' : 'อัปโหลดภาพ'}</span>
         </button>
 
         <button
@@ -187,7 +216,7 @@ export const ImageUploadCompressor: React.FC<ImageUploadCompressorProps> = ({
           }`}
         >
           <Layers className="w-3.5 h-3.5" />
-          <span>เลือกภาพสำเร็จรูป</span>
+          <span>{isProfileMode ? 'รูปโปรไฟล์ตัวอย่าง' : 'เลือกภาพสำเร็จรูป'}</span>
         </button>
 
         <button
@@ -205,42 +234,113 @@ export const ImageUploadCompressor: React.FC<ImageUploadCompressorProps> = ({
       {/* Tab 1: Upload from Device with Compression */}
       {activeTab === 'upload' && (
         <div className="space-y-2">
-          <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-2xl p-4 sm:p-5 text-center cursor-pointer transition flex flex-col items-center justify-center space-y-2 ${
-              isDragging
-                ? 'border-[#005BAC] bg-blue-50/70 scale-[1.01]'
-                : 'border-slate-300 hover:border-[#005BAC] bg-slate-50/80 hover:bg-blue-50/30'
-            }`}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/png, image/jpeg, image/jpg, image/webp"
-              onChange={handleFileChange}
-              className="hidden"
-            />
+          {/* Profile-specific interactive avatar row */}
+          {isProfileMode ? (
+            <div className="flex flex-col sm:flex-row items-center gap-4 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className="relative group cursor-pointer shrink-0"
+                title="คลิกเพื่อเปลี่ยนรูปโปรไฟล์"
+              >
+                <div className="w-20 h-20 rounded-2xl overflow-hidden bg-slate-200 border-2 border-[#005BAC] shadow-md relative">
+                  {value ? (
+                    <img
+                      src={value}
+                      alt="Avatar Preview"
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-blue-50 text-[#005BAC]">
+                      <User className="w-10 h-10" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center text-white text-[10px] font-bold">
+                    <Camera className="w-5 h-5 mb-0.5" />
+                    <span>เปลี่ยนรูป</span>
+                  </div>
+                </div>
+              </div>
 
-            <div className="w-10 h-10 rounded-full bg-blue-100 text-[#005BAC] flex items-center justify-center">
-              {isCompressing ? (
-                <RefreshCw className="w-5 h-5 animate-spin" />
-              ) : (
-                <Upload className="w-5 h-5" />
-              )}
-            </div>
+              <div className="flex-1 text-center sm:text-left space-y-2 w-full">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <div>
+                  <p className="text-xs font-bold text-slate-800">
+                    {isCompressing ? 'กำลังบีบอัดรูปภาพโปรไฟล์...' : 'เลือกรูปถ่ายจากมือถือหรือคอมพิวเตอร์'}
+                  </p>
+                  <p className="text-[11px] text-slate-500">
+                    รองรับ JPG, PNG, WebP (บีบอัดจัตุรัส 1:1 เหลือ ~15-25 KB โหลดไวมาก)
+                  </p>
+                </div>
 
-            <div className="space-y-0.5">
-              <p className="text-xs font-bold text-slate-800">
-                {isCompressing ? 'กำลังบีบอัดรูปภาพให้เล็กลง...' : 'คลิกเพื่อเลือกรูปภาพ หรือลากไฟล์มาวางที่นี่'}
-              </p>
-              <p className="text-[11px] text-slate-500">
-                รองรับ JPG, PNG, WebP (บีบอัดอัตโนมัติเหลือ ~20-40 KB ประหยัดพื้นที่ 98%)
-              </p>
+                <div className="flex flex-wrap items-center gap-2 justify-center sm:justify-start">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isCompressing}
+                    className="px-3.5 py-1.5 bg-[#005BAC] hover:bg-[#004584] text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center space-x-1.5"
+                  >
+                    {isCompressing ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                    <span>{value ? 'เลือกรูปใหม่' : 'อัปโหลดรูปถ่าย'}</span>
+                  </button>
+
+                  {value && (
+                    <button
+                      type="button"
+                      onClick={handleClearImage}
+                      className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold transition flex items-center space-x-1"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>ลบรูป</span>
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`border-2 border-dashed rounded-2xl p-4 sm:p-5 text-center cursor-pointer transition flex flex-col items-center justify-center space-y-2 ${
+                isDragging
+                  ? 'border-[#005BAC] bg-blue-50/70 scale-[1.01]'
+                  : 'border-slate-300 hover:border-[#005BAC] bg-slate-50/80 hover:bg-blue-50/30'
+              }`}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+
+              <div className="w-10 h-10 rounded-full bg-blue-100 text-[#005BAC] flex items-center justify-center">
+                {isCompressing ? (
+                  <RefreshCw className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Upload className="w-5 h-5" />
+                )}
+              </div>
+
+              <div className="space-y-0.5">
+                <p className="text-xs font-bold text-slate-800">
+                  {isCompressing ? 'กำลังบีบอัดรูปภาพให้เล็กลง...' : 'คลิกเพื่อเลือกรูปภาพ หรือลากไฟล์มาวางที่นี่'}
+                </p>
+                <p className="text-[11px] text-slate-500">
+                  รองรับ JPG, PNG, WebP (บีบอัดอัตโนมัติเหลือ ~20-40 KB ประหยัดพื้นที่ 98%)
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Compression Stat Pill */}
           {compressionStats && (
@@ -267,40 +367,70 @@ export const ImageUploadCompressor: React.FC<ImageUploadCompressorProps> = ({
       {/* Tab 2: Preset Library */}
       {activeTab === 'presets' && (
         <div className="space-y-2">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-1">
-            {EDUCATIONAL_COVER_PRESETS.map((preset) => {
-              const isSelected = value === preset.url;
-              return (
-                <button
-                  key={preset.id}
-                  type="button"
-                  onClick={() => handleSelectPreset(preset.url)}
-                  className={`group relative rounded-xl overflow-hidden border text-left transition aspect-4/3 flex flex-col justify-end p-2 ${
-                    isSelected ? 'ring-2 ring-[#005BAC] border-transparent shadow-md' : 'border-slate-200 hover:border-slate-300'
-                  }`}
-                >
-                  <img
-                    src={preset.url}
-                    alt={preset.title}
-                    referrerPolicy="no-referrer"
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                  
-                  <div className="relative z-10 space-y-0.5">
-                    <span className="text-[9px] font-bold text-amber-300 uppercase block">{preset.tag}</span>
-                    <p className="text-[10px] font-bold text-white leading-tight line-clamp-1">{preset.title}</p>
-                  </div>
-
-                  {isSelected && (
-                    <div className="absolute top-1.5 right-1.5 z-20 w-5 h-5 bg-[#005BAC] text-white rounded-full flex items-center justify-center shadow-md">
-                      <Check className="w-3 h-3" />
+          {isProfileMode ? (
+            <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 p-1">
+              {TEACHER_AVATAR_PRESETS.map((pUrl, idx) => {
+                const isSelected = value === pUrl;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleSelectPreset(pUrl)}
+                    className={`group relative rounded-2xl overflow-hidden border-2 transition aspect-square flex items-center justify-center p-0.5 ${
+                      isSelected ? 'border-[#005BAC] ring-2 ring-[#005BAC]/30 scale-105 shadow-md' : 'border-slate-200 hover:border-slate-300 opacity-80 hover:opacity-100'
+                    }`}
+                  >
+                    <img
+                      src={pUrl}
+                      alt={`Avatar Preset ${idx + 1}`}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover rounded-xl"
+                    />
+                    {isSelected && (
+                      <div className="absolute top-1 right-1 z-20 w-4 h-4 bg-[#005BAC] text-white rounded-full flex items-center justify-center shadow-xs">
+                        <Check className="w-2.5 h-2.5" />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-1">
+              {EDUCATIONAL_COVER_PRESETS.map((preset) => {
+                const isSelected = value === preset.url;
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => handleSelectPreset(preset.url)}
+                    className={`group relative rounded-xl overflow-hidden border text-left transition aspect-4/3 flex flex-col justify-end p-2 ${
+                      isSelected ? 'ring-2 ring-[#005BAC] border-transparent shadow-md' : 'border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <img
+                      src={preset.url}
+                      alt={preset.title}
+                      referrerPolicy="no-referrer"
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                    
+                    <div className="relative z-10 space-y-0.5">
+                      <span className="text-[9px] font-bold text-amber-300 uppercase block">{preset.tag}</span>
+                      <p className="text-[10px] font-bold text-white leading-tight line-clamp-1">{preset.title}</p>
                     </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+
+                    {isSelected && (
+                      <div className="absolute top-1.5 right-1.5 z-20 w-5 h-5 bg-[#005BAC] text-white rounded-full flex items-center justify-center shadow-md">
+                        <Check className="w-3 h-3" />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
@@ -309,7 +439,7 @@ export const ImageUploadCompressor: React.FC<ImageUploadCompressorProps> = ({
         <div className="space-y-1.5">
           <input
             type="url"
-            placeholder="https://images.unsplash.com/... หรือ ลิงก์รูปภาพอื่น"
+            placeholder={isProfileMode ? "https://... วางลิงก์รูปภาพโปรไฟล์" : "https://images.unsplash.com/... หรือ ลิงก์รูปภาพอื่น"}
             value={value}
             onChange={(e) => {
               setCompressionStats(null);
@@ -320,8 +450,8 @@ export const ImageUploadCompressor: React.FC<ImageUploadCompressorProps> = ({
         </div>
       )}
 
-      {/* Image Preview & Quick Actions */}
-      {value && (
+      {/* Image Preview for non-profile mode */}
+      {!isProfileMode && value && (
         <div className="flex items-center space-x-3 p-2 bg-slate-50 rounded-xl border border-slate-200">
           <div className="w-16 h-12 rounded-lg overflow-hidden bg-slate-200 shrink-0 relative shadow-xs">
             <img
@@ -353,7 +483,7 @@ export const ImageUploadCompressor: React.FC<ImageUploadCompressorProps> = ({
       )}
 
       <p className="text-[11px] text-slate-400">
-        💡 {helpText}
+        💡 {displayHelpText}
       </p>
     </div>
   );

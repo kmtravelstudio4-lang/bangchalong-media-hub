@@ -22,6 +22,7 @@ import {
   LogOut, 
   ShieldCheck, 
   Star, 
+  Camera,
   Layers, 
   Share2, 
   Calendar, 
@@ -363,12 +364,20 @@ export const TeacherDashboardPage: React.FC = () => {
             
             {/* Teacher Identity & Bio */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-5">
-              <div className="relative">
+              <div 
+                onClick={() => setIsTeacherProfileOpen(true)}
+                className="relative cursor-pointer group shrink-0"
+                title="คลิกเพื่อแก้ไขรูปโปรไฟล์"
+              >
                 <img 
                   src={currentTeacher.photo || 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=200'} 
                   alt={currentTeacher.name} 
-                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl object-cover border-4 border-white/40 shadow-xl"
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl object-cover border-4 border-white/40 shadow-xl group-hover:opacity-90 transition"
                 />
+                <div className="absolute inset-0 bg-black/40 rounded-3xl opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center text-white text-[11px] font-bold">
+                  <Camera className="w-5 h-5 mb-0.5" />
+                  <span>เปลี่ยนรูป</span>
+                </div>
                 <span className="absolute -bottom-2 -right-2 bg-emerald-500 text-white p-1.5 rounded-full shadow-md border-2 border-white" title="สถานะ: เข้าสู่ระบบแล้ว">
                   <CheckCircle2 className="w-4 h-4" />
                 </span>

@@ -3751,8 +3751,9 @@ export const AdminDashboard: React.FC = () => {
               <ImageUploadCompressor
                 value={tForm.photo}
                 onChange={(newPhoto) => setTForm({ ...tForm, photo: newPhoto })}
-                label="รูปโปรไฟล์ครู (บีบอัดอัตโนมัติ ~15-30 KB)"
-                helpText="ระบบย่อภาพอัตโนมัติ ประหยัดเนื้อที่ฐานข้อมูล"
+                mode="profile"
+                label="รูปโปรไฟล์ครู (บีบอัดจัตุรัส 1:1 อัตโนมัติ ~15-25 KB)"
+                helpText="ระบบย่อรูปถ่ายเหลือ ~15-25 KB ตัดขอบจัตุรัสพอดี โหลดไวและประหยัดพื้นที่ฐานข้อมูล 99%"
               />
 
               <div>
@@ -4271,8 +4272,9 @@ export const AdminDashboard: React.FC = () => {
               <ImageUploadCompressor
                 value={committeeFormData.avatar}
                 onChange={(newAvatar) => setCommitteeFormData({ ...committeeFormData, avatar: newAvatar })}
-                label="รูปภาพประจำตัวกรรมการ (บีบอัดอัตโนมัติ ~15-30 KB)"
-                helpText="ระบบย่อภาพอัตโนมัติ ประหยัดเนื้อที่ฐานข้อมูล"
+                mode="profile"
+                label="รูปประจำตัวกรรมการ (บีบอัดจัตุรัส 1:1 อัตโนมัติ ~15-25 KB)"
+                helpText="ระบบย่อรูปถ่ายเหลือ ~15-25 KB ตัดขอบจัตุรัสพอดี โหลดไวและประหยัดพื้นที่ฐานข้อมูล 99%"
               />
 
               <div className="grid grid-cols-2 gap-3">

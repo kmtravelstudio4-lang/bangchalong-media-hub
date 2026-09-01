@@ -39,7 +39,7 @@ export function formatBytes(bytes: number, decimals = 1): string {
 
 /**
  * Compresses a File or Blob client-side using Adaptive Multi-Pass Ultra Compression:
- * - Profile targets: max 512x512 px, ≤ 150 KB (Adaptive quality 0.82 -> 0.50)
+ * - Profile targets: max 320x320 px square, ≤ 35 KB (Ultra-compact 1:1 crop, WebP)
  * - Media Thumbnail targets: max 800x800 px, ≤ 200 KB (Adaptive quality 0.82 -> 0.50)
  * - Exam Cover targets: max 800x600 px, ≤ 100 KB (Adaptive quality 0.80 -> 0.45)
  * - Strips all EXIF / GPS / camera metadata
@@ -50,15 +50,15 @@ export async function compressImageFile(
   options: CompressionOptions = {}
 ): Promise<CompressionResult> {
   const mode = options.mode || 'thumbnail';
-  const defaultMaxDim = mode === 'profile' ? 512 : 800;
+  const defaultMaxDim = mode === 'profile' ? 320 : 800;
   const defaultTargetBytes = mode === 'profile' 
-    ? 150 * 1024 
+    ? 35 * 1024 
     : mode === 'exam_cover' 
       ? 100 * 1024 
       : 200 * 1024;
 
   let maxW = options.maxWidth || defaultMaxDim;
-  let maxH = options.maxHeight || (mode === 'exam_cover' ? 600 : defaultMaxDim);
+  let maxH = options.maxHeight || (mode === 'exam_cover' ? 600 : (mode === 'profile' ? 320 : defaultMaxDim));
   const targetBytes = options.targetMaxBytes || defaultTargetBytes;
   const preferredMime = options.mimeType || 'image/webp';
 
@@ -73,26 +73,7 @@ export async function compressImageFile(
       img.src = readerEvent.target?.result as string;
 
       img.onload = () => {
-        let currentW = img.width;
-        let currentH = img.height;
-
-        // Downscale to fit within initial bounding box
-        if (currentW > currentH) {
-          if (currentW > maxW) {
-            currentH = Math.round((currentH * maxW) / currentW);
-            currentW = maxW;
-          }
-        } else {
-          if (currentH > maxH) {
-            currentW = Math.round((currentW * maxH) / currentH);
-            currentH = maxH;
-          }
-        }
-
         const canvas = document.createElement('canvas');
-        canvas.width = currentW;
-        canvas.height = currentH;
-
         const ctx = canvas.getContext('2d');
         if (!ctx) {
           reject(new Error('Could not get canvas 2d context'));
@@ -101,10 +82,46 @@ export async function compressImageFile(
 
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(img, 0, 0, currentW, currentH);
 
-        // Adaptive Multi-pass Compression: try qualities 0.82, 0.72, 0.60, 0.50
-        const qualities = [options.quality || 0.80, 0.70, 0.60, 0.50];
+        let currentW = img.width;
+        let currentH = img.height;
+
+        if (mode === 'profile') {
+          // Center-crop 1:1 square for perfect avatar circle/square fit
+          const minSide = Math.min(img.width, img.height);
+          const startX = Math.round((img.width - minSide) / 2);
+          const startY = Math.round((img.height - minSide) / 2);
+          const finalDim = Math.min(maxW, 320, minSide);
+
+          canvas.width = finalDim;
+          canvas.height = finalDim;
+          ctx.drawImage(img, startX, startY, minSide, minSide, 0, 0, finalDim, finalDim);
+
+          currentW = finalDim;
+          currentH = finalDim;
+        } else {
+          // Downscale to fit within initial bounding box
+          if (currentW > currentH) {
+            if (currentW > maxW) {
+              currentH = Math.round((currentH * maxW) / currentW);
+              currentW = maxW;
+            }
+          } else {
+            if (currentH > maxH) {
+              currentW = Math.round((currentW * maxH) / currentH);
+              currentH = maxH;
+            }
+          }
+
+          canvas.width = currentW;
+          canvas.height = currentH;
+          ctx.drawImage(img, 0, 0, currentW, currentH);
+        }
+
+        // Adaptive Multi-pass Compression: try qualities
+        const qualities = mode === 'profile' 
+          ? [options.quality || 0.75, 0.65, 0.55, 0.45] 
+          : [options.quality || 0.80, 0.70, 0.60, 0.50];
         let bestDataUrl = '';
         let finalSizeBytes = 0;
 
