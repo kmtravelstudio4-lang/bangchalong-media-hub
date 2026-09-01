@@ -371,8 +371,20 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const openEditResource = (res: Resource) => {
-    const matchedTeacher = teachers.find(t => t.id === res.teacherId || (res.teacherName && t.name.trim().toLowerCase() === res.teacherName.trim().toLowerCase()));
-    const matchedCategory = categories.find(c => c.id === res.categoryId || (res.categoryName && c.name.trim().toLowerCase() === res.categoryName.trim().toLowerCase()));
+    const matchedTeacher = (teachers || []).find(t => {
+      if (!t) return false;
+      if (res.teacherId && t.id === res.teacherId) return true;
+      const tName = String(t.name || '').trim().toLowerCase();
+      const rName = String(res.teacherName || '').trim().toLowerCase();
+      return Boolean(tName && rName && tName === rName);
+    });
+    const matchedCategory = (categories || []).find(c => {
+      if (!c) return false;
+      if (res.categoryId && c.id === res.categoryId) return true;
+      const cName = String(c.name || '').trim().toLowerCase();
+      const rName = String(res.categoryName || '').trim().toLowerCase();
+      return Boolean(cName && rName && cName === rName);
+    });
 
     setEditingResource(res);
     setResForm({

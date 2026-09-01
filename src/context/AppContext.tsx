@@ -711,14 +711,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Live resources with teacher & category join (guarantees teacherName, teacherPhoto, categoryName match main site)
   const liveResources = useMemo(() => {
+    if (!Array.isArray(resources)) return [];
     return resources.map(r => {
-      const teacher = teachers.find(t => t.id === r.teacherId || (r.teacherName && t.name.trim().toLowerCase() === r.teacherName.trim().toLowerCase()));
-      const category = categories.find(c => c.id === r.categoryId || (r.categoryName && c.name.trim().toLowerCase() === r.categoryName.trim().toLowerCase()));
+      if (!r) return r;
+      const teacher = (teachers || []).find(t => {
+        if (!t) return false;
+        if (r.teacherId && t.id === r.teacherId) return true;
+        const tName = String(t.name || (t as any).full_name || '').trim().toLowerCase();
+        const rName = String(r.teacherName || '').trim().toLowerCase();
+        return Boolean(tName && rName && tName === rName);
+      });
+
+      const category = (categories || []).find(c => {
+        if (!c) return false;
+        if (r.categoryId && c.id === r.categoryId) return true;
+        const cName = String(c.name || '').trim().toLowerCase();
+        const rCatName = String(r.categoryName || '').trim().toLowerCase();
+        return Boolean(cName && rCatName && cName === rCatName);
+      });
+
       return {
         ...r,
         teacherId: r.teacherId || teacher?.id || '',
-        teacherName: teacher?.name || r.teacherName || 'ครูโรงเรียนวัดบางโฉลงใน',
-        teacherPhoto: teacher?.photo || r.teacherPhoto || 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=200&auto=format&fit=crop',
+        teacherName: teacher?.name || (teacher as any)?.full_name || r.teacherName || 'ครูโรงเรียนวัดบางโฉลงใน',
+        teacherPhoto: teacher?.photo || (teacher as any)?.photo_url || r.teacherPhoto || 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=200&auto=format&fit=crop',
         teacherPosition: teacher?.position || r.teacherPosition || 'ครูผู้สอน',
         categoryId: r.categoryId || category?.id || '',
         categoryName: category?.name || r.categoryName || 'ทั่วไป',

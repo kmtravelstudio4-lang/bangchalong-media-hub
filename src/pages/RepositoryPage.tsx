@@ -78,10 +78,12 @@ export const RepositoryPage: React.FC = () => {
       if (teacherFilter !== 'all') {
         const teacherObj = teachers.find(t => t.id === teacherFilter);
         const matchesId = res.teacherId === teacherFilter;
-        const matchesName = Boolean(teacherObj && res.teacherName && (
-          res.teacherName.trim().toLowerCase() === teacherObj.name.trim().toLowerCase() ||
-          res.teacherName.includes(teacherObj.name) ||
-          teacherObj.name.includes(res.teacherName)
+        const tName = String(teacherObj?.name || '').trim().toLowerCase();
+        const rName = String(res.teacherName || '').trim().toLowerCase();
+        const matchesName = Boolean(tName && rName && (
+          rName === tName ||
+          rName.includes(tName) ||
+          tName.includes(rName)
         ));
         if (!matchesId && !matchesName) {
           return false;
