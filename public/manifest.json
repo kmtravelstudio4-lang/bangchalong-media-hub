@@ -1,0 +1,42 @@
+{
+  "name": "คลังสื่อการสอน โรงเรียนวัดบางโฉลงใน",
+  "short_name": "สื่อบางโฉลงใน",
+  "description": "แหล่งรวมสื่อการเรียนรู้ แผนการจัดการเรียนรู้ Active Learning ข้อตกลง ว PA และผลงานคณะครู โรงเรียนวัดบางโฉลงใน สพป.สมุทรปราการ เขต 2",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#003875",
+  "theme_color": "#003875",
+  "orientation": "portrait-primary",
+  "lang": "th",
+  "dir": "ltr",
+  "categories": ["education", "productivity", "utilities"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

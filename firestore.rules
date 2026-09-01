@@ -1,0 +1,96 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for data validation
+    function isValidString(str, minLen, maxLen) {
+      return str is string && str.size() >= minLen && str.size() <= maxLen;
+    }
+
+    function isValidScore(score) {
+      return score == null || (score is number && score >= 0 && score <= 100);
+    }
+
+    function isValidStatus(status) {
+      return status in ['pending', 'completed', 'passed', 'revision', 'excellent', 'approved', 'rejected'];
+    }
+
+    // 1. Resources Collection (Educational Media, Files, Worksheets)
+    match /resources/{resourceId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.title is string
+                            && request.resource.data.fileUrl is string
+                            && request.resource.data.fileType is string
+                            && request.resource.data.categoryId is string;
+      allow delete: if true;
+    }
+
+    // 2. Teachers Collection (Teacher Directory, Profiles & PA Submissions)
+    match /teachers/{teacherId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.name is string
+                            && request.resource.data.position is string
+                            && request.resource.data.email is string
+                            && request.resource.data.subjectId is string;
+      allow delete: if true;
+    }
+
+    // 3. Categories Collection (8 Learning Subject Groups & General)
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.name is string
+                            && request.resource.data.color is string;
+      allow delete: if true;
+    }
+
+    // 4. News Collection (School Announcements & Academic News)
+    match /news/{newsId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.title is string
+                            && request.resource.data.content is string;
+      allow delete: if true;
+    }
+
+    // 5. School Documents Collection (Official Forms, Handbooks, Regulations)
+    match /documents/{docId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.title is string
+                            && request.resource.data.fileUrl is string;
+      allow delete: if true;
+    }
+
+    // 6. Featured Videos Collection (School Activities, Instructional Videos)
+    match /videos/{videoId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.title is string
+                            && request.resource.data.youtubeUrl is string;
+      allow delete: if true;
+    }
+
+    // 7. PA Committee Collection (Evaluators & Evaluator Accounts)
+    match /pa_committee/{memberId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.name is string
+                            && request.resource.data.role is string
+                            && request.resource.data.code is string;
+      allow delete: if true;
+    }
+
+    // 8. PA Evaluation Records Collection (Checklist, Scores & Feedback)
+    match /pa_evaluations/{evalId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.teacherId is string
+                            && request.resource.data.committeeId is string
+                            && isValidStatus(request.resource.data.overallStatus)
+                            && isValidScore(request.resource.data.overallScore);
+      allow delete: if true;
+    }
+
+    // 9. System Initialization & Metadata
+    match /_metadata/{metaId} {
+      allow read: if true;
+      allow write: if metaId == 'app_init';
+    }
+  }
+}
+

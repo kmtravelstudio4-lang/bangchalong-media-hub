@@ -1,0 +1,6 @@
+{
+  "name": "คลังสื่อการสอน โรงเรียนวัดบางโฉลงใน",
+  "description": "ศูนย์รวมสื่อการเรียนการสอน ผลงานวิชาการ แผนการจัดการเรียนรู้ และข่าวสารการศึกษา คณะครูโรงเรียนวัดบางโฉลงใน",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

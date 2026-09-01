@@ -1,0 +1,77 @@
+{
+  "entities": {
+    "resources": {
+      "title": "Resources",
+      "description": "Educational materials and lesson plans",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "cover": { "type": "string" },
+        "categoryId": { "type": "string" },
+        "categoryName": { "type": "string" },
+        "categoryColor": { "type": "string" },
+        "gradeLevel": { "type": "string" },
+        "fileType": { "type": "string" },
+        "fileUrl": { "type": "string" },
+        "fileSize": { "type": "string" },
+        "teacherId": { "type": "string" },
+        "teacherName": { "type": "string" },
+        "views": { "type": "number" },
+        "downloads": { "type": "number" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string" },
+        "isFeatured": { "type": "boolean" }
+      }
+    },
+    "teachers": {
+      "title": "Teachers",
+      "description": "School teaching staff profiles",
+      "properties": {
+        "name": { "type": "string" },
+        "position": { "type": "string" },
+        "subjectId": { "type": "string" },
+        "subjectName": { "type": "string" },
+        "photo": { "type": "string" },
+        "bio": { "type": "string" },
+        "education": { "type": "string" },
+        "awards": { "type": "array", "items": { "type": "string" } },
+        "stats": { "type": "object" }
+      }
+    },
+    "categories": {
+      "title": "Categories",
+      "description": "8 subject learning categories",
+      "properties": {
+        "name": { "type": "string" },
+        "code": { "type": "string" },
+        "color": { "type": "string" },
+        "description": { "type": "string" },
+        "icon": { "type": "string" }
+      }
+    },
+    "news": {
+      "title": "News",
+      "description": "Academic news and announcements",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "image": { "type": "string" },
+        "category": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "author": { "type": "string" }
+      }
+    },
+    "documents": {
+      "title": "Documents",
+      "description": "Academic forms and school templates",
+      "properties": {
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "fileType": { "type": "string" },
+        "fileSize": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "fileUrl": { "type": "string" }
+      }
+    }
+  }
+}
