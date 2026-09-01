@@ -211,21 +211,21 @@ async function runMigration() {
   const examPayload = INITIAL_EXAM_QUESTIONS.map(e => ({
     id: e.id,
     title: e.title,
-    description: e.description,
-    cover_url: e.coverUrl,
+    description: e.description || '',
+    cover_image_url: e.coverImageUrl || '',
     subject: e.subject,
     subject_group: e.subjectGroup,
     grade_level: e.gradeLevel,
     exam_type: e.examType,
-    semester: e.semester,
-    academic_year: e.academicYear,
-    total_score: e.totalScore,
-    duration_minutes: e.durationMinutes,
-    question_count: e.questionCount,
-    google_form_url: e.googleFormUrl,
-    status: e.status,
-    author_name: e.authorName,
-    created_at: new Date().toISOString()
+    semester: e.semester || 'ภาคเรียนที่ 1',
+    academic_year: e.academicYear || '2569',
+    creator_name: e.creatorName || 'ฝ่ายวิชาการ',
+    exam_url: e.examUrl,
+    status: e.status || 'published',
+    view_count: e.viewCount || 0,
+    download_count: e.downloadCount || 0,
+    created_at: e.createdAt || new Date().toISOString(),
+    updated_at: e.updatedAt || new Date().toISOString()
   }));
   const { error: examErr } = await supabase.from('exam_questions').upsert(examPayload);
   if (examErr) console.error('  ❌ Exam Questions error:', examErr);

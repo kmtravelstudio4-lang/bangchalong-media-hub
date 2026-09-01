@@ -21,7 +21,8 @@ import {
   ClipboardCheck,
   ChevronDown,
   Layers,
-  Sparkle
+  Sparkle,
+  GraduationCap
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
