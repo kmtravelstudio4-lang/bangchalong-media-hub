@@ -27,6 +27,7 @@ import {
   Share2, 
   Calendar, 
   Lock, 
+  Key,
   X, 
   Save, 
   Bot, 
@@ -433,6 +434,15 @@ export const TeacherDashboardPage: React.FC = () => {
               >
                 <Edit3 className="w-4 h-4" />
                 <span>แก้ไขโปรไฟล์</span>
+              </button>
+
+              <button
+                onClick={() => setIsTeacherProfileOpen(true)}
+                className="bg-amber-400/20 hover:bg-amber-400/30 text-amber-200 border border-amber-300/30 font-bold text-xs px-3.5 py-2.5 rounded-xl transition flex items-center space-x-1.5 backdrop-blur-xs"
+                title="เปลี่ยนรหัสผ่านเข้าสู่ระบบของคุณครู"
+              >
+                <Key className="w-4 h-4" />
+                <span>🔑 รหัสผ่าน</span>
               </button>
 
               <button

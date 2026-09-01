@@ -186,7 +186,7 @@ export async function fetchTeachersFromSupabase(): Promise<Teacher[] | null> {
         paVideoUrl: paVideo,
         paDocumentUrl: paDoc,
         paStatus: paStatus,
-        password: t.password || '123456',
+        password: t.phone || t.employee_code || t.password || '123456',
       };
     });
   } catch (err) {
@@ -208,6 +208,7 @@ export async function upsertTeacherToSupabase(teacher: Teacher): Promise<boolean
       photo_url: teacher.photo,
       bio: teacher.bio,
       email: teacher.email,
+      phone: teacher.password || '123456',
       facebook: teacher.facebook,
       subject_id: teacher.subjectId,
       resources_count: teacher.resourcesCount || 0,

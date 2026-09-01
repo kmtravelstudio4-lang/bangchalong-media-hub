@@ -22,6 +22,11 @@ import {
   ExternalLink,
   AlertCircle,
   Calendar,
+  Key,
+  Eye,
+  EyeOff,
+  Lock,
+  ShieldCheck,
   Check
 } from 'lucide-react';
 import { ImageUploadCompressor } from './ImageUploadCompressor';
@@ -85,9 +90,13 @@ export const TeacherProfileModal: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [submittingRes, setSubmittingRes] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [confirmPassword, setConfirmPassword] = useState('123456');
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   useEffect(() => {
     if (currentTeacher) {
+      const currentPass = currentTeacher.password || '123456';
       setForm({
         name: currentTeacher.name || '',
         position: currentTeacher.position || 'ครู',
@@ -101,8 +110,10 @@ export const TeacherProfileModal: React.FC = () => {
         paYear: currentTeacher.paYear || '2569',
         paVideoUrl: currentTeacher.paVideoUrl || '',
         paDocumentUrl: currentTeacher.paDocumentUrl || '',
-        password: currentTeacher.password || '123456'
+        password: currentPass
       });
+      setConfirmPassword(currentPass);
+      setPasswordError(null);
       
       setResForm(prev => ({
         ...prev,
@@ -124,6 +135,21 @@ export const TeacherProfileModal: React.FC = () => {
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setPasswordError(null);
+
+    const newPass = form.password.trim() || '123456';
+    const confPass = confirmPassword.trim() || '123456';
+
+    if (newPass !== confPass) {
+      setPasswordError('รหัสผ่านใหม่และการยืนยันรหัสผ่านไม่ตรงกัน');
+      return;
+    }
+
+    if (newPass.length < 4) {
+      setPasswordError('รหัสผ่านต้องมีความยาวอย่างน้อย 4 ตัวอักษร');
+      return;
+    }
+
     setSaving(true);
     setSuccessMsg(null);
 
@@ -144,13 +170,13 @@ export const TeacherProfileModal: React.FC = () => {
         paVideoUrl: form.paVideoUrl.trim(),
         paDocumentUrl: form.paDocumentUrl.trim(),
         paStatus: calculatedStatus,
-        password: form.password.trim() || '123456'
+        password: newPass
       });
 
       if (calculatedStatus === 'completed') {
-        setSuccessMsg('บันทึกข้อมูลสำเร็จ! ระบบอัปเดตสถานะเป็น "✅ จัดทำเรียบร้อยแล้ว"');
+        setSuccessMsg('บันทึกข้อมูลและรหัสผ่านสำเร็จ! ระบบอัปเดตสถานะเป็น "✅ จัดทำเรียบร้อยแล้ว"');
       } else {
-        setSuccessMsg('บันทึกข้อมูลเรียบร้อยแล้ว! (กรอกชื่อประเด็นท้าทายและคลิปวิดีโอเพื่อเปลี่ยนเป็นสถานะจัดทำเรียบร้อย)');
+        setSuccessMsg('บันทึกข้อมูลและรหัสผ่านเรียบร้อยแล้ว!');
       }
 
       setTimeout(() => setSuccessMsg(null), 4000);
@@ -632,16 +658,89 @@ export const TeacherProfileModal: React.FC = () => {
               />
             </div>
 
-            {/* Password */}
-            <div>
-              <label className="block font-bold text-slate-700 mb-1">🔑 รหัสผ่านเข้าสู่ระบบของคุณครู</label>
-              <input
-                type="text"
-                placeholder="เปลี่ยนรหัสผ่านส่วนตัว"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="w-full bg-white border border-slate-300 rounded-xl py-2 px-3 text-xs font-bold text-slate-900"
-              />
+            {/* Security & Password Change Card */}
+            <div className="bg-gradient-to-br from-amber-50/70 to-blue-50/70 p-4 rounded-2xl border border-amber-200/80 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="font-bold text-slate-800 text-xs flex items-center space-x-1.5">
+                  <Key className="w-4 h-4 text-amber-600" />
+                  <span>ความปลอดภัย & รหัสผ่านเข้าสู่ระบบ</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-[11px] text-[#005BAC] hover:underline font-bold flex items-center space-x-1"
+                >
+                  {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5 text-slate-500" />}
+                  <span>{showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                    รหัสผ่านใหม่ *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="กรอกรหัสผ่านใหม่ (เช่น 123456)"
+                      value={form.password}
+                      onChange={(e) => {
+                        setForm({ ...form, password: e.target.value });
+                        setPasswordError(null);
+                      }}
+                      className="w-full bg-white border border-slate-300 rounded-xl py-2 px-3 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-[#005BAC]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                    ยืนยันรหัสผ่านใหม่อีกครั้ง *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="พิมพ์ยืนยันรหัสผ่านใหม่อีกครั้ง"
+                      value={confirmPassword}
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                        setPasswordError(null);
+                      }}
+                      className="w-full bg-white border border-slate-300 rounded-xl py-2 px-3 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-[#005BAC]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {passwordError && (
+                <p className="text-xs text-rose-600 font-bold flex items-center space-x-1 animate-in fade-in">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{passwordError}</span>
+                </p>
+              )}
+
+              {form.password && confirmPassword && form.password === confirmPassword && form.password.length >= 4 && (
+                <p className="text-[11px] text-emerald-700 font-bold flex items-center space-x-1 animate-in fade-in">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span>✓ รหัสผ่านตรงกันเรียบร้อย (กดบันทึกข้อมูลด้านล่างเพื่ออัปเดต)</span>
+                </p>
+              )}
+
+              <div className="flex items-center justify-between pt-1 border-t border-amber-200/60 text-[11px] text-slate-500">
+                <span>💡 รหัสเริ่มต้น: <strong>123456</strong></span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForm({ ...form, password: '123456' });
+                    setConfirmPassword('123456');
+                    setPasswordError(null);
+                  }}
+                  className="text-amber-800 hover:text-amber-950 font-bold hover:underline"
+                >
+                  คืนค่าเริ่มต้น (123456)
+                </button>
+              </div>
             </div>
           </form>
         )}
