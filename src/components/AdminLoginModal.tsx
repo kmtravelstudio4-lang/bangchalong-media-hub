@@ -69,7 +69,7 @@ export const AdminLoginModal: React.FC = () => {
             <div className="relative">
               <input
                 type="text"
-                placeholder="nasdking123"
+                placeholder="kmtravelstudio4-lang / admin"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-9 pr-4 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#005BAC]"

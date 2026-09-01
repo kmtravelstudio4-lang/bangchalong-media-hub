@@ -489,8 +489,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const cleanUser = (usernameOrEmail || '').trim().toLowerCase();
     const cleanPass = (passwordInput || '').trim();
 
-    const isValidUsername = cleanUser === 'nasdking123' || 
-                            cleanUser === 'nasdking123@bangchalong.ac.th' || 
+    const isValidUsername = cleanUser === 'kmtravelstudio4-lang' || 
+                            cleanUser === 'kmtravelstudio4@gmail.com' || 
+                            cleanUser === 'kmtravelstudio4@bangchalong.ac.th' || 
                             cleanUser === 'admin' ||
                             cleanUser === 'admin@bangchalong.ac.th';
     const isValidPassword = cleanPass === '0911351744a';
@@ -500,9 +501,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem(STORAGE_KEYS.TEACHER_USER);
 
       const user: AdminUser = {
-        id: 'admin-nasdking123',
-        email: 'nasdking123@bangchalong.ac.th',
-        name: 'ผู้ดูแลระบบ (Admin: nasdking123)',
+        id: 'admin-kmtravelstudio4-lang',
+        email: 'kmtravelstudio4@gmail.com',
+        name: 'ผู้ดูแลระบบ (Admin: kmtravelstudio4-lang)',
         role: 'admin',
         avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop'
       };
