@@ -88,7 +88,7 @@ async function runMigration() {
   }));
   const { error: teachErr } = await supabase.from('teachers').upsert(teacherPayload);
   if (teachErr) console.error('  ❌ Teachers error:', teachErr);
-  else console.log('  ✓ Teachers (14) synced');
+  else console.log(`  ✓ Teachers (${INITIAL_TEACHERS.length}) synced`);
 
   // 3. Resources
   const resourcePayload = INITIAL_RESOURCES.map(r => ({
@@ -112,7 +112,7 @@ async function runMigration() {
   }));
   const { error: resErr } = await supabase.from('resources').upsert(resourcePayload);
   if (resErr) console.error('  ❌ Resources error:', resErr);
-  else console.log('  ✓ Educational Resources (23) synced');
+  else console.log(`  ✓ Educational Resources (${INITIAL_RESOURCES.length}) synced`);
 
   // 4. Committee Members
   const memberPayload = INITIAL_PA_COMMITTEE.map(m => ({
