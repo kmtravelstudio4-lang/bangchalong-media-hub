@@ -121,25 +121,40 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, Error
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6 text-center">
-          <div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-200 max-w-md w-full space-y-4">
-            <div className="w-16 h-16 bg-blue-50 text-[#005BAC] rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold">
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 text-center">
+          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 max-w-lg w-full space-y-4">
+            <div className="w-14 h-14 bg-blue-50 text-[#005BAC] rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold">
               🏫
             </div>
             <h2 className="font-prompt font-bold text-slate-900 text-lg">
               คลังสื่อการสอน โรงเรียนวัดบางโฉลงใน
             </h2>
+            
+            {this.state.error && (
+              <div className="bg-rose-50 border border-rose-200 text-rose-800 p-3 rounded-xl text-left text-xs font-mono break-all max-h-36 overflow-y-auto">
+                <div className="font-bold text-xs">{this.state.error.name}: {this.state.error.message}</div>
+              </div>
+            )}
+
             <p className="text-xs text-slate-500">
-              เกิดข้อผิดพลาดในการโหลดระบบ กำลังรีเฟรชเพื่อโหลดข้อมูลเวอร์ชันล่าสุด
+              กดปุ่มด้านล่างเพื่อล้างข้อมูลแคชและโหลดข้อมูลล่าสุดจากเซิร์ฟเวอร์
             </p>
             <button
               onClick={() => {
-                localStorage.clear();
-                window.location.href = '/';
+                try {
+                  localStorage.clear();
+                  sessionStorage.clear();
+                  if ('caches' in window) {
+                    caches.keys().then(names => names.forEach(name => caches.delete(name)));
+                  }
+                } catch (e) {
+                  // ignore
+                }
+                window.location.reload();
               }}
               className="w-full bg-[#005BAC] hover:bg-[#004584] text-white py-3 rounded-xl font-bold text-xs shadow-md transition"
             >
-              รีเฟรชหน้าเว็บใหม่ (Clear Cache & Reload)
+              รีเฟรชและล้างแคชระบบ (Clear Cache & Reload)
             </button>
           </div>
         </div>

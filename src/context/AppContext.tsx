@@ -240,7 +240,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [resources, setResources] = useState<Resource[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.RESOURCES);
-      return saved ? JSON.parse(saved) : INITIAL_RESOURCES;
+      if (!saved) return INITIAL_RESOURCES;
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : INITIAL_RESOURCES;
     } catch {
       return INITIAL_RESOURCES;
     }
@@ -249,7 +251,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [teachers, setTeachers] = useState<Teacher[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.TEACHERS);
-      return saved ? JSON.parse(saved) : INITIAL_TEACHERS;
+      if (!saved) return INITIAL_TEACHERS;
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : INITIAL_TEACHERS;
     } catch {
       return INITIAL_TEACHERS;
     }
@@ -258,7 +262,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [categories, setCategories] = useState<Category[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
-      return saved ? JSON.parse(saved) : INITIAL_CATEGORIES;
+      if (!saved) return INITIAL_CATEGORIES;
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : INITIAL_CATEGORIES;
     } catch {
       return INITIAL_CATEGORIES;
     }
@@ -267,7 +273,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [newsList, setNewsList] = useState<News[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.NEWS);
-      return saved ? JSON.parse(saved) : INITIAL_NEWS;
+      if (!saved) return INITIAL_NEWS;
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : INITIAL_NEWS;
     } catch {
       return INITIAL_NEWS;
     }
@@ -276,7 +284,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [documents, setDocuments] = useState<SchoolDocument[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.DOCUMENTS);
-      return saved ? JSON.parse(saved) : INITIAL_DOCUMENTS;
+      if (!saved) return INITIAL_DOCUMENTS;
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : INITIAL_DOCUMENTS;
     } catch {
       return INITIAL_DOCUMENTS;
     }
@@ -287,7 +297,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [paCommitteeMembers, setPaCommitteeMembers] = useState<PaCommitteeMember[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.COMMITTEE);
-      return saved ? JSON.parse(saved) : INITIAL_PA_COMMITTEE;
+      if (!saved) return INITIAL_PA_COMMITTEE;
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : INITIAL_PA_COMMITTEE;
     } catch {
       return INITIAL_PA_COMMITTEE;
     }
@@ -296,7 +308,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [paEvaluations, setPaEvaluations] = useState<PaEvaluationRecord[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.EVALUATIONS);
-      return saved ? JSON.parse(saved) : INITIAL_PA_EVALUATIONS;
+      if (!saved) return INITIAL_PA_EVALUATIONS;
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : INITIAL_PA_EVALUATIONS;
     } catch {
       return INITIAL_PA_EVALUATIONS;
     }
@@ -306,7 +320,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [examQuestions, setExamQuestions] = useState<ExamQuestion[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.EXAM_QUESTIONS);
-      return saved ? JSON.parse(saved) : INITIAL_EXAM_QUESTIONS;
+      if (!saved) return INITIAL_EXAM_QUESTIONS;
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : INITIAL_EXAM_QUESTIONS;
     } catch {
       return INITIAL_EXAM_QUESTIONS;
     }
