@@ -15,7 +15,8 @@ import {
   INITIAL_DOCUMENTS, 
   INITIAL_VIDEOS, 
   INITIAL_PA_COMMITTEE, 
-  INITIAL_PA_EVALUATIONS 
+  INITIAL_PA_EVALUATIONS,
+  INITIAL_EXAM_QUESTIONS 
 } from '../src/data/mockData';
 
 dotenv.config();
@@ -206,8 +207,32 @@ async function runMigration() {
   if (vidErr) console.error('  ❌ Featured Videos error:', vidErr);
   else console.log('  ✓ Featured Videos (3) synced');
 
+  // 10. Exam Questions (คลังข้อสอบ)
+  const examPayload = INITIAL_EXAM_QUESTIONS.map(e => ({
+    id: e.id,
+    title: e.title,
+    description: e.description,
+    cover_url: e.coverUrl,
+    subject: e.subject,
+    subject_group: e.subjectGroup,
+    grade_level: e.gradeLevel,
+    exam_type: e.examType,
+    semester: e.semester,
+    academic_year: e.academicYear,
+    total_score: e.totalScore,
+    duration_minutes: e.durationMinutes,
+    question_count: e.questionCount,
+    google_form_url: e.googleFormUrl,
+    status: e.status,
+    author_name: e.authorName,
+    created_at: new Date().toISOString()
+  }));
+  const { error: examErr } = await supabase.from('exam_questions').upsert(examPayload);
+  if (examErr) console.error('  ❌ Exam Questions error:', examErr);
+  else console.log(`  ✓ Exam Questions (${INITIAL_EXAM_QUESTIONS.length}) synced`);
+
   console.log('\n============================================================');
-  console.log('🎉 100% COMPLETE: All Database Tables Synchronized to Supabase!');
+  console.log('🎉 100% COMPLETE: All 10 Database Tables Synchronized to Supabase!');
   console.log('============================================================');
 }
 

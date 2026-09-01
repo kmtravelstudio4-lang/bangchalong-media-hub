@@ -21,7 +21,8 @@ import {
   Play,
   Wand2,
   Zap,
-  FileText
+  FileText,
+  GraduationCap
 } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
@@ -31,6 +32,7 @@ export const HomePage: React.FC = () => {
     categories, 
     newsList, 
     videos,
+    examQuestions,
     setActiveTab, 
     viewCategoryResources,
     setIsAIPlannerOpen
@@ -243,6 +245,34 @@ export const HomePage: React.FC = () => {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* 3.5 📚 คลังข้อสอบโรงเรียนวัดบางโฉลงใน (School Exam Bank Showcase) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-gradient-to-r from-[#002D5E] via-[#004B8F] to-[#005BAC] rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 border-2 border-[#FFD54F]/20 relative overflow-hidden">
+          <div className="space-y-2 z-10 text-center md:text-left">
+            <div className="inline-flex items-center space-x-2 bg-[#FFD54F]/20 text-[#FFD54F] px-3 py-1 rounded-full text-xs font-bold border border-[#FFD54F]/30">
+              <GraduationCap className="w-4 h-4" />
+              <span>ระบบคลังข้อสอบ & แบบทดสอบวัดผล</span>
+            </div>
+            <h3 className="font-prompt text-2xl sm:text-3xl font-extrabold text-white">
+              คลังข้อสอบ โรงเรียนวัดบางโฉลงใน
+            </h3>
+            <p className="text-blue-100 text-xs sm:text-sm max-w-xl">
+              รวมแบบทดสอบก่อนเรียน-หลังเรียน ข้อสอบกลางภาค-ปลายภาค และแบบประเมินผลสัมฤทธิ์ทางการเรียนทุกระดับชั้นและทุกกลุ่มสาระการเรียนรู้
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-3 z-10 shrink-0">
+            <button
+              onClick={() => setActiveTab('exam-library')}
+              className="px-6 py-3 bg-[#FFD54F] hover:bg-[#ffca28] text-slate-950 rounded-2xl text-xs sm:text-sm font-extrabold transition shadow-md flex items-center space-x-2"
+            >
+              <span>เข้าสู่คลังข้อสอบ ({examQuestions.length} รายการ)</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </section>

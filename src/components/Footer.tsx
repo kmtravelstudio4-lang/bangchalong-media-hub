@@ -61,6 +61,11 @@ export const Footer: React.FC = () => {
                 </button>
               </li>
               <li>
+                <button onClick={() => setActiveTab('exam-library')} className="hover:text-[#FFD54F] text-[#FFD54F] font-bold transition flex items-center gap-1.5">
+                  <span>📚 คลังข้อสอบวัดผล (Exam Bank)</span>
+                </button>
+              </li>
+              <li>
                 <button onClick={() => setActiveTab('teachers')} className="hover:text-[#FFD54F] transition">
                   ผลงานและโปรไฟล์ครู
                 </button>

@@ -91,8 +91,9 @@ import {
   sanitizeFileName,
   PaExportFilterOptions
 } from '../utils/paExportUtils';
+import { AdminExamManagement } from './AdminExamManagement';
 
-type AdminTab = 'dashboard' | 'approvals' | 'resources' | 'teachers' | 'pa-management' | 'categories' | 'news' | 'videos' | 'documents' | 'settings';
+type AdminTab = 'dashboard' | 'approvals' | 'resources' | 'teachers' | 'pa-management' | 'exams' | 'categories' | 'news' | 'videos' | 'documents' | 'settings';
 
 export const AdminDashboard: React.FC = () => {
   const { 
@@ -102,6 +103,7 @@ export const AdminDashboard: React.FC = () => {
     newsList, 
     documents,
     videos,
+    examQuestions,
     paCommitteeMembers,
     paEvaluations,
     addCommitteeMember,
@@ -128,6 +130,7 @@ export const AdminDashboard: React.FC = () => {
     editNews, 
     deleteNews,
     addDocument,
+    editDocument,
     deleteDocument,
     addVideo,
     deleteVideo,
@@ -165,6 +168,7 @@ export const AdminDashboard: React.FC = () => {
   const [editingNews, setEditingNews] = useState<News | null>(null);
 
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
+  const [editingDoc, setEditingDoc] = useState<SchoolDocument | null>(null);
 
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
@@ -298,6 +302,8 @@ export const AdminDashboard: React.FC = () => {
   const handleSaveResource = (e: React.FormEvent) => {
     e.preventDefault();
     const tagArray = resForm.tags.split(',').map(t => t.trim()).filter(Boolean);
+    const selectedTeacher = teachers.find(t => t.id === resForm.teacherId);
+    const selectedCat = categories.find(c => c.id === resForm.categoryId);
 
     if (editingResource) {
       editResource(editingResource.id, {
@@ -309,7 +315,12 @@ export const AdminDashboard: React.FC = () => {
         fileType: resForm.fileType,
         fileSize: resForm.fileSize,
         teacherId: resForm.teacherId,
+        teacherName: selectedTeacher?.name || editingResource.teacherName || 'ครูโรงเรียนวัดบางโฉลงใน',
+        teacherPhoto: selectedTeacher?.photo || editingResource.teacherPhoto,
+        teacherPosition: selectedTeacher?.position || editingResource.teacherPosition,
         categoryId: resForm.categoryId,
+        categoryName: selectedCat?.name || editingResource.categoryName || 'ทั่วไป',
+        categoryColor: selectedCat?.color || editingResource.categoryColor || '#005BAC',
         gradeLevel: resForm.gradeLevel,
         tags: tagArray,
         featured: resForm.featured
@@ -324,7 +335,12 @@ export const AdminDashboard: React.FC = () => {
         fileType: resForm.fileType,
         fileSize: resForm.fileSize,
         teacherId: resForm.teacherId || teachers[0]?.id || '',
+        teacherName: selectedTeacher?.name || 'ครูโรงเรียนวัดบางโฉลงใน',
+        teacherPhoto: selectedTeacher?.photo,
+        teacherPosition: selectedTeacher?.position,
         categoryId: resForm.categoryId || categories[0]?.id || '',
+        categoryName: selectedCat?.name || 'ทั่วไป',
+        categoryColor: selectedCat?.color || '#005BAC',
         gradeLevel: resForm.gradeLevel,
         tags: tagArray,
         featured: resForm.featured
@@ -355,6 +371,9 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const openEditResource = (res: Resource) => {
+    const matchedTeacher = teachers.find(t => t.id === res.teacherId || (res.teacherName && t.name.trim().toLowerCase() === res.teacherName.trim().toLowerCase()));
+    const matchedCategory = categories.find(c => c.id === res.categoryId || (res.categoryName && c.name.trim().toLowerCase() === res.categoryName.trim().toLowerCase()));
+
     setEditingResource(res);
     setResForm({
       title: res.title,
@@ -364,8 +383,8 @@ export const AdminDashboard: React.FC = () => {
       previewUrl: res.previewUrl || '',
       fileType: res.fileType,
       fileSize: res.fileSize || '3.5 MB',
-      teacherId: res.teacherId,
-      categoryId: res.categoryId,
+      teacherId: matchedTeacher?.id || res.teacherId || teachers[0]?.id || '',
+      categoryId: matchedCategory?.id || res.categoryId || categories[0]?.id || '',
       gradeLevel: res.gradeLevel,
       tags: res.tags ? res.tags.join(', ') : '',
       featured: Boolean(res.featured)
@@ -457,11 +476,40 @@ export const AdminDashboard: React.FC = () => {
     setEditingNews(null);
   };
 
-  // Doc Save Action
+  // Doc Actions & Save
+  const openAddDoc = () => {
+    setEditingDoc(null);
+    setDocForm({
+      title: '',
+      category: 'แบบฟอร์มโรงเรียน',
+      fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+      fileType: 'PDF (.pdf)',
+      fileSize: '1.2 MB'
+    });
+    setIsDocModalOpen(true);
+  };
+
+  const openEditDoc = (doc: SchoolDocument) => {
+    setEditingDoc(doc);
+    setDocForm({
+      title: doc.title,
+      category: doc.category,
+      fileUrl: doc.fileUrl,
+      fileType: doc.fileType || 'PDF (.pdf)',
+      fileSize: doc.fileSize || '1.2 MB'
+    });
+    setIsDocModalOpen(true);
+  };
+
   const handleSaveDoc = (e: React.FormEvent) => {
     e.preventDefault();
-    addDocument(docForm);
+    if (editingDoc) {
+      editDocument(editingDoc.id, docForm);
+    } else {
+      addDocument(docForm);
+    }
     setIsDocModalOpen(false);
+    setEditingDoc(null);
   };
 
   // Video Save Action
@@ -579,6 +627,20 @@ export const AdminDashboard: React.FC = () => {
               <span className="bg-amber-500/20 text-[#FFD54F] border border-amber-500/40 text-[10px] px-2 py-0.5 rounded-full font-bold">
                 {teachers.filter(t => t.paStatus === 'completed' || (t.paChallengeTitle && t.paVideoUrl)).length}/{teachers.length}
               </span>
+            </button>
+
+            {/* คลังข้อสอบ */}
+            <button
+              onClick={() => setActiveAdminTab('exams')}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition ${
+                activeAdminTab === 'exams' ? 'bg-[#005BAC] text-white shadow-sm' : 'hover:bg-slate-800 text-slate-400 hover:text-white'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <GraduationCap className="w-4 h-4 text-[#FFD54F]" />
+                <span>คลังข้อสอบ</span>
+              </div>
+              <span className="bg-slate-800 text-xs px-2 py-0.5 rounded-full font-mono">{examQuestions.length}</span>
             </button>
 
             <button
@@ -816,10 +878,21 @@ export const AdminDashboard: React.FC = () => {
                     {resources.slice(0, 5).map((r) => (
                       <tr key={r.id} className="hover:bg-slate-50">
                         <td className="py-3 px-4 font-bold text-slate-900 max-w-xs truncate">{r.title}</td>
-                        <td className="py-3 px-4">{r.categoryName}</td>
+                        <td className="py-3 px-4">{r.categoryName || 'ทั่วไป'}</td>
                         <td className="py-3 px-4 font-semibold text-slate-800">{r.gradeLevel}</td>
                         <td className="py-3 px-4"><span className="bg-slate-100 px-2 py-0.5 rounded-md font-mono">{r.fileType}</span></td>
-                        <td className="py-3 px-4">{r.teacherName}</td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center space-x-2">
+                            <img 
+                              src={r.teacherPhoto || teachers.find(t => t.id === r.teacherId)?.photo || 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=200'} 
+                              alt={r.teacherName || 'ครูผู้จัดทำ'} 
+                              className="w-5 h-5 rounded-full object-cover shrink-0 border border-slate-200" 
+                            />
+                            <span className="font-medium text-slate-800">
+                              {r.teacherName || teachers.find(t => t.id === r.teacherId)?.name || 'ครูโรงเรียนวัดบางโฉลงใน'}
+                            </span>
+                          </div>
+                        </td>
                         <td className="py-3 px-4 text-center font-bold text-[#005BAC]">{r.downloads}</td>
                       </tr>
                     ))}
@@ -961,8 +1034,19 @@ export const AdminDashboard: React.FC = () => {
                       {resources.filter(r => r.status !== 'pending').slice(0, 10).map((r) => (
                         <tr key={r.id} className="hover:bg-slate-50">
                           <td className="py-3 px-4 font-bold text-slate-900">{r.title}</td>
-                          <td className="py-3 px-4">{r.teacherName}</td>
-                          <td className="py-3 px-4">{r.categoryName}</td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-2">
+                              <img 
+                                src={r.teacherPhoto || teachers.find(t => t.id === r.teacherId)?.photo || 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=200'} 
+                                alt={r.teacherName || 'ครูผู้จัดทำ'} 
+                                className="w-5 h-5 rounded-full object-cover shrink-0 border border-slate-200" 
+                              />
+                              <span className="font-medium text-slate-800">
+                                {r.teacherName || teachers.find(t => t.id === r.teacherId)?.name || 'ครูโรงเรียนวัดบางโฉลงใน'}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">{r.categoryName || 'ทั่วไป'}</td>
                           <td className="py-3 px-4">
                             {(!r.status || r.status === 'approved') ? (
                               <span className="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full text-[10px]">
@@ -1074,10 +1158,26 @@ export const AdminDashboard: React.FC = () => {
                               </div>
                             </div>
                           </td>
-                          <td className="p-4 font-semibold text-slate-700">{res.categoryName}</td>
+                          <td className="p-4 font-semibold text-slate-700">{res.categoryName || 'ทั่วไป'}</td>
                           <td className="p-4"><span className="bg-blue-50 text-[#005BAC] font-bold px-2 py-0.5 rounded-md">{res.gradeLevel}</span></td>
                           <td className="p-4"><span className="bg-slate-100 text-slate-800 font-mono text-[11px] px-2 py-0.5 rounded-md">{res.fileType}</span></td>
-                          <td className="p-4 font-medium text-slate-800">{res.teacherName}</td>
+                          <td className="p-4">
+                            <div className="flex items-center space-x-2.5">
+                              <img 
+                                src={res.teacherPhoto || teachers.find(t => t.id === res.teacherId)?.photo || 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=200'} 
+                                alt={res.teacherName || 'ครูผู้จัดทำ'} 
+                                className="w-7 h-7 rounded-full object-cover shrink-0 border border-slate-200" 
+                              />
+                              <div className="min-w-0">
+                                <div className="font-bold text-slate-900 text-xs truncate max-w-[150px]">
+                                  {res.teacherName || teachers.find(t => t.id === res.teacherId)?.name || 'ครูโรงเรียนวัดบางโฉลงใน'}
+                                </div>
+                                <div className="text-[10px] text-slate-400 truncate max-w-[150px]">
+                                  {res.teacherPosition || teachers.find(t => t.id === res.teacherId)?.position || 'ครูผู้สอน'}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
                           <td className="p-4 text-center font-bold text-[#005BAC]">{res.downloads}</td>
                           <td className="p-4 text-center">
                             <div className="flex items-center justify-center space-x-2">
@@ -2737,6 +2837,13 @@ export const AdminDashboard: React.FC = () => {
           );
         })()}
 
+        {/* TAB 3.5: EXAM BANK MANAGEMENT (คลังข้อสอบ) */}
+        {activeAdminTab === 'exams' && (
+          <div className="animate-in fade-in duration-200">
+            <AdminExamManagement />
+          </div>
+        )}
+
         {/* TAB 4: CATEGORIES MANAGER */}
         {activeAdminTab === 'categories' && (
           <div className="space-y-6 animate-in fade-in duration-200">
@@ -2915,35 +3022,53 @@ export const AdminDashboard: React.FC = () => {
                 จัดการแบบฟอร์ม & เอกสารดาวน์โหลด
               </h1>
               <button
-                onClick={() => setIsDocModalOpen(true)}
-                className="bg-[#005BAC] hover:bg-[#004584] text-white px-4 py-2.5 rounded-xl font-bold text-xs"
+                onClick={openAddDoc}
+                className="bg-[#005BAC] hover:bg-[#004584] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm transition"
               >
                 + เพิ่มเอกสารใหม่
               </button>
             </div>
 
             <div className="space-y-3">
-              {documents.map((doc) => (
-                <div key={doc.id} className="bg-white p-4 rounded-xl border border-slate-200 flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <FileText className="w-5 h-5 text-[#005BAC]" />
-                    <div>
-                      <h4 className="font-bold text-slate-900 text-sm">{doc.title}</h4>
-                      <p className="text-xs text-slate-400">{doc.category} • {doc.fileType} • {doc.fileSize}</p>
+              {documents.length === 0 ? (
+                <div className="bg-white p-12 text-center text-slate-400 rounded-2xl border border-slate-200">
+                  <FileText className="w-12 h-12 mx-auto mb-2 opacity-40 text-blue-500" />
+                  <p className="font-bold text-sm">ยังไม่มีเอกสารในระบบ</p>
+                  <p className="text-xs text-slate-400">กดปุ่ม "+ เพิ่มเอกสารใหม่" ด้านบนเพื่อเริ่มอัปโหลดเอกสาร</p>
+                </div>
+              ) : (
+                documents.map((doc) => (
+                  <div key={doc.id} className="bg-white p-4 rounded-xl border border-slate-200 flex items-center justify-between hover:shadow-xs transition">
+                    <div className="flex items-center space-x-3 min-w-0">
+                      <FileText className="w-5 h-5 text-[#005BAC] shrink-0" />
+                      <div className="min-w-0">
+                        <h4 className="font-bold text-slate-900 text-sm truncate">{doc.title}</h4>
+                        <p className="text-xs text-slate-400">{doc.category} • {doc.fileType} • {doc.fileSize}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-1.5 shrink-0 ml-3">
+                      <button
+                        onClick={() => openEditDoc(doc)}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                        title="แก้ไขเอกสาร"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (window.confirm(`คุณยืนยันที่จะลบเอกสาร "${doc.title}" หรือไม่?`)) {
+                            deleteDocument(doc.id);
+                          }
+                        }}
+                        className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                        title="ลบเอกสาร"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
-                  <button
-                    onClick={() => {
-                      if (window.confirm('คุณยืนยันที่จะลบเอกสารนี้หรือไม่?')) {
-                        deleteDocument(doc.id);
-                      }
-                    }}
-                    className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         )}
@@ -3606,14 +3731,18 @@ export const AdminDashboard: React.FC = () => {
         <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 my-auto relative">
             <button
-              onClick={() => setIsDocModalOpen(false)}
+              onClick={() => {
+                setIsDocModalOpen(false);
+                setEditingDoc(null);
+              }}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2 rounded-full"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h2 className="font-prompt font-bold text-slate-900 text-xl mb-6">
-              เพิ่มเอกสารดาวน์โหลดใหม่
+            <h2 className="font-prompt font-bold text-slate-900 text-xl mb-6 flex items-center space-x-2">
+              <FileText className="w-5 h-5 text-[#005BAC]" />
+              <span>{editingDoc ? 'แก้ไขแบบฟอร์ม & เอกสารดาวน์โหลด' : 'เพิ่มเอกสารดาวน์โหลดใหม่'}</span>
             </h2>
 
             <form onSubmit={handleSaveDoc} className="space-y-4 text-xs">
@@ -3640,7 +3769,37 @@ export const AdminDashboard: React.FC = () => {
                   <option value="แผนการจัดการเรียนรู้">แผนการจัดการเรียนรู้</option>
                   <option value="เอกสาร SAR">เอกสาร SAR</option>
                   <option value="วิจัยในชั้นเรียน">วิจัยในชั้นเรียน</option>
+                  <option value="เอกสารวิชาการ">เอกสารวิชาการ</option>
+                  <option value="งานบริหารทั่วไป">งานบริหารทั่วไป</option>
                 </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">ประเภทไฟล์</label>
+                  <select
+                    value={docForm.fileType}
+                    onChange={(e) => setDocForm({ ...docForm, fileType: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 px-3 text-xs"
+                  >
+                    <option value="PDF (.pdf)">PDF (.pdf)</option>
+                    <option value="Word (.docx)">Word (.docx)</option>
+                    <option value="Excel (.xlsx)">Excel (.xlsx)</option>
+                    <option value="PowerPoint (.pptx)">PowerPoint (.pptx)</option>
+                    <option value="ZIP (.zip)">ZIP (.zip)</option>
+                    <option value="Google Drive Link">Google Drive Link</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">ขนาดไฟล์</label>
+                  <input
+                    type="text"
+                    value={docForm.fileSize}
+                    onChange={(e) => setDocForm({ ...docForm, fileSize: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 px-3 text-xs"
+                    placeholder="เช่น 1.2 MB"
+                  />
+                </div>
               </div>
 
               <div>
@@ -3648,6 +3807,7 @@ export const AdminDashboard: React.FC = () => {
                 <input
                   type="text"
                   required
+                  placeholder="https://drive.google.com/... หรือ ลิงก์ดาวน์โหลดไฟล์"
                   value={docForm.fileUrl}
                   onChange={(e) => setDocForm({ ...docForm, fileUrl: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 px-3 text-xs"
@@ -3657,16 +3817,19 @@ export const AdminDashboard: React.FC = () => {
               <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
                 <button
                   type="button"
-                  onClick={() => setIsDocModalOpen(false)}
+                  onClick={() => {
+                    setIsDocModalOpen(false);
+                    setEditingDoc(null);
+                  }}
                   className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold"
                 >
                   ยกเลิก
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-[#005BAC] text-white rounded-xl font-bold"
+                  className="px-6 py-2 bg-[#005BAC] text-white rounded-xl font-bold hover:bg-[#004584] transition"
                 >
-                  บันทึกเอกสาร
+                  {editingDoc ? 'บันทึกการแก้ไข' : 'บันทึกเอกสาร'}
                 </button>
               </div>
             </form>

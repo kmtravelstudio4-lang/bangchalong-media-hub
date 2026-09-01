@@ -65,6 +65,7 @@ export const Header: React.FC = () => {
     { id: 'home', label: 'หน้าแรก', icon: <BookOpen className="w-3.5 h-3.5" /> },
     ...(currentTeacher ? [{ id: 'teacher-dashboard' as ActiveTab, label: 'ห้องทำงานครู', icon: <UserCheck className="w-3.5 h-3.5 text-amber-500" /> }] : []),
     { id: 'repository', label: 'คลังสื่อการสอน', icon: <Layers className="w-3.5 h-3.5" /> },
+    { id: 'exam-library', label: 'คลังข้อสอบ', icon: <GraduationCap className="w-3.5 h-3.5 text-rose-500" /> },
     { id: 'teachers', label: 'ผลงานครู', icon: <Award className="w-3.5 h-3.5 text-blue-500" /> },
     { id: 'pa', label: 'ข้อตกลง PA', icon: <Award className="w-3.5 h-3.5 text-amber-500" /> },
     { id: 'pa-committee', label: 'กรรมการ PA', icon: <ClipboardCheck className="w-3.5 h-3.5 text-emerald-500" /> },

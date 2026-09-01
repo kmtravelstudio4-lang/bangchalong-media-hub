@@ -1,5 +1,6 @@
 export * from './supabaseClient';
 export * from './supabaseService';
+export * from './supabaseRealtimeService';
 
 /* Full Production PostgreSQL Schema Generator for Admin Dashboard & SQL Editor */
 export const SUPABASE_SQL_SCHEMA = `-- =============================================================================
@@ -186,6 +187,31 @@ CREATE TABLE IF NOT EXISTS public.featured_videos (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- 10. Exam Questions (School Examination Bank)
+CREATE TABLE IF NOT EXISTS public.exam_questions (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  subject_group TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  grade_level TEXT NOT NULL DEFAULT 'ทุกระดับชั้น',
+  semester TEXT NOT NULL DEFAULT 'ภาคเรียนที่ 1',
+  academic_year TEXT NOT NULL DEFAULT '2569',
+  exam_type TEXT NOT NULL DEFAULT 'แบบทดสอบ',
+  creator_name TEXT NOT NULL DEFAULT 'ฝ่ายวิชาการ',
+  exam_url TEXT NOT NULL,
+  cover_image_url TEXT,
+  status TEXT NOT NULL DEFAULT 'published' CHECK (status IN ('draft', 'published', 'archived')),
+  view_count INT NOT NULL DEFAULT 0 CHECK (view_count >= 0),
+  download_count INT NOT NULL DEFAULT 0 CHECK (download_count >= 0),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_exam_subject_group ON public.exam_questions(subject_group);
+CREATE INDEX IF NOT EXISTS idx_exam_grade_level ON public.exam_questions(grade_level);
+CREATE INDEX IF NOT EXISTS idx_exam_status ON public.exam_questions(status);
+
 -- Enable RLS
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
@@ -198,6 +224,7 @@ ALTER TABLE public.pa_evaluations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.news ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.school_documents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.featured_videos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.exam_questions ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Public Read Categories" ON public.categories FOR SELECT USING (true);
 CREATE POLICY "Public Read Teachers" ON public.teachers FOR SELECT USING (true);
@@ -207,8 +234,10 @@ CREATE POLICY "Public Read Committee Members" ON public.committee_members FOR SE
 CREATE POLICY "Public Read News" ON public.news FOR SELECT USING (true);
 CREATE POLICY "Public Read School Documents" ON public.school_documents FOR SELECT USING (true);
 CREATE POLICY "Public Read Featured Videos" ON public.featured_videos FOR SELECT USING (true);
+CREATE POLICY "Public Read Exam Questions" ON public.exam_questions FOR SELECT USING (true);
 CREATE POLICY "Authenticated Full Access Resources" ON public.resources FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Authenticated Full Access Evaluations" ON public.pa_evaluations FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY "Authenticated Full Access Exam Questions" ON public.exam_questions FOR ALL USING (auth.role() = 'authenticated');
 
 -- 10. Storage Buckets & Policies
 INSERT INTO storage.buckets (id, name, public)

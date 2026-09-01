@@ -24,8 +24,8 @@ export interface CompressionOptions {
   maxHeight?: number;
   quality?: number;
   mimeType?: 'image/webp' | 'image/jpeg';
-  targetMaxBytes?: number; // Target max size in bytes (e.g. 150KB for profile, 200KB for media)
-  mode?: 'profile' | 'thumbnail' | 'custom';
+  targetMaxBytes?: number; // Target max size in bytes (e.g. 150KB for profile, 200KB for media, 100KB for exam cover)
+  mode?: 'profile' | 'thumbnail' | 'exam_cover' | 'custom';
 }
 
 export function formatBytes(bytes: number, decimals = 1): string {
@@ -41,6 +41,7 @@ export function formatBytes(bytes: number, decimals = 1): string {
  * Compresses a File or Blob client-side using Adaptive Multi-Pass Ultra Compression:
  * - Profile targets: max 512x512 px, ≤ 150 KB (Adaptive quality 0.82 -> 0.50)
  * - Media Thumbnail targets: max 800x800 px, ≤ 200 KB (Adaptive quality 0.82 -> 0.50)
+ * - Exam Cover targets: max 800x600 px, ≤ 100 KB (Adaptive quality 0.80 -> 0.45)
  * - Strips all EXIF / GPS / camera metadata
  * - Converts to optimized WebP (with JPEG fallback)
  */
@@ -50,10 +51,14 @@ export async function compressImageFile(
 ): Promise<CompressionResult> {
   const mode = options.mode || 'thumbnail';
   const defaultMaxDim = mode === 'profile' ? 512 : 800;
-  const defaultTargetBytes = mode === 'profile' ? 150 * 1024 : 200 * 1024;
+  const defaultTargetBytes = mode === 'profile' 
+    ? 150 * 1024 
+    : mode === 'exam_cover' 
+      ? 100 * 1024 
+      : 200 * 1024;
 
   let maxW = options.maxWidth || defaultMaxDim;
-  let maxH = options.maxHeight || defaultMaxDim;
+  let maxH = options.maxHeight || (mode === 'exam_cover' ? 600 : defaultMaxDim);
   const targetBytes = options.targetMaxBytes || defaultTargetBytes;
   const preferredMime = options.mimeType || 'image/webp';
 

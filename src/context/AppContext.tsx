@@ -11,7 +11,8 @@ import {
   SupabaseConfig,
   PaCommitteeMember,
   PaEvaluationRecord,
-  TeacherConsensusResult
+  TeacherConsensusResult,
+  ExamQuestion
 } from '../types';
 import { 
   INITIAL_RESOURCES, 
@@ -22,6 +23,7 @@ import {
   INITIAL_VIDEOS, 
   INITIAL_PA_COMMITTEE, 
   INITIAL_PA_EVALUATIONS,
+  INITIAL_EXAM_QUESTIONS,
   getYouTubeId,
   isTeacherAssignedToCommittee,
   getTeacherCommitteeSetNumber
@@ -56,8 +58,12 @@ import {
   deleteCommitteeMemberFromSupabase,
   fetchPaEvaluationsFromSupabase,
   upsertPaEvaluationToSupabase,
-  subscribeToSupabaseRealtime
+  fetchExamQuestionsFromSupabase,
+  upsertExamQuestionToSupabase,
+  deleteExamQuestionFromSupabase,
+  incrementExamCounterInSupabase
 } from '../services/supabaseService';
+import { subscribeToAllRealtime } from '../services/supabaseRealtimeService';
 
 interface AppContextType {
   activeTab: ActiveTab;
@@ -89,6 +95,33 @@ interface AppContextType {
   sortBy: 'latest' | 'downloads' | 'title' | 'views';
   setSortBy: (sort: 'latest' | 'downloads' | 'title' | 'views') => void;
   resetFilters: () => void;
+
+  // Exam Bank (คลังข้อสอบ)
+  examQuestions: ExamQuestion[];
+  selectedExamQuestion: ExamQuestion | null;
+  setSelectedExamQuestion: (exam: ExamQuestion | null) => void;
+  examSearchQuery: string;
+  setExamSearchQuery: (query: string) => void;
+  examGradeFilter: string;
+  setExamGradeFilter: (grade: string) => void;
+  examSubjectGroupFilter: string;
+  setExamSubjectGroupFilter: (group: string) => void;
+  examSubjectFilter: string;
+  setExamSubjectFilter: (subject: string) => void;
+  examSemesterFilter: string;
+  setExamSemesterFilter: (sem: string) => void;
+  examYearFilter: string;
+  setExamYearFilter: (year: string) => void;
+  examTypeFilter: string;
+  setExamTypeFilter: (type: string) => void;
+  examSortBy: 'latest' | 'views' | 'downloads' | 'title';
+  setExamSortBy: (sort: 'latest' | 'views' | 'downloads' | 'title') => void;
+  resetExamFilters: () => void;
+  addExamQuestion: (exam: Omit<ExamQuestion, 'id' | 'createdAt' | 'updatedAt' | 'viewCount' | 'downloadCount'>) => Promise<void>;
+  editExamQuestion: (id: string, updated: Partial<ExamQuestion>) => Promise<void>;
+  deleteExamQuestion: (id: string) => Promise<void>;
+  incrementExamViews: (id: string) => void;
+  incrementExamDownloads: (id: string) => void;
   
   // Admin & Auth
   isAdmin: boolean;
@@ -146,6 +179,7 @@ interface AppContextType {
   deleteNews: (id: string) => Promise<void>;
 
   addDocument: (doc: Omit<SchoolDocument, 'id' | 'updatedAt' | 'downloads'>) => Promise<void>;
+  editDocument: (id: string, updated: Partial<SchoolDocument>) => Promise<void>;
   deleteDocument: (id: string) => Promise<void>;
 
   videos: FeaturedVideo[];
@@ -196,6 +230,7 @@ const STORAGE_KEYS = {
   COMMITTEE_USER: 'bangchalong_committee_user_v2',
   EVALUATIONS: 'bangchalong_evaluations_v2',
   COMMITTEE: 'bangchalong_committee_v2',
+  EXAM_QUESTIONS: 'bangchalong_exam_questions_v2',
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -266,6 +301,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return INITIAL_PA_EVALUATIONS;
     }
   });
+
+  // Exam Questions (School Examination Bank)
+  const [examQuestions, setExamQuestions] = useState<ExamQuestion[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.EXAM_QUESTIONS);
+      return saved ? JSON.parse(saved) : INITIAL_EXAM_QUESTIONS;
+    } catch {
+      return INITIAL_EXAM_QUESTIONS;
+    }
+  });
+
+  const [selectedExamQuestion, setSelectedExamQuestion] = useState<ExamQuestion | null>(null);
+
+  // Exam Filters State
+  const [examSearchQuery, setExamSearchQuery] = useState('');
+  const [examGradeFilter, setExamGradeFilter] = useState('all');
+  const [examSubjectGroupFilter, setExamSubjectGroupFilter] = useState('all');
+  const [examSubjectFilter, setExamSubjectFilter] = useState('all');
+  const [examSemesterFilter, setExamSemesterFilter] = useState('all');
+  const [examYearFilter, setExamYearFilter] = useState('all');
+  const [examTypeFilter, setExamTypeFilter] = useState('all');
+  const [examSortBy, setExamSortBy] = useState<'latest' | 'views' | 'downloads' | 'title'>('latest');
+
+  const resetExamFilters = () => {
+    setExamSearchQuery('');
+    setExamGradeFilter('all');
+    setExamSubjectGroupFilter('all');
+    setExamSubjectFilter('all');
+    setExamSemesterFilter('all');
+    setExamYearFilter('all');
+    setExamTypeFilter('all');
+    setExamSortBy('latest');
+  };
 
   // Selected Detail Modals
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
@@ -352,7 +420,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Supabase Config State
   const [supabaseConfig, setSupabaseConfig] = useState<SupabaseConfig>(getStoredSupabaseConfig());
 
-  // --- Sync with Supabase PostgreSQL & Realtime Channels ---
+  // --- Sync with Supabase PostgreSQL & Central Realtime Engine ---
   useEffect(() => {
     let isMounted = true;
 
@@ -369,7 +437,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           remoteDocs,
           remoteVideos,
           remoteCommittee,
-          remoteEvaluations
+          remoteEvaluations,
+          remoteExams
         ] = await Promise.all([
           fetchResourcesFromSupabase(),
           fetchTeachersFromSupabase(),
@@ -378,7 +447,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           fetchDocumentsFromSupabase(),
           fetchVideosFromSupabase(),
           fetchCommitteeMembersFromSupabase(),
-          fetchPaEvaluationsFromSupabase()
+          fetchPaEvaluationsFromSupabase(),
+          fetchExamQuestionsFromSupabase()
         ]);
 
         if (!isMounted) return;
@@ -422,6 +492,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setPaEvaluations(remoteEvaluations);
           localStorage.setItem(STORAGE_KEYS.EVALUATIONS, JSON.stringify(remoteEvaluations));
         }
+
+        if (remoteExams && remoteExams.length > 0) {
+          setExamQuestions(remoteExams);
+          localStorage.setItem(STORAGE_KEYS.EXAM_QUESTIONS, JSON.stringify(remoteExams));
+        }
       } catch (err) {
         console.info('Supabase initial sync active with local fallback.');
       }
@@ -429,49 +504,78 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     syncFromSupabase();
 
-    // Subscribe to Realtime Updates on core tables
-    const unsubResources = subscribeToSupabaseRealtime('resources', () => {
-      fetchResourcesFromSupabase().then(res => {
-        if (res && isMounted) {
-          setResources(res);
-          localStorage.setItem(STORAGE_KEYS.RESOURCES, JSON.stringify(res));
-        }
-      });
-    });
+    // Central Realtime listener across ALL tables
+    const unsubRealtime = subscribeToAllRealtime((table) => {
+      if (!isMounted) return;
 
-    const unsubTeachers = subscribeToSupabaseRealtime('teachers', () => {
-      fetchTeachersFromSupabase().then(t => {
-        if (t && isMounted) {
-          setTeachers(t);
-          localStorage.setItem(STORAGE_KEYS.TEACHERS, JSON.stringify(t));
-        }
-      });
-    });
-
-    const unsubEvaluations = subscribeToSupabaseRealtime('pa_evaluations', () => {
-      fetchPaEvaluationsFromSupabase().then(ev => {
-        if (ev && isMounted) {
-          setPaEvaluations(ev);
-          localStorage.setItem(STORAGE_KEYS.EVALUATIONS, JSON.stringify(ev));
-        }
-      });
-    });
-
-    const unsubCommittee = subscribeToSupabaseRealtime('committee_members', () => {
-      fetchCommitteeMembersFromSupabase().then(cm => {
-        if (cm && isMounted) {
-          setPaCommitteeMembers(cm);
-          localStorage.setItem(STORAGE_KEYS.COMMITTEE, JSON.stringify(cm));
-        }
-      });
+      if (table === 'resources') {
+        fetchResourcesFromSupabase().then(res => {
+          if (res && isMounted) {
+            setResources(res);
+            localStorage.setItem(STORAGE_KEYS.RESOURCES, JSON.stringify(res));
+          }
+        });
+      } else if (table === 'teachers') {
+        fetchTeachersFromSupabase().then(t => {
+          if (t && isMounted) {
+            setTeachers(t);
+            localStorage.setItem(STORAGE_KEYS.TEACHERS, JSON.stringify(t));
+          }
+        });
+      } else if (table === 'categories') {
+        fetchCategoriesFromSupabase().then(cats => {
+          if (cats && isMounted) {
+            setCategories(cats);
+            localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(cats));
+          }
+        });
+      } else if (table === 'news') {
+        fetchNewsFromSupabase().then(news => {
+          if (news && isMounted) {
+            setNewsList(news);
+            localStorage.setItem(STORAGE_KEYS.NEWS, JSON.stringify(news));
+          }
+        });
+      } else if (table === 'school_documents' || table === 'documents') {
+        fetchDocumentsFromSupabase().then(docs => {
+          if (docs && isMounted) {
+            setDocuments(docs);
+            localStorage.setItem(STORAGE_KEYS.DOCUMENTS, JSON.stringify(docs));
+          }
+        });
+      } else if (table === 'featured_videos' || table === 'videos') {
+        fetchVideosFromSupabase().then(vids => {
+          if (vids && isMounted) {
+            setVideos(vids);
+          }
+        });
+      } else if (table === 'committee_members') {
+        fetchCommitteeMembersFromSupabase().then(cm => {
+          if (cm && isMounted) {
+            setPaCommitteeMembers(cm);
+            localStorage.setItem(STORAGE_KEYS.COMMITTEE, JSON.stringify(cm));
+          }
+        });
+      } else if (table === 'pa_evaluations') {
+        fetchPaEvaluationsFromSupabase().then(ev => {
+          if (ev && isMounted) {
+            setPaEvaluations(ev);
+            localStorage.setItem(STORAGE_KEYS.EVALUATIONS, JSON.stringify(ev));
+          }
+        });
+      } else if (table === 'exam_questions') {
+        fetchExamQuestionsFromSupabase().then(exams => {
+          if (exams && isMounted) {
+            setExamQuestions(exams);
+            localStorage.setItem(STORAGE_KEYS.EXAM_QUESTIONS, JSON.stringify(exams));
+          }
+        });
+      }
     });
 
     return () => {
       isMounted = false;
-      unsubResources();
-      unsubTeachers();
-      unsubEvaluations();
-      unsubCommittee();
+      unsubRealtime();
     };
   }, [supabaseConfig]);
 
@@ -605,20 +709,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSupabaseConfig(newConf);
   };
 
-  // Live resources with teacher join
+  // Live resources with teacher & category join (guarantees teacherName, teacherPhoto, categoryName match main site)
   const liveResources = useMemo(() => {
     return resources.map(r => {
-      if (!r.teacherId) return r;
-      const teacher = teachers.find(t => t.id === r.teacherId);
-      if (!teacher) return r;
+      const teacher = teachers.find(t => t.id === r.teacherId || (r.teacherName && t.name.trim().toLowerCase() === r.teacherName.trim().toLowerCase()));
+      const category = categories.find(c => c.id === r.categoryId || (r.categoryName && c.name.trim().toLowerCase() === r.categoryName.trim().toLowerCase()));
       return {
         ...r,
-        teacherName: teacher.name || r.teacherName,
-        teacherPhoto: teacher.photo || r.teacherPhoto,
-        teacherPosition: teacher.position || r.teacherPosition,
+        teacherId: r.teacherId || teacher?.id || '',
+        teacherName: teacher?.name || r.teacherName || 'ครูโรงเรียนวัดบางโฉลงใน',
+        teacherPhoto: teacher?.photo || r.teacherPhoto || 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=200&auto=format&fit=crop',
+        teacherPosition: teacher?.position || r.teacherPosition || 'ครูผู้สอน',
+        categoryId: r.categoryId || category?.id || '',
+        categoryName: category?.name || r.categoryName || 'ทั่วไป',
+        categoryColor: category?.color || r.categoryColor || '#005BAC',
       };
     });
-  }, [resources, teachers]);
+  }, [resources, teachers, categories]);
 
   const approvedResources = useMemo(() => {
     return liveResources.filter(r => r.status !== 'rejected');
@@ -834,6 +941,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await upsertDocumentToSupabase(newD);
   };
 
+  const editDocument = async (id: string, updated: Partial<SchoolDocument>) => {
+    const today = new Date().toISOString().split('T')[0];
+    const existing = documents.find(d => d.id === id);
+    if (!existing) return;
+
+    const merged: SchoolDocument = {
+      ...existing,
+      ...updated,
+      updatedAt: today
+    };
+
+    setDocuments(prev => {
+      const next = prev.map(d => d.id === id ? merged : d);
+      localStorage.setItem(STORAGE_KEYS.DOCUMENTS, JSON.stringify(next));
+      return next;
+    });
+    await upsertDocumentToSupabase(merged);
+  };
+
   const deleteDocument = async (id: string) => {
     setDocuments(prev => prev.filter(d => d.id !== id));
     await deleteDocumentFromSupabase(id);
@@ -856,6 +982,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteVideo = async (id: string) => {
     setVideos(prev => prev.filter(v => v.id !== id));
     await deleteVideoFromSupabase(id);
+  };
+
+  // CRUD for Exam Questions (คลังข้อสอบ)
+  const addExamQuestion = async (data: Omit<ExamQuestion, 'id' | 'createdAt' | 'updatedAt' | 'viewCount' | 'downloadCount'>) => {
+    const newId = `exam-${Date.now()}`;
+    const newExam: ExamQuestion = {
+      ...data,
+      id: newId,
+      viewCount: 0,
+      downloadCount: 0,
+      createdAt: new Date().toISOString().split('T')[0],
+      updatedAt: new Date().toISOString().split('T')[0]
+    };
+    setExamQuestions(prev => [newExam, ...prev]);
+    localStorage.setItem(STORAGE_KEYS.EXAM_QUESTIONS, JSON.stringify([newExam, ...examQuestions]));
+    await upsertExamQuestionToSupabase(newExam);
+  };
+
+  const editExamQuestion = async (id: string, updated: Partial<ExamQuestion>) => {
+    const today = new Date().toISOString().split('T')[0];
+    setExamQuestions(prev => {
+      const next = prev.map(e => e.id === id ? { ...e, ...updated, updatedAt: today } : e);
+      localStorage.setItem(STORAGE_KEYS.EXAM_QUESTIONS, JSON.stringify(next));
+      return next;
+    });
+    const target = examQuestions.find(e => e.id === id);
+    if (target) {
+      const merged: ExamQuestion = { ...target, ...updated, updatedAt: today };
+      await upsertExamQuestionToSupabase(merged);
+    }
+  };
+
+  const deleteExamQuestion = async (id: string) => {
+    setExamQuestions(prev => {
+      const next = prev.filter(e => e.id !== id);
+      localStorage.setItem(STORAGE_KEYS.EXAM_QUESTIONS, JSON.stringify(next));
+      return next;
+    });
+    await deleteExamQuestionFromSupabase(id);
+  };
+
+  const incrementExamViews = (id: string) => {
+    setExamQuestions(prev => prev.map(e => e.id === id ? { ...e, viewCount: (e.viewCount || 0) + 1 } : e));
+    incrementExamCounterInSupabase(id, 'views');
+  };
+
+  const incrementExamDownloads = (id: string) => {
+    setExamQuestions(prev => prev.map(e => e.id === id ? { ...e, downloadCount: (e.downloadCount || 0) + 1 } : e));
+    incrementExamCounterInSupabase(id, 'downloads');
   };
 
   // PA Committee Authentication & Portal
@@ -1197,7 +1372,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     <AppContext.Provider value={{
       activeTab,
       setActiveTab,
-      resources,
+      resources: liveResources,
       teachers,
       categories,
       newsList,
@@ -1219,6 +1394,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       sortBy,
       setSortBy,
       resetFilters,
+      examQuestions,
+      selectedExamQuestion,
+      setSelectedExamQuestion,
+      examSearchQuery,
+      setExamSearchQuery,
+      examGradeFilter,
+      setExamGradeFilter,
+      examSubjectGroupFilter,
+      setExamSubjectGroupFilter,
+      examSubjectFilter,
+      setExamSubjectFilter,
+      examSemesterFilter,
+      setExamSemesterFilter,
+      examYearFilter,
+      setExamYearFilter,
+      examTypeFilter,
+      setExamTypeFilter,
+      examSortBy,
+      setExamSortBy,
+      resetExamFilters,
+      addExamQuestion,
+      editExamQuestion,
+      deleteExamQuestion,
+      incrementExamViews,
+      incrementExamDownloads,
       isAdmin,
       adminUser,
       isAdminLoginOpen,
@@ -1264,6 +1464,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       editNews,
       deleteNews,
       addDocument,
+      editDocument,
       deleteDocument,
       videos,
       addVideo,

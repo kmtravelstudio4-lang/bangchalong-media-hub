@@ -18,6 +18,7 @@ import { NewsPage } from './pages/NewsPage';
 import { DocumentsPage } from './pages/DocumentsPage';
 import { AboutPage } from './pages/AboutPage';
 import { ContactPage } from './pages/ContactPage';
+import { ExamLibraryPage } from './pages/ExamLibraryPage';
 import { AdminDashboard } from './components/AdminDashboard';
 import { ResourceDetailModal } from './components/ResourceDetailModal';
 import { TeacherDetailModal } from './components/TeacherDetailModal';
@@ -47,7 +48,7 @@ function MainContent() {
       } else if (action === 'ai-chat' || action === 'ai-qa') {
         setIsAIChatOpen(true);
       }
-      if (tab && ['home', 'repository', 'teachers', 'pa', 'pa-committee', 'subjects', 'news', 'documents', 'about', 'contact'].includes(tab)) {
+      if (tab && ['home', 'repository', 'exam-library', 'teachers', 'pa', 'pa-committee', 'subjects', 'news', 'documents', 'about', 'contact'].includes(tab)) {
         setActiveTab(tab as any);
       }
     } catch {
@@ -62,6 +63,7 @@ function MainContent() {
       <main className="flex-1">
         {activeTab === 'home' && <HomePage />}
         {activeTab === 'repository' && <RepositoryPage />}
+        {activeTab === 'exam-library' && <ExamLibraryPage />}
         {activeTab === 'teachers' && <TeachersPage />}
         {activeTab === 'pa' && <PaPage />}
         {activeTab === 'pa-committee' && <PaCommitteePage />}

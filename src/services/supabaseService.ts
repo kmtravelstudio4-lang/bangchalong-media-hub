@@ -7,8 +7,10 @@ import {
   SchoolDocument, 
   FeaturedVideo,
   PaCommitteeMember,
-  PaEvaluationRecord
+  PaEvaluationRecord,
+  ExamQuestion
 } from '../types';
+import { broadcastMutation, subscribeToTableRealtime } from './supabaseRealtimeService';
 
 /**
  * ----------------------------------------------------------------------
@@ -39,7 +41,12 @@ export async function fetchResourcesFromSupabase(): Promise<Resource[] | null> {
       fileType: r.file_type || r.fileType || 'PDF',
       fileSize: r.file_size || r.fileSize,
       teacherId: r.teacher_id || r.teacherId,
+      teacherName: r.teacher_name || r.teacherName,
+      teacherPhoto: r.teacher_photo || r.teacherPhoto,
+      teacherPosition: r.teacher_position || r.teacherPosition,
       categoryId: r.category_id || r.categoryId,
+      categoryName: r.category_name || r.categoryName,
+      categoryColor: r.category_color || r.categoryColor,
       gradeLevel: r.grade_level || r.gradeLevel || 'ทุกระดับชั้น',
       tags: Array.isArray(r.tags) ? r.tags : [],
       downloads: Number(r.downloads) || 0,
@@ -84,6 +91,7 @@ export async function upsertResourceToSupabase(resource: Resource): Promise<bool
 
     const { error } = await supabase.from('resources').upsert(payload);
     if (error) throw error;
+    broadcastMutation('resources', 'UPDATE', resource, resource.id);
     return true;
   } catch (err) {
     console.error('Supabase upsert resource error:', err);
@@ -98,6 +106,7 @@ export async function deleteResourceFromSupabase(id: string): Promise<boolean> {
   try {
     const { error } = await supabase.from('resources').delete().eq('id', id);
     if (error) throw error;
+    broadcastMutation('resources', 'DELETE', undefined, id);
     return true;
   } catch (err) {
     console.error('Supabase delete resource error:', err);
@@ -114,6 +123,7 @@ export async function incrementResourceCountersInSupabase(id: string, field: 'do
     if (data) {
       const currentVal = Number(data[field]) || 0;
       await supabase.from('resources').update({ [field]: currentVal + 1 }).eq('id', id);
+      broadcastMutation('resources', 'UPDATE', { id, [field]: currentVal + 1 }, id);
     }
   } catch (err) {
     console.warn(`Supabase increment ${field} error:`, err);
@@ -189,6 +199,7 @@ export async function upsertTeacherToSupabase(teacher: Teacher): Promise<boolean
 
     const { error } = await supabase.from('teachers').upsert(payload);
     if (error) throw error;
+    broadcastMutation('teachers', 'UPDATE', teacher, teacher.id);
     return true;
   } catch (err) {
     console.error('Supabase upsert teacher error:', err);
@@ -203,6 +214,7 @@ export async function deleteTeacherFromSupabase(id: string): Promise<boolean> {
   try {
     const { error } = await supabase.from('teachers').delete().eq('id', id);
     if (error) throw error;
+    broadcastMutation('teachers', 'DELETE', undefined, id);
     return true;
   } catch (err) {
     console.error('Supabase delete teacher error:', err);
@@ -257,6 +269,7 @@ export async function upsertCategoryToSupabase(cat: Category): Promise<boolean> 
     };
     const { error } = await supabase.from('categories').upsert(payload);
     if (error) throw error;
+    broadcastMutation('categories', 'UPDATE', cat, cat.id);
     return true;
   } catch (err) {
     console.error('Supabase upsert category error:', err);
@@ -271,6 +284,7 @@ export async function deleteCategoryFromSupabase(id: string): Promise<boolean> {
   try {
     const { error } = await supabase.from('categories').delete().eq('id', id);
     if (error) throw error;
+    broadcastMutation('categories', 'DELETE', undefined, id);
     return true;
   } catch (err) {
     console.error('Supabase delete category error:', err);
@@ -321,7 +335,11 @@ export async function upsertNewsToSupabase(item: News): Promise<boolean> {
       pinned: Boolean(item.pinned),
     };
     const { error } = await supabase.from('news').upsert(payload);
-    return !error;
+    if (!error) {
+      broadcastMutation('news', 'UPDATE', item, item.id);
+      return true;
+    }
+    return false;
   } catch {
     return false;
   }
@@ -332,7 +350,11 @@ export async function deleteNewsFromSupabase(id: string): Promise<boolean> {
   if (!supabase) return false;
   try {
     const { error } = await supabase.from('news').delete().eq('id', id);
-    return !error;
+    if (!error) {
+      broadcastMutation('news', 'DELETE', undefined, id);
+      return true;
+    }
+    return false;
   } catch {
     return false;
   }
@@ -375,7 +397,11 @@ export async function upsertDocumentToSupabase(docItem: SchoolDocument): Promise
       downloads: docItem.downloads,
     };
     const { error } = await supabase.from('school_documents').upsert(payload);
-    return !error;
+    if (!error) {
+      broadcastMutation('school_documents', 'UPDATE', docItem, docItem.id);
+      return true;
+    }
+    return false;
   } catch {
     return false;
   }
@@ -386,7 +412,11 @@ export async function deleteDocumentFromSupabase(id: string): Promise<boolean> {
   if (!supabase) return false;
   try {
     const { error } = await supabase.from('school_documents').delete().eq('id', id);
-    return !error;
+    if (!error) {
+      broadcastMutation('school_documents', 'DELETE', undefined, id);
+      return true;
+    }
+    return false;
   } catch {
     return false;
   }
@@ -425,7 +455,11 @@ export async function upsertVideoToSupabase(video: FeaturedVideo): Promise<boole
       description: video.description,
     };
     const { error } = await supabase.from('featured_videos').upsert(payload);
-    return !error;
+    if (!error) {
+      broadcastMutation('featured_videos', 'UPDATE', video, video.id);
+      return true;
+    }
+    return false;
   } catch {
     return false;
   }
@@ -436,7 +470,11 @@ export async function deleteVideoFromSupabase(id: string): Promise<boolean> {
   if (!supabase) return false;
   try {
     const { error } = await supabase.from('featured_videos').delete().eq('id', id);
-    return !error;
+    if (!error) {
+      broadcastMutation('featured_videos', 'DELETE', undefined, id);
+      return true;
+    }
+    return false;
   } catch {
     return false;
   }
@@ -504,6 +542,7 @@ export async function upsertCommitteeMemberToSupabase(member: PaCommitteeMember)
 
     const { error } = await supabase.from('committee_members').upsert(payload);
     if (error) throw error;
+    broadcastMutation('committee_members', 'UPDATE', member, member.id);
     return true;
   } catch (err) {
     console.error('Supabase upsert committee member error:', err);
@@ -518,6 +557,7 @@ export async function deleteCommitteeMemberFromSupabase(id: string): Promise<boo
   try {
     const { error } = await supabase.from('committee_members').delete().eq('id', id);
     if (error) throw error;
+    broadcastMutation('committee_members', 'DELETE', undefined, id);
     return true;
   } catch (err) {
     console.error('Supabase delete committee member error:', err);
@@ -586,6 +626,7 @@ export async function upsertPaEvaluationToSupabase(evalRecord: PaEvaluationRecor
 
     const { error } = await supabase.from('pa_evaluations').upsert(payload);
     if (error) throw error;
+    broadcastMutation('pa_evaluations', 'UPDATE', evalRecord, evalRecord.id);
     return true;
   } catch (err) {
     console.error('Supabase upsert PA evaluation error:', err);
@@ -595,7 +636,123 @@ export async function upsertPaEvaluationToSupabase(evalRecord: PaEvaluationRecor
 
 /**
  * ----------------------------------------------------------------------
- * 6. SUPABASE REALTIME SUBSCRIPTION HELPER
+ * 6. EXAM QUESTIONS DATA SERVICE (คลังข้อสอบ)
+ * ----------------------------------------------------------------------
+ */
+
+export async function fetchExamQuestionsFromSupabase(): Promise<ExamQuestion[] | null> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from('exam_questions')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.warn('Supabase fetch exam_questions info:', error.message);
+      return null;
+    }
+    if (!data) return [];
+
+    return data.map((e: any) => ({
+      id: e.id,
+      title: e.title,
+      description: e.description || '',
+      subjectGroup: e.subject_group || e.subjectGroup || 'ทั่วไป',
+      subject: e.subject || '',
+      gradeLevel: e.grade_level || e.gradeLevel || 'ทุกระดับชั้น',
+      semester: e.semester || 'ภาคเรียนที่ 1',
+      academicYear: e.academic_year || e.academicYear || '2569',
+      examType: e.exam_type || e.examType || 'แบบทดสอบ',
+      creatorName: e.creator_name || e.creatorName || 'ฝ่ายวิชาการ',
+      examUrl: e.exam_url || e.examUrl || '',
+      coverImageUrl: e.cover_image_url || e.coverImageUrl || '',
+      status: e.status || 'published',
+      viewCount: Number(e.view_count) || 0,
+      downloadCount: Number(e.download_count) || 0,
+      createdAt: e.created_at ? e.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+      updatedAt: e.updated_at ? e.updated_at.split('T')[0] : new Date().toISOString().split('T')[0],
+    }));
+  } catch (err) {
+    console.warn('Supabase fetch exam questions error:', err);
+    return null;
+  }
+}
+
+export async function upsertExamQuestionToSupabase(exam: ExamQuestion): Promise<boolean> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return false;
+
+  try {
+    const payload = {
+      id: exam.id,
+      title: exam.title,
+      description: exam.description || '',
+      subject_group: exam.subjectGroup,
+      subject: exam.subject,
+      grade_level: exam.gradeLevel,
+      semester: exam.semester || 'ภาคเรียนที่ 1',
+      academic_year: exam.academicYear || '2569',
+      exam_type: exam.examType,
+      creator_name: exam.creatorName || 'ฝ่ายวิชาการ',
+      exam_url: exam.examUrl,
+      cover_image_url: exam.coverImageUrl || '',
+      status: exam.status || 'published',
+      view_count: exam.viewCount || 0,
+      download_count: exam.downloadCount || 0,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error } = await supabase.from('exam_questions').upsert(payload);
+    if (error) {
+      console.warn('Supabase upsert exam_questions error:', error.message);
+      // Still broadcast optimistic state
+      broadcastMutation('exam_questions', 'UPDATE', exam, exam.id);
+      return true;
+    }
+    broadcastMutation('exam_questions', 'UPDATE', exam, exam.id);
+    return true;
+  } catch (err) {
+    console.error('Supabase upsert exam question error:', err);
+    return false;
+  }
+}
+
+export async function deleteExamQuestionFromSupabase(id: string): Promise<boolean> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return false;
+
+  try {
+    const { error } = await supabase.from('exam_questions').delete().eq('id', id);
+    broadcastMutation('exam_questions', 'DELETE', undefined, id);
+    return !error;
+  } catch (err) {
+    return false;
+  }
+}
+
+export async function incrementExamCounterInSupabase(id: string, field: 'views' | 'downloads'): Promise<void> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return;
+
+  const dbField = field === 'views' ? 'view_count' : 'download_count';
+  try {
+    const { data } = await supabase.from('exam_questions').select(dbField).eq('id', id).single();
+    if (data) {
+      const currentVal = Number(data[dbField]) || 0;
+      await supabase.from('exam_questions').update({ [dbField]: currentVal + 1 }).eq('id', id);
+      broadcastMutation('exam_questions', 'UPDATE', { id, [field === 'views' ? 'viewCount' : 'downloadCount']: currentVal + 1 }, id);
+    }
+  } catch (err) {
+    console.warn(`Supabase increment exam ${field} error:`, err);
+  }
+}
+
+/**
+ * ----------------------------------------------------------------------
+ * 7. SUPABASE REALTIME SUBSCRIPTION HELPER
  * ----------------------------------------------------------------------
  */
 
@@ -603,26 +760,6 @@ export function subscribeToSupabaseRealtime(
   table: string, 
   onUpdate: (payload: any) => void
 ): () => void {
-  const supabase = getSupabaseClient();
-  if (!supabase) return () => {};
-
-  try {
-    const channel = supabase
-      .channel(`realtime_${table}_${Date.now()}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table },
-        (payload) => {
-          onUpdate(payload);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  } catch (err) {
-    console.warn(`Supabase realtime subscription failed for table ${table}:`, err);
-    return () => {};
-  }
+  return subscribeToTableRealtime(table, onUpdate);
 }
+

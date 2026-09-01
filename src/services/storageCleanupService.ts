@@ -20,7 +20,7 @@ export interface StorageCleanupLog {
   bucket: string;
   oldPath: string | null;
   newPath: string;
-  entityType: 'profile_image' | 'media_thumbnail';
+  entityType: 'profile_image' | 'media_thumbnail' | 'exam_cover' | 'document_cover' | 'video_thumbnail';
   entityId: string;
   status: 'success' | 'db_failed_new_cleaned' | 'delete_old_warning';
   timestamp: string;
@@ -110,7 +110,7 @@ export interface SafeUploadOptions {
   bucket: string;
   folder: string;
   entityId: string;
-  entityType: 'profile_image' | 'media_thumbnail';
+  entityType: 'profile_image' | 'media_thumbnail' | 'exam_cover' | 'document_cover' | 'video_thumbnail';
   fileData: Blob | File | string; // Supports File, Blob, or DataUrl
   mimeType?: string;
   oldUrl?: string;

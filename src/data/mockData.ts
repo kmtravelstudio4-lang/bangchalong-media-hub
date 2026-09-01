@@ -1,4 +1,4 @@
-import { Category, Teacher, Resource, News, SchoolDocument, FeaturedVideo, PaCommitteeMember, PaEvaluationRecord } from '../types';
+import { Category, Teacher, Resource, News, SchoolDocument, FeaturedVideo, PaCommitteeMember, PaEvaluationRecord, ExamQuestion } from '../types';
 
 export const INITIAL_CATEGORIES: Category[] = [
   {
@@ -1492,3 +1492,140 @@ export const INITIAL_PA_EVALUATIONS: PaEvaluationRecord[] = [
     updatedAt: '2569-08-26 14:25'
   }
 ];
+
+export const INITIAL_EXAM_QUESTIONS: ExamQuestion[] = [
+  {
+    id: 'exam-000',
+    title: 'แบบฝึกหัดและข้อสอบเก็บคะแนน วิชาภาษาไทย ป.1 (พยัญชนะ สระ และวรรณยุกต์)',
+    description: 'ชุดแบบทดสอบเตรียมความพร้อมการอ่านออกเขียนได้สำหรับนักเรียนชั้นประถมศึกษาปีที่ 1',
+    subjectGroup: 'กลุ่มสาระฯ ภาษาไทย',
+    subject: 'ภาษาไทย',
+    gradeLevel: 'ป.1',
+    semester: 'ภาคเรียนที่ 1',
+    academicYear: '2569',
+    examType: 'แบบฝึกหัด',
+    creatorName: 'สายชั้นประถมศึกษาปีที่ 1',
+    examUrl: 'https://docs.google.com/forms/d/e/1FAIpQLScP1ThaiQuiz/viewform',
+    coverImageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800&auto=format&fit=crop',
+    status: 'published',
+    viewCount: 168,
+    downloadCount: 72,
+    createdAt: '2569-08-10',
+    updatedAt: '2569-08-10'
+  },
+  {
+    id: 'exam-001',
+    title: 'แบบทดสอบวัดผลสัมฤทธิ์ทางการเรียน วิชาคณิตศาสตร์ (บทที่ 1: จำนวนนับไม่เกิน 1,000)',
+    description: 'แบบทดสอบออนไลน์ผ่าน Google Forms วัดทักษะการบวก ลบ และค่าประจำหลัก พร้อมเฉลยอัตโนมัติ',
+    subjectGroup: 'กลุ่มสาระฯ คณิตศาสตร์',
+    subject: 'คณิตศาสตร์',
+    gradeLevel: 'ป.2',
+    semester: 'ภาคเรียนที่ 1',
+    academicYear: '2569',
+    examType: 'แบบทดสอบ',
+    creatorName: 'ฝ่ายวิชาการคณิตศาสตร์',
+    examUrl: 'https://docs.google.com/forms/d/e/1FAIpQLScD9example/viewform',
+    coverImageUrl: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=800&auto=format&fit=crop',
+    status: 'published',
+    viewCount: 142,
+    downloadCount: 58,
+    createdAt: '2569-08-15',
+    updatedAt: '2569-08-15'
+  },
+  {
+    id: 'exam-002',
+    title: 'ข้อสอบกลางภาค วิชาภาษาไทย (การอ่านจับใจความและมาตราตัวสะกด)',
+    description: 'ชุดข้อสอบปรนัย 30 ข้อ และอัตนัย 2 ข้อ สำหรับประเมินผลการเรียนรู้กลางภาคเรียนที่ 1',
+    subjectGroup: 'กลุ่มสาระฯ ภาษาไทย',
+    subject: 'ภาษาไทย',
+    gradeLevel: 'ป.4',
+    semester: 'ภาคเรียนที่ 1',
+    academicYear: '2569',
+    examType: 'ข้อสอบกลางภาค',
+    creatorName: 'กลุ่มสาระการเรียนรู้ภาษาไทย',
+    examUrl: 'https://drive.google.com/file/d/1exampleThaiExam/view?usp=sharing',
+    coverImageUrl: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=800&auto=format&fit=crop',
+    status: 'published',
+    viewCount: 215,
+    downloadCount: 94,
+    createdAt: '2569-08-18',
+    updatedAt: '2569-08-18'
+  },
+  {
+    id: 'exam-003',
+    title: 'แบบทดสอบวิทยาการคำนวณและสะเต็มศึกษา (STEM Coding Challenge)',
+    description: 'แบบประเมินทักษะการคิดเชิงคำนวณและการเขียนโปรแกรมแบบบล็อก (Block-based Coding)',
+    subjectGroup: 'กลุ่มสาระฯ วิทยาศาสตร์และเทคโนโลยี',
+    subject: 'วิทยาการคำนวณ',
+    gradeLevel: 'ป.5',
+    semester: 'ภาคเรียนที่ 1',
+    academicYear: '2569',
+    examType: 'แบบทดสอบ',
+    creatorName: 'ครูสมชาย สายเทคโน',
+    examUrl: 'https://forms.gle/exampleSTEMQuiz2569',
+    coverImageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=800&auto=format&fit=crop',
+    status: 'published',
+    viewCount: 189,
+    downloadCount: 42,
+    createdAt: '2569-08-20',
+    updatedAt: '2569-08-20'
+  },
+  {
+    id: 'exam-004',
+    title: 'ข้อสอบปลายภาค วิชาภาษาต่างประเทศ (English Grammar & Reading Comprehension)',
+    description: 'ข้อสอบมาตรฐานวัดระดับภาษาอังกฤษ ระดับชั้นประถมศึกษาปีที่ 6 ตามกรอบ CEFR A1-A2',
+    subjectGroup: 'กลุ่มสาระฯ ภาษาต่างประเทศ',
+    subject: 'ภาษาอังกฤษ',
+    gradeLevel: 'ป.6',
+    semester: 'ภาคเรียนที่ 1',
+    academicYear: '2569',
+    examType: 'ข้อสอบปลายภาค',
+    creatorName: 'ฝ่ายวิชาการภาษาต่างประเทศ',
+    examUrl: 'https://drive.google.com/file/d/1exampleEnglishFinal/view?usp=sharing',
+    coverImageUrl: 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?q=80&w=800&auto=format&fit=crop',
+    status: 'published',
+    viewCount: 310,
+    downloadCount: 165,
+    createdAt: '2569-08-22',
+    updatedAt: '2569-08-22'
+  },
+  {
+    id: 'exam-005',
+    title: 'แบบประเมินพัฒนาการ 4 ด้าน สำหรับเด็กปฐมวัย (อนุบาล 3)',
+    description: 'เครื่องมือและแบบสังเกตพฤติกรรมประเมินพัฒนาการด้านร่างกาย อารมณ์-จิตใจ สังคม และสติปัญญา',
+    subjectGroup: 'ระดับปฐมวัย',
+    subject: 'กิจกรรมเสริมประสบการณ์',
+    gradeLevel: 'อนุบาล 3',
+    semester: 'ภาคเรียนที่ 1',
+    academicYear: '2569',
+    examType: 'แบบประเมิน',
+    creatorName: 'สายชั้นอนุบาล',
+    examUrl: 'https://drive.google.com/file/d/1exampleKindergartenEval/view?usp=sharing',
+    coverImageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800&auto=format&fit=crop',
+    status: 'published',
+    viewCount: 128,
+    downloadCount: 76,
+    createdAt: '2569-08-25',
+    updatedAt: '2569-08-25'
+  },
+  {
+    id: 'exam-006',
+    title: 'แบบฝึกหัดและข้อสอบก่อนเรียน วิชาวิทยาศาสตร์ (แรงและการเคลื่อนที่)',
+    description: 'แบบทดสอบ Pre-test เพื่อวัดความรู้พื้นฐานของผู้เรียนก่อนเริ่มหน่วยการเรียนรู้',
+    subjectGroup: 'กลุ่มสาระฯ วิทยาศาสตร์และเทคโนโลยี',
+    subject: 'วิทยาศาสตร์',
+    gradeLevel: 'ป.3',
+    semester: 'ภาคเรียนที่ 1',
+    academicYear: '2569',
+    examType: 'ข้อสอบก่อนเรียน',
+    creatorName: 'ครูศิริพร สอนวิทย์',
+    examUrl: 'https://docs.google.com/forms/d/e/1FAIpQLScSciencePretest/viewform',
+    coverImageUrl: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=800&auto=format&fit=crop',
+    status: 'published',
+    viewCount: 95,
+    downloadCount: 33,
+    createdAt: '2569-08-27',
+    updatedAt: '2569-08-27'
+  }
+];
+

@@ -127,9 +127,42 @@ export interface FeaturedVideo {
   createdAt: string;
 }
 
+export type ExamType = 
+  | 'ข้อสอบก่อนเรียน'
+  | 'ข้อสอบหลังเรียน'
+  | 'แบบทดสอบ'
+  | 'แบบฝึกหัด'
+  | 'แบบประเมิน'
+  | 'ข้อสอบกลางภาค'
+  | 'ข้อสอบปลายภาค'
+  | 'อื่นๆ';
+
+export type ExamStatus = 'draft' | 'published' | 'archived';
+
+export interface ExamQuestion {
+  id: string;
+  title: string;
+  description?: string;
+  subjectGroup: string; // กลุ่มสาระการเรียนรู้
+  subject: string; // วิชา
+  gradeLevel: GradeLevel | string; // ระดับชั้น
+  semester?: string; // ภาคเรียนที่ 1, ภาคเรียนที่ 2
+  academicYear?: string; // ปีการศึกษา เช่น 2569
+  examType: ExamType | string; // ประเภทข้อสอบ
+  creatorName?: string; // ผู้จัดทำ
+  examUrl: string; // URL ข้อสอบ (Google Forms, Drive, Canva, PDF, Web)
+  coverImageUrl?: string; // รูปภาพปกข้อสอบ
+  status: ExamStatus; // draft | published | archived
+  viewCount: number;
+  downloadCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type ActiveTab = 
   | 'home'
   | 'repository'
+  | 'exam-library'
   | 'teachers'
   | 'pa'
   | 'pa-committee'
