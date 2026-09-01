@@ -56,7 +56,8 @@ import {
   Target
 } from 'lucide-react';
 import { 
-  getYouTubeId, 
+  getYouTubeId,
+  getVideoEmbedUrl,
   isTeacherAssignedToCommittee,
   getTeacherAcademicCategory,
   STANDARD_ACADEMIC_CATEGORIES 
@@ -1521,9 +1522,9 @@ export const PaCommitteePage: React.FC = () => {
                 </div>
 
                 <div className="flex-1 bg-black flex items-center justify-center relative">
-                  {bigInspectTeacher.paVideoUrl && getYouTubeId(bigInspectTeacher.paVideoUrl) ? (
+                  {bigInspectTeacher.paVideoUrl && getVideoEmbedUrl(bigInspectTeacher.paVideoUrl, false) ? (
                     <iframe
-                      src={`https://www.youtube.com/embed/${getYouTubeId(bigInspectTeacher.paVideoUrl)}?autoplay=0`}
+                      src={getVideoEmbedUrl(bigInspectTeacher.paVideoUrl, false)!}
                       title="PA Video Player"
                       className="w-full h-full border-0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

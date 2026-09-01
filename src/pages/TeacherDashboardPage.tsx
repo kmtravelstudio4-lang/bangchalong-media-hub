@@ -37,7 +37,7 @@ import {
   Zap,
   Check
 } from 'lucide-react';
-import { getYouTubeId, isTeacherAssignedToCommittee, getTeacherCommitteeSetNumber } from '../data/mockData';
+import { getYouTubeId, getVideoEmbedUrl, isTeacherAssignedToCommittee, getTeacherCommitteeSetNumber } from '../data/mockData';
 import { ImageUploadCompressor } from '../components/ImageUploadCompressor';
 
 export const TeacherDashboardPage: React.FC = () => {
@@ -1075,16 +1075,16 @@ export const TeacherDashboardPage: React.FC = () => {
                         </div>
                         {currentTeacher.paVideoUrl ? (
                           <div className="space-y-2">
-                            {getYouTubeId(currentTeacher.paVideoUrl) && (
+                            {getVideoEmbedUrl(currentTeacher.paVideoUrl, false) ? (
                               <div className="aspect-video w-full rounded-xl overflow-hidden bg-black shadow-xs">
                                 <iframe
-                                  src={`https://www.youtube.com/embed/${getYouTubeId(currentTeacher.paVideoUrl)}`}
+                                  src={getVideoEmbedUrl(currentTeacher.paVideoUrl, false)!}
                                   title="PA Video Preview"
-                                  className="w-full h-full"
+                                  className="w-full h-full border-0"
                                   allowFullScreen
                                 />
                               </div>
-                            )}
+                            ) : null}
                           </div>
                         ) : (
                           <p className="text-xs text-slate-400">ยังไม่มีลิงก์วิดีโอคลิปการสอน</p>

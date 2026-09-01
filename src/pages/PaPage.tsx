@@ -29,6 +29,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { 
+  getVideoEmbedUrl,
   getYouTubeEmbedUrl, 
   isTeacherAssignedToCommittee, 
   getTeacherCommitteeSetNumber, 
@@ -810,9 +811,9 @@ export const PaPage: React.FC = () => {
 
             {/* Video Container */}
             <div className="relative aspect-video bg-black rounded-2xl overflow-hidden border border-slate-800 shadow-inner">
-              {getYouTubeEmbedUrl(activeVideo.url) ? (
+              {getVideoEmbedUrl(activeVideo.url) ? (
                 <iframe
-                  src={getYouTubeEmbedUrl(activeVideo.url)!}
+                  src={getVideoEmbedUrl(activeVideo.url)!}
                   title={`PA Video ${activeVideo.teacherName}`}
                   className="w-full h-full border-0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

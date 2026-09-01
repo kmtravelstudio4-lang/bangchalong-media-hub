@@ -1051,6 +1051,63 @@ export const getYouTubeEmbedUrl = (url: string, autoplay = true): string | null 
   return `https://www.youtube.com/embed/${ytId}${autoplay ? '?autoplay=1' : ''}`;
 };
 
+export const getGoogleDriveFileId = (url: string): string | null => {
+  if (!url) return null;
+  const trimmed = url.trim();
+  // Match drive.google.com/file/d/{id} or drive.google.com/d/{id}
+  const matchFile = trimmed.match(/\/(?:file\/)?d\/([a-zA-Z0-9_-]+)/);
+  if (matchFile && matchFile[1]) return matchFile[1];
+  // Match ?id={id} or &id={id}
+  const matchId = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (matchId && matchId[1]) return matchId[1];
+  // Match docs.google.com/open?id={id} or uc?id={id}
+  const matchOpen = trimmed.match(/(?:open|uc)\?id=([a-zA-Z0-9_-]+)/);
+  if (matchOpen && matchOpen[1]) return matchOpen[1];
+  return null;
+};
+
+export const getGoogleDriveEmbedUrl = (url: string): string | null => {
+  const fileId = getGoogleDriveFileId(url);
+  if (!fileId) return null;
+  return `https://drive.google.com/file/d/${fileId}/preview`;
+};
+
+export const getVideoEmbedUrl = (url: string, autoplay = true): string | null => {
+  if (!url) return null;
+  const trimmed = url.trim();
+
+  // 1. YouTube
+  const ytEmbed = getYouTubeEmbedUrl(trimmed, autoplay);
+  if (ytEmbed) return ytEmbed;
+
+  // 2. Google Drive
+  const gdriveEmbed = getGoogleDriveEmbedUrl(trimmed);
+  if (gdriveEmbed) return gdriveEmbed;
+
+  // 3. Direct video format or already formatted iframe
+  if (trimmed.includes('drive.google.com/file/d/') && trimmed.includes('/preview')) {
+    return trimmed;
+  }
+  if (trimmed.includes('youtube.com/embed/') || trimmed.includes('player.vimeo.com/video/')) {
+    return trimmed;
+  }
+
+  return null;
+};
+
+export const getDocEmbedUrl = (url?: string): string => {
+  if (!url) return '';
+  const trimmed = url.trim();
+  const driveId = getGoogleDriveFileId(trimmed);
+  if (driveId) {
+    return `https://drive.google.com/file/d/${driveId}/preview`;
+  }
+  if (trimmed.toLowerCase().endsWith('.pdf') || trimmed.includes('.pdf?')) {
+    return `https://docs.google.com/viewer?url=${encodeURIComponent(trimmed)}&embedded=true`;
+  }
+  return trimmed;
+};
+
 export const INITIAL_VIDEOS: FeaturedVideo[] = [
   {
     id: 'vid-1',

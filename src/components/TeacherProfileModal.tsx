@@ -25,6 +25,7 @@ import {
   Check
 } from 'lucide-react';
 import { ImageUploadCompressor } from './ImageUploadCompressor';
+import { getVideoEmbedUrl } from '../data/mockData';
 
 const AVATAR_PRESETS = [
   'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=400&auto=format&fit=crop',
@@ -35,12 +36,7 @@ const AVATAR_PRESETS = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop'
 ];
 
-function getYouTubeEmbedUrl(url: string): string | null {
-  if (!url) return null;
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-  const match = url.match(regExp);
-  return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}` : null;
-}
+
 
 export const TeacherProfileModal: React.FC = () => {
   const { 
@@ -210,7 +206,7 @@ export const TeacherProfileModal: React.FC = () => {
     }
   };
 
-  const embedUrl = getYouTubeEmbedUrl(form.paVideoUrl);
+  const embedUrl = getVideoEmbedUrl(form.paVideoUrl, false);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">

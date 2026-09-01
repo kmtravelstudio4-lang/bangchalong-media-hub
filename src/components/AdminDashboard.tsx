@@ -14,7 +14,8 @@ import {
   isTeacherAssignedToCommittee, 
   getTeacherCommitteeSetNumber,
   getTeacherAcademicCategory,
-  STANDARD_ACADEMIC_CATEGORIES
+  STANDARD_ACADEMIC_CATEGORIES,
+  getVideoEmbedUrl
 } from '../data/mockData';
 import { SUPABASE_SQL_SCHEMA } from '../services/supabase';
 import { 
@@ -3563,7 +3564,7 @@ export const AdminDashboard: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="https://www.youtube.com/watch?v=... หรือ ลิงก์คลิปวิดีโอ"
+                    placeholder="https://www.youtube.com/watch?v=... หรือ https://drive.google.com/file/d/..."
                     value={tForm.paVideoUrl}
                     onChange={(e) => setTForm({ 
                       ...tForm, 
@@ -3572,6 +3573,16 @@ export const AdminDashboard: React.FC = () => {
                     })}
                     className="w-full bg-white border border-slate-300 rounded-xl py-2 px-3 text-xs text-slate-900 focus:ring-2 focus:ring-[#005BAC]"
                   />
+                  {tForm.paVideoUrl && getVideoEmbedUrl(tForm.paVideoUrl, false) && (
+                    <div className="mt-2 rounded-xl overflow-hidden aspect-video max-h-36 bg-black border border-slate-200 shadow-xs">
+                      <iframe
+                        src={getVideoEmbedUrl(tForm.paVideoUrl, false)!}
+                        title="PA Video Preview"
+                        className="w-full h-full border-0"
+                        allowFullScreen
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div>
