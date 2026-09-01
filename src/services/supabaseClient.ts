@@ -12,20 +12,30 @@ export interface SupabaseConfig {
  * Retrieve Supabase configuration from localStorage or Vite environment variables.
  */
 export function getStoredSupabaseConfig(): SupabaseConfig {
-  const envUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim();
-  const envKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
+  const envUrl = (
+    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) ||
+    (typeof process !== 'undefined' && (process.env?.VITE_SUPABASE_URL || process.env?.SUPABASE_URL)) ||
+    ''
+  ).trim();
+  const envKey = (
+    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY) ||
+    (typeof process !== 'undefined' && (process.env?.VITE_SUPABASE_ANON_KEY || process.env?.SUPABASE_SERVICE_ROLE_KEY)) ||
+    ''
+  ).trim();
 
   try {
-    const saved = localStorage.getItem(STORAGE_KEY_CONFIG);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      const url = (parsed.url || envUrl || '').trim();
-      const anonKey = (parsed.anonKey || envKey || '').trim();
-      return {
-        url,
-        anonKey,
-        isConnected: Boolean(url && anonKey)
-      };
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY_CONFIG);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const url = (parsed.url || envUrl || '').trim();
+        const anonKey = (parsed.anonKey || envKey || '').trim();
+        return {
+          url,
+          anonKey,
+          isConnected: Boolean(url && anonKey)
+        };
+      }
     }
   } catch (e) {
     console.warn('Failed to parse Supabase config from localStorage:', e);

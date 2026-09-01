@@ -382,4 +382,32 @@ FROM public.teachers t
 LEFT JOIN public.pa_submissions ps ON ps.teacher_id = t.id
 LEFT JOIN public.pa_evaluations pe ON pe.pa_submission_id = ps.id
 GROUP BY t.id, t.full_name, t.position, t.academic_standing, ps.id, ps.challenge_title, ps.status;
+
+-- -----------------------------------------------------------------------------
+-- 4. STORAGE BUCKETS & AUTO-CLEANUP SECURITY POLICIES
+-- -----------------------------------------------------------------------------
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES 
+  ('avatars', 'avatars', true, 52428800, ARRAY['image/webp', 'image/jpeg', 'image/png']),
+  ('media-thumbnails', 'media-thumbnails', true, 52428800, ARRAY['image/webp', 'image/jpeg', 'image/png']),
+  ('media', 'media', true, 52428800, NULL),
+  ('documents', 'documents', true, 52428800, NULL)
+ON CONFLICT (id) DO UPDATE SET 
+  public = true,
+  file_size_limit = 52428800;
+
+-- Storage Read Access Policies
+CREATE POLICY "Public Read Avatars" ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
+CREATE POLICY "Public Read Media Thumbnails" ON storage.objects FOR SELECT USING (bucket_id = 'media-thumbnails');
+CREATE POLICY "Public Read Media" ON storage.objects FOR SELECT USING (bucket_id = 'media');
+CREATE POLICY "Public Read Documents" ON storage.objects FOR SELECT USING (bucket_id = 'documents');
+
+-- Storage Safe Upload & Lifecycle Policies
+CREATE POLICY "Allow Upload Avatars" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'avatars');
+CREATE POLICY "Allow Update Avatars" ON storage.objects FOR UPDATE USING (bucket_id = 'avatars');
+CREATE POLICY "Allow Delete Avatars" ON storage.objects FOR DELETE USING (bucket_id = 'avatars');
+
+CREATE POLICY "Allow Upload Media Thumbnails" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'media-thumbnails');
+CREATE POLICY "Allow Update Media Thumbnails" ON storage.objects FOR UPDATE USING (bucket_id = 'media-thumbnails');
+CREATE POLICY "Allow Delete Media Thumbnails" ON storage.objects FOR DELETE USING (bucket_id = 'media-thumbnails');
 ```

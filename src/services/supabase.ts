@@ -209,4 +209,21 @@ CREATE POLICY "Public Read School Documents" ON public.school_documents FOR SELE
 CREATE POLICY "Public Read Featured Videos" ON public.featured_videos FOR SELECT USING (true);
 CREATE POLICY "Authenticated Full Access Resources" ON public.resources FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Authenticated Full Access Evaluations" ON public.pa_evaluations FOR ALL USING (auth.role() = 'authenticated');
+
+-- 10. Storage Buckets & Policies
+INSERT INTO storage.buckets (id, name, public)
+VALUES 
+  ('avatars', 'avatars', true),
+  ('media-thumbnails', 'media-thumbnails', true),
+  ('media', 'media', true),
+  ('documents', 'documents', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+CREATE POLICY "Public Read Avatars" ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
+CREATE POLICY "Public Upload Avatars" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'avatars');
+CREATE POLICY "Public Delete Avatars" ON storage.objects FOR DELETE USING (bucket_id = 'avatars');
+
+CREATE POLICY "Public Read Media Thumbnails" ON storage.objects FOR SELECT USING (bucket_id = 'media-thumbnails');
+CREATE POLICY "Public Upload Media Thumbnails" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'media-thumbnails');
+CREATE POLICY "Public Delete Media Thumbnails" ON storage.objects FOR DELETE USING (bucket_id = 'media-thumbnails');
 `;
