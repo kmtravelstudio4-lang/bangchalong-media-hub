@@ -154,6 +154,7 @@ export const AdminDashboard: React.FC = () => {
   const [teacherSearch, setTeacherSearch] = useState('');
   const [teacherPaFilter, setTeacherPaFilter] = useState<'all' | 'completed' | 'pending'>('all');
   const [teacherSubjectFilter, setTeacherSubjectFilter] = useState<string>('all');
+  const [teacherStandingFilter, setTeacherStandingFilter] = useState<string>('all');
 
   // Modals state
   const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
@@ -1255,7 +1256,71 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Search and Filters */}
+            {/* Academic Standing Quick Category Chips */}
+            <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs space-y-2.5">
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <Award className="w-4 h-4 text-[#005BAC]" />
+                    <span>แยกดูตามวิทยฐานะ / ตำแหน่ง</span>
+                  </span>
+                  <span className="text-[11px] text-slate-400">
+                    (เลือกดูครูตามกลุ่มวิทยฐานะ)
+                  </span>
+                </div>
+                {teacherStandingFilter !== 'all' && (
+                  <button
+                    onClick={() => setTeacherStandingFilter('all')}
+                    className="text-[11px] text-[#005BAC] hover:underline font-bold"
+                  >
+                    ล้างตัวกรองวิทยฐานะ
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                <button
+                  onClick={() => setTeacherStandingFilter('all')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 shrink-0 ${
+                    teacherStandingFilter === 'all'
+                      ? 'bg-[#005BAC] text-white shadow-xs'
+                      : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>ทั้งหมด</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                    teacherStandingFilter === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                  }`}>
+                    {teachers.length}
+                  </span>
+                </button>
+
+                {STANDARD_ACADEMIC_CATEGORIES.map((cat) => {
+                  const count = teachers.filter((t) => getTeacherAcademicCategory(t) === cat).length;
+                  if (count === 0 && teacherStandingFilter !== cat) return null;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setTeacherStandingFilter(cat)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 shrink-0 ${
+                        teacherStandingFilter === cat
+                          ? 'bg-[#005BAC] text-white shadow-xs'
+                          : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      <span>{cat}</span>
+                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                        teacherStandingFilter === cat ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                      }`}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Search and Dropdown Filters */}
             <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs flex flex-col md:flex-row gap-3 items-center justify-between">
               <div className="relative w-full md:w-80">
                 <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -1269,6 +1334,22 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <select
+                  value={teacherStandingFilter}
+                  onChange={(e) => setTeacherStandingFilter(e.target.value)}
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 outline-hidden focus:ring-2 focus:ring-[#005BAC]"
+                >
+                  <option value="all">ทุกวิทยฐานะ ({teachers.length})</option>
+                  {STANDARD_ACADEMIC_CATEGORIES.map((cat) => {
+                    const count = teachers.filter((t) => getTeacherAcademicCategory(t) === cat).length;
+                    return (
+                      <option key={cat} value={cat}>
+                        {cat} ({count})
+                      </option>
+                    );
+                  })}
+                </select>
+
                 <select
                   value={teacherSubjectFilter}
                   onChange={(e) => setTeacherSubjectFilter(e.target.value)}
@@ -1292,166 +1373,220 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Teachers Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {teachers
-                .filter((t) => {
-                  const isCompleted = t.paStatus === 'completed' || (Boolean(t.paChallengeTitle) && Boolean(t.paVideoUrl));
-                  if (teacherPaFilter === 'completed' && !isCompleted) return false;
-                  if (teacherPaFilter === 'pending' && isCompleted) return false;
-                  if (teacherSubjectFilter !== 'all' && t.subjectName !== teacherSubjectFilter) return false;
-                  if (!teacherSearch.trim()) return true;
-                  const q = teacherSearch.toLowerCase();
-                  return (
-                    t.name.toLowerCase().includes(q) ||
-                    (t.academicStanding || '').toLowerCase().includes(q) ||
-                    (t.position || '').toLowerCase().includes(q) ||
-                    (t.subjectName || '').toLowerCase().includes(q) ||
-                    (t.paChallengeTitle || '').toLowerCase().includes(q)
-                  );
-                })
-                .map((t) => {
-                  const isCompleted = t.paStatus === 'completed' || (Boolean(t.paChallengeTitle) && Boolean(t.paVideoUrl));
-                  return (
-                    <div key={t.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4 hover:shadow-md transition">
-                      <div className="flex items-center space-x-4">
-                        <img 
-                          src={t.photo || 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=400'} 
-                          alt={t.name} 
-                          className="w-14 h-14 rounded-2xl object-cover border-2 border-slate-100 shrink-0" 
-                        />
-                        <div className="min-w-0 flex-1">
-                          <h3 className="font-bold text-slate-900 text-sm truncate">{t.name}</h3>
-                          <div className="flex flex-wrap gap-1 my-0.5">
-                            <span className="text-[10px] font-bold text-[#005BAC] bg-blue-50 px-2 py-0.5 rounded-md">
-                              {t.academicStanding || t.position || 'ครู'}
-                            </span>
-                            {t.position && t.position !== t.academicStanding && (
-                              <span className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-md">
-                                {t.position}
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-[11px] text-slate-400 block truncate">{t.subjectName}</span>
-                        </div>
+            {/* Filter Summary & Result Count */}
+            {(() => {
+              const filteredTeachers = teachers.filter((t) => {
+                const isCompleted = t.paStatus === 'completed' || (Boolean(t.paChallengeTitle) && Boolean(t.paVideoUrl));
+                if (teacherPaFilter === 'completed' && !isCompleted) return false;
+                if (teacherPaFilter === 'pending' && isCompleted) return false;
+                if (teacherStandingFilter !== 'all' && getTeacherAcademicCategory(t) !== teacherStandingFilter) return false;
+                if (teacherSubjectFilter !== 'all' && t.subjectName !== teacherSubjectFilter) return false;
+                if (!teacherSearch.trim()) return true;
+                const q = teacherSearch.toLowerCase();
+                return (
+                  t.name.toLowerCase().includes(q) ||
+                  (t.academicStanding || '').toLowerCase().includes(q) ||
+                  (t.position || '').toLowerCase().includes(q) ||
+                  (t.subjectName || '').toLowerCase().includes(q) ||
+                  (t.paChallengeTitle || '').toLowerCase().includes(q)
+                );
+              });
+
+              return (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between text-xs text-slate-500 px-1">
+                    <span>
+                      กำลังแสดงผล <strong className="text-slate-900 font-bold">{filteredTeachers.length}</strong> จากทั้งหมด <strong className="text-slate-900 font-bold">{teachers.length}</strong> ท่าน
+                      {teacherStandingFilter !== 'all' && (
+                        <span className="ml-1 text-[#005BAC] font-bold">
+                          (วิทยฐานะ: {teacherStandingFilter})
+                        </span>
+                      )}
+                    </span>
+                    {(teacherStandingFilter !== 'all' || teacherSubjectFilter !== 'all' || teacherPaFilter !== 'all' || teacherSearch.trim()) && (
+                      <button
+                        onClick={() => {
+                          setTeacherStandingFilter('all');
+                          setTeacherSubjectFilter('all');
+                          setTeacherPaFilter('all');
+                          setTeacherSearch('');
+                        }}
+                        className="text-xs text-rose-600 hover:underline font-bold"
+                      >
+                        ล้างตัวกรองทั้งหมด
+                      </button>
+                    )}
+                  </div>
+
+                  {filteredTeachers.length === 0 ? (
+                    <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center space-y-3">
+                      <div className="w-12 h-12 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto text-xl font-bold">
+                        👥
                       </div>
-
-                      {/* PA Details Box */}
-                      <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80 space-y-2 text-xs">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-1.5 font-bold text-slate-800 text-[11px]">
-                            <Award className="w-3.5 h-3.5 text-amber-500" />
-                            <span>ข้อตกลง PA ปี {t.paYear || '2569'}</span>
-                          </div>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center space-x-1 ${
-                            isCompleted 
-                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' 
-                              : 'bg-amber-100 text-amber-800 border border-amber-300'
-                          }`}>
-                            {isCompleted ? (
-                              <>
-                                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                                <span>จัดทำเรียบร้อย</span>
-                              </>
-                            ) : (
-                              <>
-                                <Clock className="w-3 h-3 text-amber-600" />
-                                <span>ยังไม่จัดทำ</span>
-                              </>
-                            )}
-                          </span>
-                        </div>
-
-                        {/* PA Challenge Title */}
-                        <div>
-                          <div className="text-[10px] font-semibold text-slate-500">ชื่อประเด็นท้าทาย:</div>
-                          <div className="text-slate-800 font-medium text-[11px] line-clamp-2 mt-0.5 bg-white p-2 rounded-lg border border-slate-200">
-                            {t.paChallengeTitle ? (
-                              <span className="text-slate-900">{t.paChallengeTitle}</span>
-                            ) : (
-                              <span className="text-slate-400 italic">(ยังไม่ได้ระบุประเด็นท้าทาย)</span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Video & Document links */}
-                        <div className="flex flex-wrap gap-1.5 pt-1">
-                          {t.paVideoUrl ? (
-                            <a
-                              href={t.paVideoUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-1 rounded-lg hover:bg-rose-100 transition"
-                            >
-                              <Video className="w-3 h-3 mr-1 text-rose-600" />
-                              <span>ดูคลิปวิดีโอ PA</span>
-                              <ExternalLink className="w-2.5 h-2.5 ml-1" />
-                            </a>
-                          ) : (
-                            <span className="inline-flex items-center text-[10px] text-slate-400 bg-slate-200/60 px-2 py-1 rounded-lg">
-                              ไม่มีคลิปวิดีโอ PA
-                            </span>
-                          )}
-
-                          {t.paDocumentUrl ? (
-                            <a
-                              href={t.paDocumentUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center text-[10px] font-bold text-[#005BAC] bg-blue-50 border border-blue-200 px-2 py-1 rounded-lg hover:bg-blue-100 transition"
-                            >
-                              <FileText className="w-3 h-3 mr-1 text-[#005BAC]" />
-                              <span>ดูไฟล์เอกสาร PA</span>
-                              <ExternalLink className="w-2.5 h-2.5 ml-1" />
-                            </a>
-                          ) : (
-                            <span className="inline-flex items-center text-[10px] text-slate-400 bg-slate-200/60 px-2 py-1 rounded-lg">
-                              ไม่มีไฟล์เอกสาร PA
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Action buttons */}
-                      <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs">
-                        <span className="font-bold text-[#005BAC] text-[11px]">{t.resourcesCount || 0} สื่อการสอน</span>
-                        <div className="flex items-center space-x-1.5">
-                          <button
-                            onClick={() => openEditTeacher(t)}
-                            className="px-2.5 py-1.5 bg-[#005BAC]/10 hover:bg-[#005BAC]/20 text-[#005BAC] rounded-lg text-xs font-bold flex items-center space-x-1 transition"
-                            title="แก้ไขข้อมูลครูและข้อตกลง PA"
-                          >
-                            <Edit className="w-3.5 h-3.5" />
-                            <span>แก้ไข</span>
-                          </button>
-
-                          {(t.paChallengeTitle || t.paVideoUrl || t.paDocumentUrl || t.paStatus === 'completed') && (
-                            <button
-                              onClick={() => handleResetTeacherPa(t.id, t.name)}
-                              className="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-lg text-xs font-bold flex items-center transition"
-                              title="ล้าง/ลบเฉพาะข้อตกลง PA ของครูท่านนี้"
-                            >
-                              <RotateCcw className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-
-                          <button
-                            onClick={() => {
-                              if (window.confirm(`คุณยืนยันที่จะลบข้อมูลครู "${t.name}" หรือไม่?`)) {
-                                deleteTeacher(t.id);
-                              }
-                            }}
-                            className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs transition"
-                            title="ลบข้อมูลครู"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
+                      <h3 className="font-prompt font-bold text-slate-800 text-base">ไม่พบข้อมูลครูตามเงื่อนไขที่เลือก</h3>
+                      <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                        ลองเปลี่ยนตัวกรองวิทยฐานะ กลุ่มสาระ หรือคำค้นหา เพื่อดูรายชื่อครูท่านอื่น
+                      </p>
+                      <button
+                        onClick={() => {
+                          setTeacherStandingFilter('all');
+                          setTeacherSubjectFilter('all');
+                          setTeacherPaFilter('all');
+                          setTeacherSearch('');
+                        }}
+                        className="px-4 py-2 bg-[#005BAC] text-white rounded-xl text-xs font-bold shadow-xs hover:bg-[#004584] transition"
+                      >
+                        แสดงครูทั้งหมด
+                      </button>
                     </div>
-                  );
-                })}
-            </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredTeachers.map((t) => {
+                        const isCompleted = t.paStatus === 'completed' || (Boolean(t.paChallengeTitle) && Boolean(t.paVideoUrl));
+                        return (
+                          <div key={t.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4 hover:shadow-md transition">
+                            <div className="flex items-center space-x-4">
+                              <img 
+                                src={t.photo || 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=400'} 
+                                alt={t.name} 
+                                className="w-14 h-14 rounded-2xl object-cover border-2 border-slate-100 shrink-0" 
+                              />
+                              <div className="min-w-0 flex-1">
+                                <h3 className="font-bold text-slate-900 text-sm truncate">{t.name}</h3>
+                                <div className="flex flex-wrap gap-1 my-0.5">
+                                  <span className="text-[10px] font-bold text-[#005BAC] bg-blue-50 px-2 py-0.5 rounded-md">
+                                    {getTeacherAcademicCategory(t)}
+                                  </span>
+                                  {t.position && t.position !== getTeacherAcademicCategory(t) && (
+                                    <span className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-md truncate max-w-[120px]">
+                                      {t.position}
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="text-[11px] text-slate-400 block truncate">{t.subjectName}</span>
+                              </div>
+                            </div>
+
+                            {/* PA Details Box */}
+                            <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80 space-y-2 text-xs">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-1.5 font-bold text-slate-800 text-[11px]">
+                                  <Award className="w-3.5 h-3.5 text-amber-500" />
+                                  <span>ข้อตกลง PA ปี {t.paYear || '2569'}</span>
+                                </div>
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center space-x-1 ${
+                                  isCompleted 
+                                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' 
+                                    : 'bg-amber-100 text-amber-800 border border-amber-300'
+                                }`}>
+                                  {isCompleted ? (
+                                    <>
+                                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                      <span>จัดทำเรียบร้อย</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Clock className="w-3 h-3 text-amber-600" />
+                                      <span>ยังไม่จัดทำ</span>
+                                    </>
+                                  )}
+                                </span>
+                              </div>
+
+                              {/* PA Challenge Title */}
+                              <div>
+                                <div className="text-[10px] font-semibold text-slate-500">ชื่อประเด็นท้าทาย:</div>
+                                <div className="text-slate-800 font-medium text-[11px] line-clamp-2 mt-0.5 bg-white p-2 rounded-lg border border-slate-200">
+                                  {t.paChallengeTitle ? (
+                                    <span className="text-slate-900">{t.paChallengeTitle}</span>
+                                  ) : (
+                                    <span className="text-slate-400 italic">(ยังไม่ได้ระบุประเด็นท้าทาย)</span>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Video & Document links */}
+                              <div className="flex flex-wrap gap-1.5 pt-1">
+                                {t.paVideoUrl ? (
+                                  <a
+                                    href={t.paVideoUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-1 rounded-lg hover:bg-rose-100 transition"
+                                  >
+                                    <Video className="w-3 h-3 mr-1 text-rose-600" />
+                                    <span>ดูคลิปวิดีโอ PA</span>
+                                    <ExternalLink className="w-2.5 h-2.5 ml-1" />
+                                  </a>
+                                ) : (
+                                  <span className="inline-flex items-center text-[10px] text-slate-400 bg-slate-200/60 px-2 py-1 rounded-lg">
+                                    ไม่มีคลิปวิดีโอ PA
+                                  </span>
+                                )}
+
+                                {t.paDocumentUrl ? (
+                                  <a
+                                    href={t.paDocumentUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center text-[10px] font-bold text-[#005BAC] bg-blue-50 border border-blue-200 px-2 py-1 rounded-lg hover:bg-blue-100 transition"
+                                  >
+                                    <FileText className="w-3 h-3 mr-1 text-[#005BAC]" />
+                                    <span>ดูไฟล์เอกสาร PA</span>
+                                    <ExternalLink className="w-2.5 h-2.5 ml-1" />
+                                  </a>
+                                ) : (
+                                  <span className="inline-flex items-center text-[10px] text-slate-400 bg-slate-200/60 px-2 py-1 rounded-lg">
+                                    ไม่มีไฟล์เอกสาร PA
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Action buttons */}
+                            <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs">
+                              <span className="font-bold text-[#005BAC] text-[11px]">{t.resourcesCount || 0} สื่อการสอน</span>
+                              <div className="flex items-center space-x-1.5">
+                                <button
+                                  onClick={() => openEditTeacher(t)}
+                                  className="px-2.5 py-1.5 bg-[#005BAC]/10 hover:bg-[#005BAC]/20 text-[#005BAC] rounded-lg text-xs font-bold flex items-center space-x-1 transition"
+                                  title="แก้ไขข้อมูลครูและข้อตกลง PA"
+                                >
+                                  <Edit className="w-3.5 h-3.5" />
+                                  <span>แก้ไข</span>
+                                </button>
+
+                                {(t.paChallengeTitle || t.paVideoUrl || t.paDocumentUrl || t.paStatus === 'completed') && (
+                                  <button
+                                    onClick={() => handleResetTeacherPa(t.id, t.name)}
+                                    className="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-lg text-xs font-bold flex items-center transition"
+                                    title="ล้าง/ลบเฉพาะข้อตกลง PA ของครูท่านนี้"
+                                  >
+                                    <RotateCcw className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+
+                                <button
+                                  onClick={() => {
+                                    if (window.confirm(`คุณยืนยันที่จะลบข้อมูลครู "${t.name}" หรือไม่?`)) {
+                                      deleteTeacher(t.id);
+                                    }
+                                  }}
+                                  className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs transition"
+                                  title="ลบข้อมูลครู"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         )}
 
