@@ -531,7 +531,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             localStorage.setItem(STORAGE_KEYS.RESOURCES, JSON.stringify(res));
           }
         });
-      } else if (table === 'teachers') {
+      } else if (table === 'teachers' || table === 'pa_submissions') {
         fetchTeachersFromSupabase().then(t => {
           if (t && isMounted) {
             setTeachers(t);
@@ -713,7 +713,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...(cat && { subjectName: cat.name })
     };
 
-    setTeachers(prev => prev.map(t => t.id === currentTeacher.id ? newTeacherData : t));
+    // Calculate PA status reliably
+    const isPaCompleted = Boolean(newTeacherData.paChallengeTitle && newTeacherData.paVideoUrl);
+    newTeacherData.paStatus = isPaCompleted ? 'completed' : (updated.paStatus || newTeacherData.paStatus || 'pending');
+
+    setTeachers(prev => {
+      const updatedList = prev.map(t => t.id === currentTeacher.id ? newTeacherData : t);
+      localStorage.setItem(STORAGE_KEYS.TEACHERS, JSON.stringify(updatedList));
+      return updatedList;
+    });
     setCurrentTeacher(newTeacherData);
     localStorage.setItem(STORAGE_KEYS.TEACHER_USER, JSON.stringify(newTeacherData));
 
@@ -887,12 +895,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...(cat && { subjectName: cat.name })
     };
 
-    setTeachers(prev => prev.map(t => t.id === id ? updatedT : t));
+    if (updatedT.paChallengeTitle && updatedT.paVideoUrl) {
+      updatedT.paStatus = 'completed';
+    }
+
+    setTeachers(prev => {
+      const next = prev.map(t => t.id === id ? updatedT : t);
+      localStorage.setItem(STORAGE_KEYS.TEACHERS, JSON.stringify(next));
+      return next;
+    });
+
+    if (currentTeacher && currentTeacher.id === id) {
+      setCurrentTeacher(updatedT);
+      localStorage.setItem(STORAGE_KEYS.TEACHER_USER, JSON.stringify(updatedT));
+    }
+
     await upsertTeacherToSupabase(updatedT);
   };
 
   const deleteTeacher = async (id: string) => {
-    setTeachers(prev => prev.filter(t => t.id !== id));
+    setTeachers(prev => {
+      const next = prev.filter(t => t.id !== id);
+      localStorage.setItem(STORAGE_KEYS.TEACHERS, JSON.stringify(next));
+      return next;
+    });
     await deleteTeacherFromSupabase(id);
   };
 
@@ -906,7 +932,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       paDocumentUrl: '',
       paStatus: 'pending'
     };
-    setTeachers(prev => prev.map(t => t.id === id ? updatedT : t));
+    setTeachers(prev => {
+      const next = prev.map(t => t.id === id ? updatedT : t);
+      localStorage.setItem(STORAGE_KEYS.TEACHERS, JSON.stringify(next));
+      return next;
+    });
+    if (currentTeacher && currentTeacher.id === id) {
+      setCurrentTeacher(updatedT);
+      localStorage.setItem(STORAGE_KEYS.TEACHER_USER, JSON.stringify(updatedT));
+    }
     await upsertTeacherToSupabase(updatedT);
   };
 

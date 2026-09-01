@@ -141,35 +141,54 @@ export async function fetchTeachersFromSupabase(): Promise<Teacher[] | null> {
   if (!supabase) return null;
 
   try {
-    const { data, error } = await supabase
-      .from('teachers')
-      .select('*')
-      .order('id', { ascending: true });
+    const [teachersRes, paRes] = await Promise.all([
+      supabase.from('teachers').select('*').order('id', { ascending: true }),
+      supabase.from('pa_submissions').select('*')
+    ]);
 
-    if (error) throw error;
-    if (!data) return [];
+    if (teachersRes.error) throw teachersRes.error;
+    const teachersData = teachersRes.data || [];
+    const paData = paRes.data || [];
 
-    return data.map((t: any) => ({
-      id: t.id,
-      name: t.full_name || t.name,
-      position: t.position || '',
-      academicStanding: t.academic_standing || t.academicStanding || '',
-      photo: t.photo_url || t.photo || '',
-      bio: t.bio || '',
-      email: t.email || '',
-      facebook: t.facebook || '',
-      subjectId: t.subject_id || t.subjectId || 'cat-dash',
-      subjectName: t.subject_name || t.subjectName || '',
-      resourcesCount: Number(t.resources_count) || 0,
-      totalDownloads: Number(t.total_downloads) || 0,
-      createdAt: t.created_at ? t.created_at.split('T')[0] : '2024-01-01',
-      paChallengeTitle: t.pa_challenge_title || t.paChallengeTitle || '',
-      paYear: t.school_year || t.paYear || '2569',
-      paVideoUrl: t.pa_video_url || t.paVideoUrl || '',
-      paDocumentUrl: t.pa_document_url || t.paDocumentUrl || '',
-      paStatus: t.pa_status || t.paStatus || 'pending',
-      password: t.password || '123456',
-    }));
+    // Map PA Submissions by teacher_id
+    const paMap = new Map<string, any>();
+    paData.forEach((p: any) => {
+      if (p.teacher_id) paMap.set(p.teacher_id, p);
+    });
+
+    return teachersData.map((t: any) => {
+      const pa = paMap.get(t.id);
+      const paChallenge = pa?.challenge_title || pa?.challenge_description || t.pa_challenge_title || t.paChallengeTitle || '';
+      const paVideo = pa?.video_url || t.pa_video_url || t.paVideoUrl || '';
+      const paDoc = pa?.document_url || t.pa_document_url || t.paDocumentUrl || '';
+      const paYear = pa?.school_year || t.school_year || t.paYear || '2569';
+      const isCompleted = Boolean(paChallenge && paVideo);
+      const paStatus: 'completed' | 'pending' = isCompleted 
+        ? 'completed' 
+        : (pa?.status === 'completed' ? 'completed' : ((t.pa_status || t.paStatus) === 'completed' ? 'completed' : 'pending'));
+
+      return {
+        id: t.id,
+        name: t.full_name || t.name,
+        position: t.position || '',
+        academicStanding: t.academic_standing || t.academicStanding || '',
+        photo: t.photo_url || t.photo || '',
+        bio: t.bio || '',
+        email: t.email || '',
+        facebook: t.facebook || '',
+        subjectId: t.subject_id || t.subjectId || 'cat-dash',
+        subjectName: t.subject_name || t.subjectName || '',
+        resourcesCount: Number(t.resources_count) || 0,
+        totalDownloads: Number(t.total_downloads) || 0,
+        createdAt: t.created_at ? t.created_at.split('T')[0] : '2024-01-01',
+        paChallengeTitle: paChallenge,
+        paYear: paYear,
+        paVideoUrl: paVideo,
+        paDocumentUrl: paDoc,
+        paStatus: paStatus,
+        password: t.password || '123456',
+      };
+    });
   } catch (err) {
     console.warn('Supabase fetch teachers error:', err);
     return null;
@@ -199,7 +218,34 @@ export async function upsertTeacherToSupabase(teacher: Teacher): Promise<boolean
 
     const { error } = await supabase.from('teachers').upsert(payload);
     if (error) throw error;
+
+    // Synchronize PA Submission to pa_submissions table in Supabase
+    const schoolYear = teacher.paYear || '2569';
+    const submissionId = `pa-${teacher.id}-${schoolYear}`;
+    const hasPA = Boolean(teacher.paChallengeTitle || teacher.paVideoUrl || teacher.paDocumentUrl);
+
+    if (hasPA) {
+      const isCompleted = Boolean(teacher.paChallengeTitle && teacher.paVideoUrl);
+      const paPayload = {
+        id: submissionId,
+        teacher_id: teacher.id,
+        school_year: schoolYear,
+        challenge_title: teacher.paChallengeTitle || '',
+        challenge_description: teacher.paChallengeTitle || '',
+        video_url: teacher.paVideoUrl || '',
+        document_url: teacher.paDocumentUrl || '',
+        status: isCompleted || teacher.paStatus === 'completed' ? 'completed' : 'draft',
+        submitted_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      const { error: paErr } = await supabase.from('pa_submissions').upsert(paPayload);
+      if (paErr) console.warn('Supabase upsert pa_submission warn:', paErr.message);
+    } else {
+      await supabase.from('pa_submissions').delete().eq('teacher_id', teacher.id).eq('school_year', schoolYear);
+    }
+
     broadcastMutation('teachers', 'UPDATE', teacher, teacher.id);
+    broadcastMutation('pa_submissions', 'UPDATE', teacher, submissionId);
     return true;
   } catch (err) {
     console.error('Supabase upsert teacher error:', err);
