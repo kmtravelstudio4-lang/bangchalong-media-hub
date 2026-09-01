@@ -8,6 +8,9 @@ export interface SupabaseConfig {
   isConnected: boolean;
 }
 
+const DEFAULT_SUPABASE_URL = "https://radbtxuyyiqexgtxwiir.supabase.co";
+const DEFAULT_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhZGJ0eHV5eWlxZXhndHh3aWlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMjU3MjMsImV4cCI6MjEwMzgwMTcyM30.WZfhd9YwtKi-dmOTsoSw9IcmJrZ2Mi3Bo8-wz6Q00WM";
+
 /**
  * Retrieve Supabase configuration from localStorage or Vite environment variables.
  */
@@ -15,12 +18,12 @@ export function getStoredSupabaseConfig(): SupabaseConfig {
   const envUrl = (
     (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) ||
     (typeof process !== 'undefined' && (process.env?.VITE_SUPABASE_URL || process.env?.SUPABASE_URL)) ||
-    ''
+    DEFAULT_SUPABASE_URL
   ).trim();
   const envKey = (
     (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY) ||
     (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_ANON_KEY) ||
-    ''
+    DEFAULT_SUPABASE_ANON_KEY
   ).trim();
 
   try {
@@ -28,8 +31,8 @@ export function getStoredSupabaseConfig(): SupabaseConfig {
       const saved = localStorage.getItem(STORAGE_KEY_CONFIG);
       if (saved) {
         const parsed = JSON.parse(saved);
-        const url = (parsed.url || envUrl || '').trim();
-        const anonKey = (parsed.anonKey || envKey || '').trim();
+        const url = (parsed.url || envUrl || DEFAULT_SUPABASE_URL).trim();
+        const anonKey = (parsed.anonKey || envKey || DEFAULT_SUPABASE_ANON_KEY).trim();
         return {
           url,
           anonKey,
