@@ -24,6 +24,8 @@ export interface CompressionOptions {
   maxHeight?: number;
   quality?: number;
   mimeType?: 'image/webp' | 'image/jpeg';
+  targetMaxBytes?: number; // Target max size in bytes (e.g. 150KB for profile, 200KB for media)
+  mode?: 'profile' | 'thumbnail' | 'custom';
 }
 
 export function formatBytes(bytes: number, decimals = 1): string {
@@ -36,18 +38,24 @@ export function formatBytes(bytes: number, decimals = 1): string {
 }
 
 /**
- * Compresses a File or Blob client-side to an ultra-lightweight Data URL
+ * Compresses a File or Blob client-side using Adaptive Multi-Pass Ultra Compression:
+ * - Profile targets: max 512x512 px, ≤ 150 KB (Adaptive quality 0.82 -> 0.50)
+ * - Media Thumbnail targets: max 800x800 px, ≤ 200 KB (Adaptive quality 0.82 -> 0.50)
+ * - Strips all EXIF / GPS / camera metadata
+ * - Converts to optimized WebP (with JPEG fallback)
  */
 export async function compressImageFile(
   file: File | Blob,
   options: CompressionOptions = {}
 ): Promise<CompressionResult> {
-  const {
-    maxWidth = 640,
-    maxHeight = 640,
-    quality = 0.72,
-    mimeType = 'image/webp'
-  } = options;
+  const mode = options.mode || 'thumbnail';
+  const defaultMaxDim = mode === 'profile' ? 512 : 800;
+  const defaultTargetBytes = mode === 'profile' ? 150 * 1024 : 200 * 1024;
+
+  let maxW = options.maxWidth || defaultMaxDim;
+  let maxH = options.maxHeight || defaultMaxDim;
+  const targetBytes = options.targetMaxBytes || defaultTargetBytes;
+  const preferredMime = options.mimeType || 'image/webp';
 
   const originalSizeBytes = file.size;
 
@@ -60,25 +68,25 @@ export async function compressImageFile(
       img.src = readerEvent.target?.result as string;
 
       img.onload = () => {
-        let width = img.width;
-        let height = img.height;
+        let currentW = img.width;
+        let currentH = img.height;
 
-        // Calculate aspect ratio downscaling
-        if (width > height) {
-          if (width > maxWidth) {
-            height = Math.round((height * maxWidth) / width);
-            width = maxWidth;
+        // Downscale to fit within initial bounding box
+        if (currentW > currentH) {
+          if (currentW > maxW) {
+            currentH = Math.round((currentH * maxW) / currentW);
+            currentW = maxW;
           }
         } else {
-          if (height > maxHeight) {
-            width = Math.round((width * maxHeight) / height);
-            height = maxHeight;
+          if (currentH > maxH) {
+            currentW = Math.round((currentW * maxH) / currentH);
+            currentH = maxH;
           }
         }
 
         const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = currentW;
+        canvas.height = currentH;
 
         const ctx = canvas.getContext('2d');
         if (!ctx) {
@@ -86,37 +94,64 @@ export async function compressImageFile(
           return;
         }
 
-        // Use high quality image smoothing
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, currentW, currentH);
 
-        // Draw image on canvas
-        ctx.drawImage(img, 0, 0, width, height);
+        // Adaptive Multi-pass Compression: try qualities 0.82, 0.72, 0.60, 0.50
+        const qualities = [options.quality || 0.80, 0.70, 0.60, 0.50];
+        let bestDataUrl = '';
+        let finalSizeBytes = 0;
 
-        // Try WebP first, fallback to JPEG if browser doesn't support WebP export
-        let outputDataUrl = canvas.toDataURL(mimeType, quality);
-        if (mimeType === 'image/webp' && !outputDataUrl.startsWith('data:image/webp')) {
-          outputDataUrl = canvas.toDataURL('image/jpeg', quality);
+        for (const q of qualities) {
+          let testUrl = canvas.toDataURL(preferredMime, q);
+          if (preferredMime === 'image/webp' && !testUrl.startsWith('data:image/webp')) {
+            testUrl = canvas.toDataURL('image/jpeg', q);
+          }
+
+          const base64Len = testUrl.length - (testUrl.indexOf(',') + 1);
+          const currentSize = Math.round((base64Len * 3) / 4);
+
+          bestDataUrl = testUrl;
+          finalSizeBytes = currentSize;
+
+          if (currentSize <= targetBytes) {
+            break;
+          }
         }
 
-        // Calculate compressed size from Base64 string length
-        // Base64 length * 3/4 approximates binary byte size
-        const base64Length = outputDataUrl.length - (outputDataUrl.indexOf(',') + 1);
-        const compressedSizeBytes = Math.round((base64Length * 3) / 4);
+        // If still larger than target, perform one resolution reduction step
+        if (finalSizeBytes > targetBytes && (currentW > 400 || currentH > 400)) {
+          const stepW = Math.round(currentW * 0.8);
+          const stepH = Math.round(currentH * 0.8);
+          canvas.width = stepW;
+          canvas.height = stepH;
+          ctx.drawImage(img, 0, 0, stepW, stepH);
+
+          let stepUrl = canvas.toDataURL(preferredMime, 0.65);
+          if (preferredMime === 'image/webp' && !stepUrl.startsWith('data:image/webp')) {
+            stepUrl = canvas.toDataURL('image/jpeg', 0.65);
+          }
+          const base64Len = stepUrl.length - (stepUrl.indexOf(',') + 1);
+          bestDataUrl = stepUrl;
+          finalSizeBytes = Math.round((base64Len * 3) / 4);
+          currentW = stepW;
+          currentH = stepH;
+        }
 
         const savingsPercentage = originalSizeBytes > 0
-          ? Math.max(0, Math.round(((originalSizeBytes - compressedSizeBytes) / originalSizeBytes) * 100))
+          ? Math.max(0, Math.round(((originalSizeBytes - finalSizeBytes) / originalSizeBytes) * 100))
           : 0;
 
         resolve({
-          dataUrl: outputDataUrl,
+          dataUrl: bestDataUrl,
           originalSizeBytes,
-          compressedSizeBytes,
+          compressedSizeBytes: finalSizeBytes,
           originalSizeFormatted: formatBytes(originalSizeBytes),
-          compressedSizeFormatted: formatBytes(compressedSizeBytes),
+          compressedSizeFormatted: formatBytes(finalSizeBytes),
           savingsPercentage,
-          width,
-          height
+          width: currentW,
+          height: currentH
         });
       };
 
