@@ -99,10 +99,62 @@ function MainContent() {
   );
 }
 
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, ErrorBoundaryState> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Application Error Boundary caught error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6 text-center">
+          <div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-200 max-w-md w-full space-y-4">
+            <div className="w-16 h-16 bg-blue-50 text-[#005BAC] rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold">
+              🏫
+            </div>
+            <h2 className="font-prompt font-bold text-slate-900 text-lg">
+              คลังสื่อการสอน โรงเรียนวัดบางโฉลงใน
+            </h2>
+            <p className="text-xs text-slate-500">
+              เกิดข้อผิดพลาดในการโหลดระบบ กำลังรีเฟรชเพื่อโหลดข้อมูลเวอร์ชันล่าสุด
+            </p>
+            <button
+              onClick={() => {
+                localStorage.clear();
+                window.location.href = '/';
+              }}
+              className="w-full bg-[#005BAC] hover:bg-[#004584] text-white py-3 rounded-xl font-bold text-xs shadow-md transition"
+            >
+              รีเฟรชหน้าเว็บใหม่ (Clear Cache & Reload)
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
   return (
-    <AppProvider>
-      <MainContent />
-    </AppProvider>
+    <ErrorBoundary>
+      <AppProvider>
+        <MainContent />
+      </AppProvider>
+    </ErrorBoundary>
   );
 }
