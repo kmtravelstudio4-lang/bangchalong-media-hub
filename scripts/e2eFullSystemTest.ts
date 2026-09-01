@@ -130,10 +130,7 @@ async function runE2ETests() {
     order: m.member_order
   }));
 
-  const csvContent = generatePaCsvContent(teachersList as any, committeeList as any, (evaluations || []) as any, {
-    setFilter: 'all',
-    academicYear: '2569'
-  });
+  const csvContent = generatePaCsvContent(teachersList as any, committeeList as any, (evaluations || []) as any);
 
   assert('CSV', 'UTF-8 BOM Header Present (\\uFEFF)', csvContent.startsWith('\uFEFF'));
   assert('CSV', 'CSV Rows match Teacher Count', csvContent.split('\n').length >= teachersList.length);
