@@ -502,7 +502,8 @@ async function runProductionSmokeTest() {
     subjectId: t.subject_id || 'cat-thai',
     resourcesCount: t.resources_count || 0,
     totalDownloads: t.total_downloads || 0,
-    photo: t.photo_url || ''
+    photo: t.photo_url || '',
+    createdAt: '2024-01-01'
   }));
 
   const sampleCommitteeList = (committeeMembers || []).map(m => ({

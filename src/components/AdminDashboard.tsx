@@ -12,7 +12,9 @@ import {
 } from '../types';
 import { 
   isTeacherAssignedToCommittee, 
-  getTeacherCommitteeSetNumber
+  getTeacherCommitteeSetNumber,
+  getTeacherAcademicCategory,
+  STANDARD_ACADEMIC_CATEGORIES
 } from '../data/mockData';
 import { SUPABASE_SQL_SCHEMA } from '../services/supabase';
 import { 
@@ -2275,31 +2277,8 @@ export const AdminDashboard: React.FC = () => {
 
               {/* VIEW 4: EXPORT CSV FOR ADMIN */}
               {paSubTab === 'export-csv' && (() => {
-                // Determine distinct standings
-                const presetStandings = [
-                  'ครูผู้ช่วย',
-                  'ครู',
-                  'ครูชำนาญการ',
-                  'ครูชำนาญการพิเศษ',
-                  'ครูเชี่ยวชาญ',
-                  'ครูเชี่ยวชาญพิเศษ',
-                  'ครูอัตราจ้าง',
-                  'พี่เลี้ยงเด็กพิการ',
-                  'ครูพี่เลี้ยง',
-                  'นักการภารโรง',
-                  'เจ้าหน้าที่',
-                  'ธุรการ'
-                ];
-                
-                const customStandings: string[] = Array.from(
-                  new Set<string>(
-                    teachers
-                      .map(t => (t.academicStanding || t.position || '').trim())
-                      .filter((s): s is string => Boolean(s) && !presetStandings.includes(s))
-                  )
-                );
-
-                const allAvailableStandings: string[] = [...presetStandings, ...customStandings];
+                // Determine distinct standings via Single Source of Truth
+                const allAvailableStandings = [...STANDARD_ACADEMIC_CATEGORIES];
 
                 // Filter for custom export preview
                 const customFilteredTeachers = filterTeachersForExport(teachers, {
@@ -2470,7 +2449,7 @@ export const AdminDashboard: React.FC = () => {
                           onClick={() => {
                             let exportedCount = 0;
                             allAvailableStandings.forEach((standing, index) => {
-                              const groupTeachers = teachers.filter(t => (t.academicStanding || t.position || '').trim() === standing);
+                              const groupTeachers = teachers.filter(t => getTeacherAcademicCategory(t) === standing);
                               if (groupTeachers.length > 0) {
                                 exportedCount++;
                                 setTimeout(() => {
@@ -2493,7 +2472,7 @@ export const AdminDashboard: React.FC = () => {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {allAvailableStandings.map((standing) => {
-                          const groupTeachers = teachers.filter(t => (t.academicStanding || t.position || '').trim() === standing);
+                          const groupTeachers = teachers.filter(t => getTeacherAcademicCategory(t) === standing);
                           const count = groupTeachers.length;
                           const submittedCount = groupTeachers.filter(t => t.paStatus === 'completed' || Boolean(t.paChallengeTitle && t.paVideoUrl)).length;
 

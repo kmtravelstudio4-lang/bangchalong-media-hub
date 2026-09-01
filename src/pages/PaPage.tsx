@@ -28,7 +28,13 @@ import {
   Sparkles,
   ChevronRight
 } from 'lucide-react';
-import { getYouTubeEmbedUrl, isTeacherAssignedToCommittee, getTeacherCommitteeSetNumber } from '../data/mockData';
+import { 
+  getYouTubeEmbedUrl, 
+  isTeacherAssignedToCommittee, 
+  getTeacherCommitteeSetNumber, 
+  getTeacherAcademicCategory,
+  STANDARD_ACADEMIC_CATEGORIES 
+} from '../data/mockData';
 
 export const PaPage: React.FC = () => {
   const { 
@@ -114,10 +120,12 @@ export const PaPage: React.FC = () => {
     if (statusFilter === 'pending' && isCompleted) return false;
     if (statusFilter === 'committeeApproved' && !isFullyApproved) return false;
 
-    // Academic standing filter
-    const teacherStanding = t.academicStanding || t.position || 'ครู';
-    if (standingFilter !== 'all' && !teacherStanding.includes(standingFilter)) {
-      return false;
+    // Academic standing filter (Exact Match via Single Source of Truth)
+    if (standingFilter !== 'all') {
+      const teacherCat = getTeacherAcademicCategory(t);
+      if (teacherCat !== standingFilter) {
+        return false;
+      }
     }
 
     // Search query matching
@@ -132,20 +140,11 @@ export const PaPage: React.FC = () => {
     );
   });
 
-  // Group teachers by Academic Standing (วิทยฐานะ)
-  const academicStandingsList = [
-    { id: 'ครูชำนาญการพิเศษ', name: 'ครูชำนาญการพิเศษ' },
-    { id: 'ครูชำนาญการ', name: 'ครูชำนาญการ' },
-    { id: 'ครู', name: 'ครู' },
-    { id: 'ครูผู้ช่วย', name: 'ครูผู้ช่วย' },
-    { id: 'ครูอัตราจ้าง', name: 'ครูอัตราจ้าง' },
-    { id: 'พี่เลี้ยงเด็กพิการ', name: 'พี่เลี้ยงเด็กพิการ' },
-    { id: 'ครูพี่เลี้ยง', name: 'ครูพี่เลี้ยง' },
-    { id: 'นักการภารโรง', name: 'นักการภารโรง' },
-    { id: 'เจ้าหน้าที่', name: 'เจ้าหน้าที่' },
-    { id: 'ธุรการ', name: 'ธุรการ' },
-    { id: 'ครูเชี่ยวชาญ', name: 'ครูเชี่ยวชาญ / เชี่ยวชาญพิเศษ' },
-  ];
+  // Group teachers by Academic Standing (วิทยฐานะ) - Single Source of Truth
+  const academicStandingsList = STANDARD_ACADEMIC_CATEGORIES.map(cat => ({
+    id: cat,
+    name: cat
+  }));
 
   const handleDownloadDoc = (fileUrl: string) => {
     window.open(fileUrl, '_blank');
@@ -450,7 +449,7 @@ export const PaPage: React.FC = () => {
           </button>
 
           {academicStandingsList.map(st => {
-            const count = teachers.filter(t => (t.academicStanding || t.position || 'ครู').includes(st.id)).length;
+            const count = teachers.filter(t => getTeacherAcademicCategory(t) === st.id).length;
             return (
               <button
                 key={st.id}

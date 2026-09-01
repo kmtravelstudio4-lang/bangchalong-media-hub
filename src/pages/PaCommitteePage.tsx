@@ -55,7 +55,12 @@ import {
   Zap,
   Target
 } from 'lucide-react';
-import { getYouTubeId, isTeacherAssignedToCommittee } from '../data/mockData';
+import { 
+  getYouTubeId, 
+  isTeacherAssignedToCommittee,
+  getTeacherAcademicCategory,
+  STANDARD_ACADEMIC_CATEGORIES 
+} from '../data/mockData';
 
 const DOC_FEEDBACK_PRESETS = [
   'แผนการจัดการเรียนรู้สอดคล้องประเด็นท้าทายครบถ้วน',
@@ -130,19 +135,10 @@ export const PaCommitteePage: React.FC = () => {
   // Quick evaluation modal for single teacher
   const [evalModalTeacher, setEvalModalTeacher] = useState<Teacher | null>(null);
 
-  // List of academic standings in Thai educational system
+  // List of academic standings in Thai educational system (Single Source of Truth)
   const academicStandings = [
     'ทั้งหมด',
-    'รองผู้อำนวยการ',
-    'ครูเชี่ยวชาญ',
-    'ครูชำนาญการพิเศษ',
-    'ครูชำนาญการ',
-    'ครู',
-    'ครูผู้ช่วย',
-    'ครูอัตราจ้าง',
-    'พี่เลี้ยงเด็กพิการ',
-    'นักการภารโรง',
-    'เจ้าหน้าที่ธุรการ'
+    ...STANDARD_ACADEMIC_CATEGORIES
   ];
 
   // Helper for formatting Document Embed / View URL
@@ -438,10 +434,10 @@ export const PaCommitteePage: React.FC = () => {
 
       if (!matchesSearch) return false;
 
-      // 2. Academic Standing Filter
+      // 2. Academic Standing Filter (Exact Match via Single Source of Truth)
       if (academicFilter !== 'all') {
-        const matchesStanding = teacher.academicStanding === academicFilter || teacher.position === academicFilter;
-        if (!matchesStanding) return false;
+        const cat = getTeacherAcademicCategory(teacher);
+        if (cat !== academicFilter) return false;
       }
 
       // 3. Subject Filter
@@ -468,26 +464,15 @@ export const PaCommitteePage: React.FC = () => {
     });
   }, [teachers, searchQuery, academicFilter, selectedSubjectFilter, activeWorkspaceTab, currentCommitteeMember, paEvaluations]);
 
-  // Group filtered teachers by academic standing or position
+  // Group filtered teachers by academic standing via Single Source of Truth
   const groupedTeachersByStanding = useMemo(() => {
     const map = new Map<string, Teacher[]>();
-    [
-      'รองผู้อำนวยการ',
-      'ครูเชี่ยวชาญ', 
-      'ครูชำนาญการพิเศษ', 
-      'ครูชำนาญการ', 
-      'ครู', 
-      'ครูผู้ช่วย',
-      'ครูอัตราจ้าง',
-      'พี่เลี้ยงเด็กพิการ',
-      'นักการภารโรง',
-      'เจ้าหน้าที่ธุรการ'
-    ].forEach(key => {
+    STANDARD_ACADEMIC_CATEGORIES.forEach(key => {
       map.set(key, []);
     });
 
     filteredTeachers.forEach(t => {
-      const standing = t.academicStanding || t.position || 'ครู';
+      const standing = getTeacherAcademicCategory(t);
       if (!map.has(standing)) {
         map.set(standing, []);
       }

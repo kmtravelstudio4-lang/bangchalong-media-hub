@@ -1,5 +1,9 @@
 import { Teacher, PaCommitteeMember, PaEvaluationRecord } from '../types';
-import { isTeacherAssignedToCommittee, getTeacherCommitteeSetNumber } from '../data/mockData';
+import { 
+  isTeacherAssignedToCommittee, 
+  getTeacherCommitteeSetNumber, 
+  getTeacherAcademicCategory 
+} from '../data/mockData';
 
 export interface PaExportFilterOptions {
   year?: string;
@@ -35,9 +39,9 @@ export function filterTeachersForExport(
       if (teacherYear !== options.year) return false;
     }
 
-    // Filter by academic standing if specified
+    // Filter by academic standing if specified (Exact Category Match)
     if (options.academicStanding && options.academicStanding !== 'all') {
-      const standing = (t.academicStanding || t.position || '').trim();
+      const standing = getTeacherAcademicCategory(t);
       if (standing !== options.academicStanding) return false;
     }
 

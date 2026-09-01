@@ -1078,125 +1078,142 @@ export const INITIAL_VIDEOS: FeaturedVideo[] = [
   }
 ];
 
+export const STANDARD_ACADEMIC_CATEGORIES = [
+  'ครูชำนาญการพิเศษ',
+  'ครูชำนาญการ',
+  'ครู',
+  'ครูผู้ช่วย',
+  'ครูอัตราจ้าง',
+  'พี่เลี้ยงเด็กพิการ',
+  'ครูพี่เลี้ยง',
+  'นักการภารโรง',
+  'เจ้าหน้าที่ธุรการ'
+] as const;
+
+export type TeacherAcademicCategory = typeof STANDARD_ACADEMIC_CATEGORIES[number];
+
 export const normalizeStanding = (val?: string): string => {
-  if (!val) return '';
+  if (!val || typeof val !== 'string') return '';
   return val.trim().replace(/\s+/g, ' ');
 };
 
 /**
- * Strict eligibility check for Committee Set 1:
- * ONLY 'ครูชำนาญการ' and 'ครูชำนาญการพิเศษ' (and standalone 'ชำนาญการ' / 'ชำนาญการพิเศษ').
- * Strictly forbidden from matching 'ครู', 'ครูผู้ช่วย', 'ครูอัตราจ้าง', support staff, etc.
+ * SINGLE SOURCE OF TRUTH: Exact classification of Teacher's Academic Standing / Position.
+ * Every teacher belongs to EXACTLY ONE category. No broad substring matching or overlaps.
+ */
+export const getTeacherAcademicCategory = (teacher?: Teacher | null): TeacherAcademicCategory => {
+  if (!teacher) return 'ครู';
+  const rawStanding = normalizeStanding(teacher.academicStanding);
+  const rawPosition = normalizeStanding(teacher.position);
+  
+  // Prefer academic standing if present, otherwise position
+  const target = rawStanding || rawPosition;
+
+  // A. ครูชำนาญการพิเศษ (Exact Match)
+  if (
+    target === 'ครูชำนาญการพิเศษ' || 
+    target === 'ชำนาญการพิเศษ' || 
+    target === 'ครูเชี่ยวชาญ' || 
+    target === 'ครูเชี่ยวชาญพิเศษ'
+  ) {
+    return 'ครูชำนาญการพิเศษ';
+  }
+
+  // B. ครูชำนาญการ (Exact Match, must NOT match ชำนาญการพิเศษ)
+  if (target === 'ครูชำนาญการ' || target === 'ชำนาญการ') {
+    return 'ครูชำนาญการ';
+  }
+
+  // D. ครูผู้ช่วย (Exact Match)
+  if (target === 'ครูผู้ช่วย' || target === 'ผู้ช่วย') {
+    return 'ครูผู้ช่วย';
+  }
+
+  // C. ครู (Exact Match, must NOT include ครูผู้ช่วย, ชำนาญการ, อัตราจ้าง, etc.)
+  if (
+    target === 'ครู' || 
+    target === 'ครู คศ.1' || 
+    target === 'ครูคศ.1' || 
+    target === 'ครู ค.ศ.1' || 
+    target === 'ครูค.ศ.1' || 
+    target === 'คศ.1' || 
+    target === 'ค.ศ.1'
+  ) {
+    return 'ครู';
+  }
+
+  // E. ครูอัตราจ้าง (Exact Match)
+  if (target === 'ครูอัตราจ้าง' || target === 'อัตราจ้าง') {
+    return 'ครูอัตราจ้าง';
+  }
+
+  // G. ครูพี่เลี้ยง (Exact Match)
+  if (target === 'ครูพี่เลี้ยง') {
+    return 'ครูพี่เลี้ยง';
+  }
+
+  // F. พี่เลี้ยงเด็กพิการ (Exact Match)
+  if (
+    target === 'พี่เลี้ยงเด็กพิการ' || 
+    target === 'พี่เลี้ยงเด็กพิเศษ' || 
+    target === 'พี่เลี้ยง'
+  ) {
+    return 'พี่เลี้ยงเด็กพิการ';
+  }
+
+  // H. นักการภารโรง (Exact Match)
+  if (
+    target === 'นักการภารโรง' || 
+    target === 'นักการ' || 
+    target === 'ภารโรง'
+  ) {
+    return 'นักการภารโรง';
+  }
+
+  // I. เจ้าหน้าที่ธุรการ (Exact Match)
+  if (
+    target === 'เจ้าหน้าที่ธุรการ' || 
+    target === 'ธุรการ' || 
+    target === 'เจ้าหน้าที่'
+  ) {
+    return 'เจ้าหน้าที่ธุรการ';
+  }
+
+  // Fallback: If position is classroom level without specific standing -> 'ครู'
+  return 'ครู';
+};
+
+/**
+ * Committee Set 1: ครูชำนาญการพิเศษ, ครูชำนาญการ
  */
 export const isTeacherSet1Eligible = (teacher?: Teacher | null): boolean => {
   if (!teacher) return false;
-  const standing = normalizeStanding(teacher.academicStanding);
-  const position = normalizeStanding(teacher.position);
-
-  // Strictly allowed exact matches for Set 1 (ครูชำนาญการ และ ครูชำนาญการพิเศษ)
-  const ALLOWED_SET_1_EXACT = [
-    'ครูชำนาญการพิเศษ',
-    'ชำนาญการพิเศษ',
-    'ครูชำนาญการ',
-    'ชำนาญการ'
-  ];
-
-  if (standing && ALLOWED_SET_1_EXACT.includes(standing)) {
-    return true;
-  }
-  if (!standing && position && ALLOWED_SET_1_EXACT.includes(position)) {
-    return true;
-  }
-  return false;
+  const category = getTeacherAcademicCategory(teacher);
+  return category === 'ครูชำนาญการพิเศษ' || category === 'ครูชำนาญการ';
 };
 
 /**
- * Strict eligibility check for Committee Set 2:
- * ONLY 'ครู' (ค.ศ.1) and 'ครูผู้ช่วย'
+ * Committee Set 2: ครู, ครูผู้ช่วย
  */
 export const isTeacherSet2Eligible = (teacher?: Teacher | null): boolean => {
   if (!teacher) return false;
-  if (isTeacherSet1Eligible(teacher)) return false;
-
-  const standing = normalizeStanding(teacher.academicStanding);
-  const position = normalizeStanding(teacher.position);
-
-  const DISQUALIFIED_STAFF = [
-    'ครูชำนาญการพิเศษ',
-    'ชำนาญการพิเศษ',
-    'ครูชำนาญการ',
-    'ชำนาญการ',
-    'ครูอัตราจ้าง',
-    'อัตราจ้าง',
-    'ครูพี่เลี้ยง',
-    'พี่เลี้ยง',
-    'พี่เลี้ยงเด็กพิการ',
-    'พี่เลี้ยงเด็กพิเศษ',
-    'นักการภารโรง',
-    'นักการ',
-    'ภารโรง',
-    'เจ้าหน้าที่',
-    'ธุรการ',
-    'เจ้าหน้าที่ธุรการ'
-  ];
-
-  if (DISQUALIFIED_STAFF.includes(standing) || DISQUALIFIED_STAFF.includes(position)) {
-    return false;
-  }
-
-  const ALLOWED_SET_2_EXACT = [
-    'ครู',
-    'ครูผู้ช่วย',
-    'ครู คศ.1',
-    'ครูคศ.1',
-    'ครู ค.ศ.1',
-    'ครูค.ศ.1',
-    'คศ.1',
-    'ค.ศ.1'
-  ];
-
-  if (standing && ALLOWED_SET_2_EXACT.includes(standing)) {
-    return true;
-  }
-  if (!standing && position && ALLOWED_SET_2_EXACT.includes(position)) {
-    return true;
-  }
-  return false;
+  const category = getTeacherAcademicCategory(teacher);
+  return category === 'ครู' || category === 'ครูผู้ช่วย';
 };
 
 /**
- * Strict eligibility check for Committee Set 3:
- * ONLY ครูอัตราจ้าง, พี่เลี้ยงเด็กพิเศษ/พิการ, ครูพี่เลี้ยง, นักการภารโรง, เจ้าหน้าที่ธุรการ
+ * Committee Set 3: ครูอัตราจ้าง, พี่เลี้ยงเด็กพิการ, ครูพี่เลี้ยง, นักการภารโรง, เจ้าหน้าที่ธุรการ
  */
 export const isTeacherSet3Eligible = (teacher?: Teacher | null): boolean => {
   if (!teacher) return false;
-  if (isTeacherSet1Eligible(teacher) || isTeacherSet2Eligible(teacher)) return false;
-
-  const standing = normalizeStanding(teacher.academicStanding);
-  const position = normalizeStanding(teacher.position);
-
-  const ALLOWED_SET_3_EXACT = [
-    'ครูอัตราจ้าง',
-    'อัตราจ้าง',
-    'พี่เลี้ยงเด็กพิการ',
-    'พี่เลี้ยงเด็กพิเศษ',
-    'ครูพี่เลี้ยง',
-    'พี่เลี้ยง',
-    'นักการภารโรง',
-    'นักการ',
-    'ภารโรง',
-    'เจ้าหน้าที่',
-    'ธุรการ',
-    'เจ้าหน้าที่ธุรการ'
-  ];
-
-  if (standing && ALLOWED_SET_3_EXACT.includes(standing)) {
-    return true;
-  }
-  if (!standing && position && ALLOWED_SET_3_EXACT.includes(position)) {
-    return true;
-  }
-  return false;
+  const category = getTeacherAcademicCategory(teacher);
+  return (
+    category === 'ครูอัตราจ้าง' ||
+    category === 'พี่เลี้ยงเด็กพิการ' ||
+    category === 'ครูพี่เลี้ยง' ||
+    category === 'นักการภารโรง' ||
+    category === 'เจ้าหน้าที่ธุรการ'
+  );
 };
 
 /**

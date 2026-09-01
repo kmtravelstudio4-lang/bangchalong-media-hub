@@ -1,16 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { UserCheck, Lock, X, AlertCircle, Sparkles, Key, CheckCircle2, Filter, Search } from 'lucide-react';
+import { getTeacherAcademicCategory, STANDARD_ACADEMIC_CATEGORIES } from '../data/mockData';
 
 const ACADEMIC_STANDINGS_LIST = [
   { id: 'all', name: 'ทุกวิทยฐานะ (แสดงทั้งหมด)' },
-  { id: 'ครูชำนาญการพิเศษ', name: 'ครูชำนาญการพิเศษ' },
-  { id: 'ครูชำนาญการ', name: 'ครูชำนาญการ' },
-  { id: 'ครู', name: 'ครู' },
-  { id: 'ครูผู้ช่วย', name: 'ครูผู้ช่วย' },
-  { id: 'ครูอัตราจ้าง', name: 'ครูอัตราจ้าง' },
-  { id: 'ครูเชี่ยวชาญ', name: 'ครูเชี่ยวชาญ' },
-  { id: 'ครูเชี่ยวชาญพิเศษ', name: 'ครูเชี่ยวชาญพิเศษ' },
+  ...STANDARD_ACADEMIC_CATEGORIES.map(cat => ({ id: cat, name: cat }))
 ];
 
 export const TeacherLoginModal: React.FC = () => {
@@ -33,10 +28,10 @@ export const TeacherLoginModal: React.FC = () => {
   // Filter teachers based on chosen academic standing and quick search
   const filteredTeachers = useMemo(() => {
     return teachers.filter(t => {
-      // 1. Standing match
+      // 1. Standing match (Exact Category via Single Source of Truth)
       if (selectedStanding !== 'all') {
-        const teacherStanding = t.academicStanding || t.position || 'ครู';
-        if (teacherStanding !== selectedStanding) {
+        const teacherCat = getTeacherAcademicCategory(t);
+        if (teacherCat !== selectedStanding) {
           return false;
         }
       }
@@ -45,7 +40,8 @@ export const TeacherLoginModal: React.FC = () => {
         const q = teacherSearchFilter.toLowerCase();
         const matchName = t.name.toLowerCase().includes(q);
         const matchPos = (t.position || '').toLowerCase().includes(q);
-        if (!matchName && !matchPos) return false;
+        const matchStanding = (t.academicStanding || '').toLowerCase().includes(q);
+        if (!matchName && !matchPos && !matchStanding) return false;
       }
       return true;
     });
@@ -148,7 +144,7 @@ export const TeacherLoginModal: React.FC = () => {
               {ACADEMIC_STANDINGS_LIST.map((standing) => {
                 const count = standing.id === 'all' 
                   ? teachers.length 
-                  : teachers.filter(t => (t.academicStanding || t.position || 'ครู') === standing.id).length;
+                  : teachers.filter(t => getTeacherAcademicCategory(t) === standing.id).length;
                 return (
                   <option key={standing.id} value={standing.id}>
                     {standing.name} {count > 0 ? `(${count} ท่าน)` : '(0 ท่าน)'}
