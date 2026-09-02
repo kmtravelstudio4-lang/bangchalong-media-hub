@@ -1344,7 +1344,7 @@ export const PaCommitteePage: React.FC = () => {
                               <button
                                 type="button"
                                 disabled={clearingTeacherId === teacher.id}
-                                onClick={() => handleClearTeacherEvaluation(teacher)}
+                                onClick={(e) => { e.stopPropagation(); handleClearTeacherEvaluation(teacher); }}
                                 className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs py-2 px-2.5 rounded-xl transition flex items-center space-x-1 shadow-2xs"
                                 title="ล้างคะแนนและผลการตรวจของครูท่านนี้"
                               >
@@ -1480,12 +1480,29 @@ export const PaCommitteePage: React.FC = () => {
 
                         {/* Actions */}
                         <td className="py-3.5 px-4 text-right">
-                          <button
-                            onClick={() => handleOpenBigInspect(teacher, 'split')}
-                            className="bg-[#005BAC] hover:bg-[#004584] text-white px-3 py-1 rounded-lg font-bold text-[11px] transition shadow-xs"
-                          >
-                            ตรวจจอใหญ่
-                          </button>
+                          <div className="flex items-center justify-end space-x-1.5">
+                            <button
+                              onClick={() => handleOpenBigInspect(teacher, 'split')}
+                              className="bg-[#005BAC] hover:bg-[#004584] text-white px-3 py-1.5 rounded-lg font-bold text-[11px] transition shadow-xs"
+                            >
+                              ตรวจจอใหญ่
+                            </button>
+                            {evals.some(e => e.committeeId === currentCommitteeMember?.id && (e.overallScore !== undefined || e.docChecked || e.videoChecked)) && (
+                              <button
+                                type="button"
+                                disabled={clearingTeacherId === teacher.id}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleClearTeacherEvaluation(teacher);
+                                }}
+                                className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-2 py-1.5 rounded-lg font-bold text-[10px] transition shadow-2xs flex items-center space-x-1"
+                                title="ล้างคะแนนของครูท่านนี้"
+                              >
+                                <RotateCcw className={`w-3 h-3 text-rose-500 ${clearingTeacherId === teacher.id ? 'animate-spin' : ''}`} />
+                                <span>ล้าง</span>
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
