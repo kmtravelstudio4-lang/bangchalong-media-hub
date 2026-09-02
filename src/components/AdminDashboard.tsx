@@ -107,6 +107,8 @@ export const AdminDashboard: React.FC = () => {
     examQuestions,
     paCommitteeMembers,
     paEvaluations,
+    clearTeacherEvaluation,
+    clearAllTeacherEvaluations,
     addCommitteeMember,
     updateCommitteeMember,
     deleteCommitteeMember,
@@ -1806,6 +1808,23 @@ export const AdminDashboard: React.FC = () => {
                         <span className="text-amber-800 text-[11px] font-medium ml-1">คะแนน</span>
                       </div>
                     </div>
+                  )}
+
+                  {paSubTab === 'consensus-matrix' && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (window.confirm('⚠️ ยืนยันการล้างคะแนนและผลการตรวจของทุกคนในระบบทั้งหมด?\n\nการกระทำนี้จะลบคะแนนและผลการตรวจทั้งหมดในระบบทันที และไม่สามารถกู้คืนได้')) {
+                          await clearAllTeacherEvaluations();
+                          alert('✓ ล้างคะแนนและผลการตรวจของทุกคนในระบบเรียบร้อยแล้ว');
+                        }
+                      }}
+                      className="flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-2xs"
+                      title="ล้างคะแนนและผลการตรวจของครูทุกคนในระบบ"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 text-rose-600" />
+                      <span>ล้างคะแนนทุกคนในระบบ ({paEvaluations.length} รายการ)</span>
+                    </button>
                   )}
                 </div>
 

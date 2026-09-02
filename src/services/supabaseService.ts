@@ -691,17 +691,29 @@ export async function deletePaEvaluationFromSupabase(teacherId: string, committe
   try {
     const evalId = committeeId ? `eval_${teacherId}_${committeeId}` : `eval_${teacherId}`;
     
-    // 1. Delete by exact ID
-    await supabase.from('pa_evaluations').delete().eq('id', evalId);
-    
-    // 2. Delete by matching composite fields if committeeId is provided
     if (committeeId) {
-      await supabase.from('pa_evaluations').delete().match({ teacher_id: teacherId, committee_member_id: committeeId });
+      const { error } = await supabase
+        .from('pa_evaluations')
+        .delete()
+        .or(`id.eq.${evalId},and(teacher_id.eq.${teacherId},committee_member_id.eq.${committeeId})`);
+      
+      if (error) {
+        console.warn('Supabase delete PA evaluation query error, fallback to match:', error);
+        await supabase.from('pa_evaluations').delete().eq('teacher_id', teacherId).eq('committee_member_id', committeeId);
+      }
     } else {
-      await supabase.from('pa_evaluations').delete().eq('teacher_id', teacherId);
+      const { error } = await supabase
+        .from('pa_evaluations')
+        .delete()
+        .or(`id.eq.${evalId},teacher_id.eq.${teacherId}`);
+      
+      if (error) {
+        console.warn('Supabase delete PA evaluation query error, fallback to eq:', error);
+        await supabase.from('pa_evaluations').delete().eq('teacher_id', teacherId);
+      }
     }
 
-    broadcastMutation('pa_evaluations', 'DELETE', null, evalId);
+    broadcastMutation('pa_evaluations', 'DELETE', { id: evalId, teacherId, committeeId }, evalId);
     return true;
   } catch (err) {
     console.error('Supabase delete PA evaluation error:', err);
@@ -714,9 +726,12 @@ export async function clearAllPaEvaluationsFromSupabase(): Promise<boolean> {
   if (!supabase) return false;
 
   try {
-    const { error } = await supabase.from('pa_evaluations').delete().neq('id', '0');
-    if (error) throw error;
-    broadcastMutation('pa_evaluations', 'DELETE', null, 'all');
+    const { error } = await supabase.from('pa_evaluations').delete().neq('id', '0_dummy_filter');
+    if (error) {
+      console.warn('Supabase clear all PA evaluations error, trying fallback:', error);
+      await supabase.from('pa_evaluations').delete().not('id', 'is', null);
+    }
+    broadcastMutation('pa_evaluations', 'DELETE', { id: 'all' }, 'all');
     return true;
   } catch (err) {
     console.error('Supabase clear all PA evaluations error:', err);

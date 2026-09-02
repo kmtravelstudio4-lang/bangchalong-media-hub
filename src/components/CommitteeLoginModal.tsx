@@ -53,6 +53,12 @@ export const CommitteeLoginModal: React.FC = () => {
       target: 'ตำแหน่ง: ครูอัตราจ้าง, พี่เลี้ยงเด็กพิการ, นักการภารโรง, เจ้าหน้าที่ธุรการ',
       color: 'border-purple-500 text-purple-600 bg-purple-50',
       badgeBg: 'bg-purple-600'
+    },
+    4: {
+      title: 'ชุดที่ 4: ประเมินรองผู้อำนวยการสถานศึกษา',
+      target: 'ตำแหน่ง: รองผู้อำนวยการสถานศึกษา (2 ท่าน)',
+      color: 'border-amber-500 text-amber-600 bg-amber-50',
+      badgeBg: 'bg-amber-600'
     }
   };
 
@@ -100,7 +106,7 @@ export const CommitteeLoginModal: React.FC = () => {
                 เข้าสู่ระบบคณะกรรมการผู้ประเมิน ว.PA
               </h3>
               <p className="text-xs text-slate-500">
-                โรงเรียนวัดบางโฉลงใน • แบ่งกรรมการ 3 ชุดตามกลุ่มเป้าหมาย
+                โรงเรียนวัดบางโฉลงใน • แบ่งกรรมการ 4 ชุดตามกลุ่มเป้าหมาย
               </p>
             </div>
           </div>
@@ -112,13 +118,13 @@ export const CommitteeLoginModal: React.FC = () => {
           </button>
         </div>
 
-        {/* 3 Set Tabs Selector */}
+        {/* 4 Set Tabs Selector */}
         <div className="space-y-1.5">
           <label className="block text-xs font-bold text-slate-600">
             เลือกชุดกรรมการที่ท่านสังกัด:
           </label>
-          <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 rounded-2xl">
-            {[1, 2, 3].map((setNum) => (
+          <div className="grid grid-cols-4 gap-1.5 p-1 bg-slate-100 rounded-2xl">
+            {[1, 2, 3, 4].map((setNum) => (
               <button
                 key={setNum}
                 type="button"
@@ -135,7 +141,7 @@ export const CommitteeLoginModal: React.FC = () => {
               >
                 <span>ชุดที่ {setNum}</span>
                 <span className="text-[10px] font-normal text-slate-400 truncate max-w-full">
-                  {setNum === 1 ? 'ชำนาญการ/พ.' : setNum === 2 ? 'ครู/ผู้ช่วย' : 'อัตราจ้าง/จนท.'}
+                  {setNum === 1 ? 'ชำนาญการ/พ.' : setNum === 2 ? 'ครู/ผู้ช่วย' : setNum === 3 ? 'อัตราจ้าง/จนท.' : 'รอง ผอ.'}
                 </span>
               </button>
             ))}
@@ -143,12 +149,12 @@ export const CommitteeLoginModal: React.FC = () => {
         </div>
 
         {/* Set Target Info Banner */}
-        <div className={`border rounded-2xl p-3 text-xs flex items-start space-x-2.5 ${setDescriptions[activeSetTab].color}`}>
+        <div className={`border rounded-2xl p-3 text-xs flex items-start space-x-2.5 ${setDescriptions[activeSetTab]?.color || 'border-slate-300 text-slate-700 bg-slate-50'}`}>
           <Target className="w-4 h-4 shrink-0 mt-0.5" />
           <div>
-            <span className="font-bold block">{setDescriptions[activeSetTab].title}</span>
+            <span className="font-bold block">{setDescriptions[activeSetTab]?.title}</span>
             <p className="text-[11px] mt-0.5 opacity-90">
-              {setDescriptions[activeSetTab].target}
+              {setDescriptions[activeSetTab]?.target}
             </p>
           </div>
         </div>

@@ -138,6 +138,8 @@ export const PaCommitteePage: React.FC = () => {
   const [saveSuccessNotice, setSaveSuccessNotice] = useState(false);
   const [clearingTeacherId, setClearingTeacherId] = useState<string | null>(null);
   const [clearSuccessToast, setClearSuccessToast] = useState<string | null>(null);
+  const [isReloadingClear, setIsReloadingClear] = useState<boolean>(false);
+  const [clearReloadMessage, setClearReloadMessage] = useState<string>('');
 
   // Quick evaluation modal for single teacher
   const [evalModalTeacher, setEvalModalTeacher] = useState<Teacher | null>(null);
@@ -315,8 +317,14 @@ export const PaCommitteePage: React.FC = () => {
     if (!currentCommitteeMember) return;
 
     setClearingTeacherId(teacher.id);
+    setIsReloadingClear(true);
+    setClearReloadMessage(`กำลังล้างคะแนนและผลการตรวจของ "${teacher.name}"...`);
+
     try {
       await clearTeacherEvaluation(teacher.id, currentCommitteeMember.id);
+      
+      // Smooth visual feedback delay for reload feeling
+      await new Promise(resolve => setTimeout(resolve, 400));
       
       // Reset big inspect modal state if open
       if (bigInspectTeacher?.id === teacher.id) {
@@ -338,7 +346,45 @@ export const PaCommitteePage: React.FC = () => {
     } catch (err) {
       console.error('Error clearing evaluation:', err);
     } finally {
+      setIsReloadingClear(false);
       setClearingTeacherId(null);
+    }
+  };
+
+  // Clear all evaluations completed by current committee member in this set
+  const handleClearAllMyEvaluations = async () => {
+    if (!currentCommitteeMember) return;
+    
+    const assignedTeachers = teachers.filter(t => isTeacherAssignedToCommittee(t, currentCommitteeMember));
+    const myEvalsCount = paEvaluations.filter(e => e.committeeId === currentCommitteeMember.id).length;
+
+    if (myEvalsCount === 0) {
+      alert('ท่านยังไม่มีคะแนนหรือผลการตรวจที่บันทึกไว้ในระบบ');
+      return;
+    }
+
+    if (!window.confirm(`⚠️ ยืนยันการล้างคะแนนและผลการตรวจของครูทั้งหมด (${myEvalsCount} รายการ) ที่ท่านได้ตรวจไว้?\n\nเมื่อยืนยัน ระบบจะรีเซ็ตสถานะของครูทุกคนในชุดของท่านกลับเป็น "รอตรวจ" ทั้งหมด`)) {
+      return;
+    }
+
+    setIsReloadingClear(true);
+    setClearReloadMessage(`กำลังล้างผลการตรวจทั้งหมดของท่าน (${myEvalsCount} รายการ) และรีโหลดระบบ...`);
+
+    try {
+      for (const t of assignedTeachers) {
+        await clearTeacherEvaluation(t.id, currentCommitteeMember.id);
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      setBigInspectTeacher(null);
+      setEvalModalTeacher(null);
+      setClearSuccessToast(`✓ ล้างคะแนนและผลการตรวจทั้งหมดของท่านเรียบร้อยแล้ว (${myEvalsCount} รายการ)`);
+      setTimeout(() => setClearSuccessToast(null), 4000);
+    } catch (err) {
+      console.error('Error clearing all my evaluations:', err);
+    } finally {
+      setIsReloadingClear(false);
     }
   };
 
@@ -842,6 +888,16 @@ export const PaCommitteePage: React.FC = () => {
                 >
                   <Award className="w-4 h-4 text-amber-300" />
                   <span>ดูหน้าข้อตกลง PA รวม (Public View)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleClearAllMyEvaluations}
+                  className="bg-rose-500/20 hover:bg-rose-500/35 text-rose-100 border border-rose-400/40 text-xs font-bold px-3.5 py-2.5 rounded-xl transition flex items-center space-x-1.5 backdrop-blur-xs"
+                  title="ล้างคะแนนและผลการตรวจทั้งหมดของท่านในชุดนี้"
+                >
+                  <RotateCcw className="w-4 h-4 text-rose-300" />
+                  <span>ล้างคะแนนทั้งหมดของฉัน</span>
                 </button>
               </div>
             </div>
@@ -2055,6 +2111,30 @@ export const PaCommitteePage: React.FC = () => {
 
             </form>
 
+          </div>
+        </div>
+      )}
+
+      {/* Fullscreen Reload / Clearing Overlay Modal */}
+      {isReloadingClear && (
+        <div className="fixed inset-0 z-[100] bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700/80 rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl flex flex-col items-center space-y-4">
+            <div className="relative">
+              <div className="w-16 h-16 rounded-full border-4 border-rose-500/20 border-t-rose-500 animate-spin flex items-center justify-center" />
+              <RotateCcw className="w-7 h-7 text-rose-400 absolute inset-0 m-auto animate-pulse" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-white font-bold text-base font-prompt">
+                กำลังล้างข้อมูลและรีโหลด...
+              </h3>
+              <p className="text-slate-300 text-xs leading-relaxed">
+                {clearReloadMessage || 'กำลังล้างคะแนนและรีโหลดสถานะห้องตรวจ...'}
+              </p>
+            </div>
+            <div className="flex items-center space-x-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-3.5 py-1.5 rounded-xl">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              <span>กำลังซิงค์ฐานข้อมูลและอัปเดตสถานะรอตรวจ...</span>
+            </div>
           </div>
         </div>
       )}

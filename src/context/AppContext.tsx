@@ -533,7 +533,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           localStorage.setItem(STORAGE_KEYS.COMMITTEE, JSON.stringify(fullCommittee));
         }
 
-        if (remoteEvaluations && remoteEvaluations.length > 0) {
+        if (remoteEvaluations !== null && remoteEvaluations !== undefined) {
           setPaEvaluations(remoteEvaluations);
           localStorage.setItem(STORAGE_KEYS.EVALUATIONS, JSON.stringify(remoteEvaluations));
         }
@@ -602,12 +602,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
         });
       } else if (table === 'pa_evaluations') {
-        fetchPaEvaluationsFromSupabase().then(ev => {
-          if (ev && isMounted) {
-            setPaEvaluations(ev);
-            localStorage.setItem(STORAGE_KEYS.EVALUATIONS, JSON.stringify(ev));
-          }
-        });
+        if (eventType === 'DELETE') {
+          const deleteTargetId = newRecord?.id || oldRecord?.id;
+          const deleteTeacherId = newRecord?.teacherId || oldRecord?.teacherId;
+          const deleteCommitteeId = newRecord?.committeeId || oldRecord?.committeeId;
+
+          setPaEvaluations(prev => {
+            let next: PaEvaluationRecord[];
+            if (deleteTargetId === 'all') {
+              next = [];
+            } else if (deleteTeacherId && deleteCommitteeId) {
+              next = prev.filter(e => !(e.teacherId === deleteTeacherId && e.committeeId === deleteCommitteeId) && e.id !== deleteTargetId);
+            } else if (deleteTeacherId) {
+              next = prev.filter(e => e.teacherId !== deleteTeacherId && e.id !== deleteTargetId);
+            } else if (deleteTargetId) {
+              next = prev.filter(e => e.id !== deleteTargetId);
+            } else {
+              next = prev;
+            }
+            try {
+              localStorage.setItem(STORAGE_KEYS.EVALUATIONS, JSON.stringify(next));
+            } catch (err) {
+              console.warn("Failed to update evaluations in local storage on delete:", err);
+            }
+            return next;
+          });
+        } else {
+          fetchPaEvaluationsFromSupabase().then(ev => {
+            if (ev && isMounted) {
+              setPaEvaluations(ev);
+              localStorage.setItem(STORAGE_KEYS.EVALUATIONS, JSON.stringify(ev));
+            }
+          });
+        }
       } else if (table === 'exam_questions') {
         fetchExamQuestionsFromSupabase().then(exams => {
           if (exams && isMounted) {
@@ -1605,6 +1632,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updateCommitteeMember,
       deleteCommitteeMember,
       savePaEvaluation,
+      clearTeacherEvaluation,
+      clearAllTeacherEvaluations,
       toggleTeacherDocChecked,
       toggleTeacherVideoChecked,
       getTeacherEvaluations,
