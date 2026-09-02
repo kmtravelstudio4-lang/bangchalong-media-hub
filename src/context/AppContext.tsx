@@ -1257,13 +1257,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const clearTeacherEvaluation = async (teacherId: string, committeeId?: string) => {
+    const targetEvalId = committeeId ? `eval_${teacherId}_${committeeId}` : undefined;
+
     setPaEvaluations(prev => {
-      let next: PaEvaluationRecord[];
-      if (committeeId) {
-        next = prev.filter(e => !(e.teacherId === teacherId && e.committeeId === committeeId));
-      } else {
-        next = prev.filter(e => e.teacherId !== teacherId);
-      }
+      const next = prev.filter(e => {
+        const matchTeacher = e.teacherId === teacherId;
+        const matchComm = committeeId ? (e.committeeId === committeeId || e.id === targetEvalId) : true;
+        return !(matchTeacher && matchComm);
+      });
       try {
         localStorage.setItem(STORAGE_KEYS.EVALUATIONS, JSON.stringify(next));
       } catch (err) {

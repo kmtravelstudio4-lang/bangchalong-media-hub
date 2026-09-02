@@ -313,16 +313,12 @@ export const PaCommitteePage: React.FC = () => {
   // Clear / Reset evaluation for a teacher by active committee member
   const handleClearTeacherEvaluation = async (teacher: Teacher) => {
     if (!currentCommitteeMember) return;
-    const confirmClear = window.confirm(
-      'คุณต้องการล้างคะแนนและผลการตรวจของ "' + teacher.name + '" ใช่หรือไม่?\n(ผลการให้คะแนนและความคิดเห็นจะถูกรีเซ็ตกลับเป็นสถานะยังไม่ได้ตรวจ)'
-    );
-    if (!confirmClear) return;
 
     setClearingTeacherId(teacher.id);
     try {
       await clearTeacherEvaluation(teacher.id, currentCommitteeMember.id);
       
-      // If big inspect modal is currently open for this teacher, reset inputs
+      // Reset big inspect modal state if open
       if (bigInspectTeacher?.id === teacher.id) {
         setEvalDocFeedback('');
         setEvalVideoFeedback('');
@@ -331,13 +327,16 @@ export const PaCommitteePage: React.FC = () => {
         setEvalOverallComment('');
         setSaveSuccessNotice(false);
       }
-      // If quick modal is open, close it
+      
+      // Reset quick modal state if open
       if (evalModalTeacher?.id === teacher.id) {
         setEvalModalTeacher(null);
       }
 
-      setClearSuccessToast('ล้างคะแนนและผลการตรวจของ "' + teacher.name + '" เรียบร้อยแล้ว');
-      setTimeout(() => setClearSuccessToast(null), 3500);
+      setClearSuccessToast(`✓ ล้างคะแนนและผลการตรวจของ "${teacher.name}" เรียบร้อยแล้ว (สถานะกลับเป็นรอตรวจ)`);
+      setTimeout(() => setClearSuccessToast(null), 4000);
+    } catch (err) {
+      console.error('Error clearing evaluation:', err);
     } finally {
       setClearingTeacherId(null);
     }
