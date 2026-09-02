@@ -40,7 +40,7 @@ import {
   Zap,
   Check
 } from 'lucide-react';
-import { getYouTubeId, getVideoEmbedUrl, isTeacherAssignedToCommittee, getTeacherCommitteeSetNumber } from '../data/mockData';
+import { getYouTubeId, getVideoEmbedUrl, isTeacherAssignedToCommittee, getTeacherCommitteeSetNumber, isTeacherDeputyDirector } from '../data/mockData';
 import { ImageUploadCompressor } from '../components/ImageUploadCompressor';
 
 export const TeacherDashboardPage: React.FC = () => {
@@ -63,6 +63,8 @@ export const TeacherDashboardPage: React.FC = () => {
     setIsAIChatOpen,
     setActiveTab
   } = useApp();
+
+  const isDeputy = isTeacherDeputyDirector(currentTeacher);
 
   // Active section tab in teacher dashboard: 'resources' | 'pa' | 'ai-tools' | 'profile-edit'
   const [currentSection, setCurrentSection] = useState<'resources' | 'pa' | 'ai-tools' | 'profile-edit'>('resources');
@@ -402,6 +404,13 @@ export const TeacherDashboardPage: React.FC = () => {
                   <span className="bg-white/20 text-white text-xs font-semibold px-3 py-0.5 rounded-full backdrop-blur-xs">
                     {currentTeacher.subjectName || 'กลุ่มสาระการเรียนรู้'}
                   </span>
+                  {currentTeacher.position && (
+                    <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
+                      isDeputy ? 'bg-amber-400 text-amber-950 font-bold shadow-xs' : 'bg-white/20 text-white backdrop-blur-xs'
+                    }`}>
+                      {isDeputy ? `ตำแหน่ง ${currentTeacher.position}` : `สายชั้น ${currentTeacher.position}`}
+                    </span>
+                  )}
                   {currentTeacher.paStatus === 'completed' ? (
                     <span className="bg-emerald-400/20 text-emerald-200 border border-emerald-300/40 text-xs font-bold px-2.5 py-0.5 rounded-full">
                       ✓ จัดทำ PA 2569 แล้ว

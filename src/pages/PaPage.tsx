@@ -197,8 +197,10 @@ export const PaPage: React.FC = () => {
                   {teacher.academicStanding || 'ครู'}
                 </span>
                 {teacher.position && (
-                  <span className="text-[10px] text-slate-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-md font-semibold">
-                    สายชั้น {teacher.position}
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-semibold ${
+                    isDeputy ? 'text-amber-900 bg-amber-50 border border-amber-300 font-bold' : 'text-slate-700 bg-amber-50 border border-amber-200'
+                  }`}>
+                    {isDeputy ? `ตำแหน่ง ${teacher.position}` : `สายชั้น ${teacher.position}`}
                   </span>
                 )}
               </div>

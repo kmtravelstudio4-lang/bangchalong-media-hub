@@ -606,6 +606,8 @@ export const TeacherProfileModal: React.FC = () => {
                   onChange={(e) => setForm({ ...form, academicStanding: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 px-3 text-xs font-bold text-[#005BAC]"
                 >
+                  <option value="รองผู้อำนวยการวิทยฐานะชำนาญการพิเศษ">รองผู้อำนวยการวิทยฐานะชำนาญการพิเศษ</option>
+                  <option value="รองผู้อำนวยการวิทยฐานะชำนาญการ">รองผู้อำนวยการวิทยฐานะชำนาญการ</option>
                   <option value="ครูชำนาญการพิเศษ">ครูชำนาญการพิเศษ</option>
                   <option value="ครูชำนาญการ">ครูชำนาญการ</option>
                   <option value="ครู">ครู</option>
@@ -622,12 +624,15 @@ export const TeacherProfileModal: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">สายชั้นที่สอน / ตำแหน่ง *</label>
+                <label className="block font-bold text-slate-700 mb-1">
+                  {form.position?.includes('รองผู้อำนวยการ') || form.academicStanding?.includes('รองผู้อำนวยการ') ? 'ตำแหน่ง *' : 'สายชั้นที่สอน / ตำแหน่ง *'}
+                </label>
                 <select
                   value={form.position}
                   onChange={(e) => setForm({ ...form, position: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 px-3 text-xs font-semibold text-slate-900"
                 >
+                  <option value="รองผู้อำนวยการโรงเรียน">รองผู้อำนวยการโรงเรียน</option>
                   <option value="-">- (ไม่มีสายชั้น / สายสนับสนุน)</option>
                   <option value="อนุบาล">อนุบาล</option>
                   <option value="อนุบาล 1">อนุบาล 1</option>
@@ -644,6 +649,7 @@ export const TeacherProfileModal: React.FC = () => {
                   <option value="มัธยมศึกษาปีที่ 3 (ม.3)">มัธยมศึกษาปีที่ 3 (ม.3)</option>
                   {/* Keep existing custom position if not in standard list */}
                   {form.position && ![
+                    'รองผู้อำนวยการโรงเรียน',
                     '-', 'อนุบาล', 'อนุบาล 1', 'อนุบาล 2', 'อนุบาล 3', 
                     'ประถมศึกษาปีที่ 1 (ป.1)', 'ประถมศึกษาปีที่ 2 (ป.2)', 
                     'ประถมศึกษาปีที่ 3 (ป.3)', 'ประถมศึกษาปีที่ 4 (ป.4)', 

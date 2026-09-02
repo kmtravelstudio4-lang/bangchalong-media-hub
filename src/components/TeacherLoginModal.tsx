@@ -222,7 +222,7 @@ export const TeacherLoginModal: React.FC = () => {
                         {deputy.name}
                       </h4>
                       <p className="text-[10px] text-amber-800 font-bold truncate">
-                        {deputy.position || 'รองผู้อำนวยการโรงเรียน'}
+                        ตำแหน่ง {deputy.position || 'รองผู้อำนวยการโรงเรียน'}
                       </p>
                       <p className="text-[9px] text-slate-500 truncate">
                         {deputy.academicStanding}
@@ -259,7 +259,7 @@ export const TeacherLoginModal: React.FC = () => {
                 }}
                 className="w-full bg-white border border-blue-200 rounded-xl py-2.5 px-3 text-xs font-bold text-[#005BAC] focus:ring-2 focus:ring-[#005BAC] focus:outline-none"
               >
-                {ACADEMIC_STANDINGS_LIST.filter(s => s.id !== 'รองผู้อำนวยการ').map((standing) => {
+                {ACADEMIC_STANDINGS_LIST.filter(s => !s.id.includes('รองผู้อำนวยการ')).map((standing) => {
                   const count = standing.id === 'all' 
                     ? teachers.filter(t => !isTeacherDeputyDirector(t)).length 
                     : teachers.filter(t => !isTeacherDeputyDirector(t) && getTeacherAcademicCategory(t) === standing.id).length;
@@ -322,7 +322,7 @@ export const TeacherLoginModal: React.FC = () => {
                 <option value="">-- กรุณาเลือกรายชื่อครู ({filteredTeachers.length} ท่าน) --</option>
                 {filteredTeachers.map((t) => (
                   <option key={t.id} value={t.id}>
-                    {t.name} — {t.academicStanding || 'ครู'}{t.position ? ` (สายชั้น ${t.position})` : ''}
+                    {t.name} — {t.academicStanding || 'ครู'}{t.position ? ` (${isTeacherDeputyDirector(t) ? 'ตำแหน่ง ' : 'สายชั้น '}${t.position})` : ''}
                   </option>
                 ))}
               </select>

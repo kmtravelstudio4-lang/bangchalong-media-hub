@@ -3,6 +3,7 @@ import { Teacher } from '../types';
 import { useApp } from '../context/AppContext';
 import { motion } from 'motion/react';
 import { Award, BookOpen, Download, Mail, Facebook, ExternalLink, UserCheck } from 'lucide-react';
+import { isTeacherDeputyDirector } from '../data/mockData';
 
 interface TeacherCardProps {
   teacher: Teacher;
@@ -11,6 +12,7 @@ interface TeacherCardProps {
 
 export const TeacherCard: React.FC<TeacherCardProps> = ({ teacher, index = 0 }) => {
   const { viewTeacherPublications, setSelectedTeacher, resources } = useApp();
+  const isDeputy = isTeacherDeputyDirector(teacher);
 
   const teacherResources = useMemo(() => {
     return resources.filter(r => {
@@ -34,10 +36,14 @@ export const TeacherCard: React.FC<TeacherCardProps> = ({ teacher, index = 0 }) 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
-      className="bg-white rounded-2xl overflow-hidden border border-slate-200/90 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between p-6 hover:-translate-y-1 relative group"
+      className={`bg-white rounded-2xl overflow-hidden border shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between p-6 hover:-translate-y-1 relative group ${
+        isDeputy ? 'border-amber-300 ring-1 ring-amber-400/30 bg-gradient-to-b from-amber-50/15 to-white' : 'border-slate-200/90'
+      }`}
     >
       {/* Top Background Badge */}
-      <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#005BAC] via-[#1A73E8] to-[#FFD54F]" />
+      <div className={`absolute top-0 left-0 right-0 h-2 bg-gradient-to-r ${
+        isDeputy ? 'from-amber-500 via-amber-400 to-[#005BAC]' : 'from-[#005BAC] via-[#1A73E8] to-[#FFD54F]'
+      }`} />
 
       <div>
         {/* Header Photo & Info */}
@@ -46,9 +52,13 @@ export const TeacherCard: React.FC<TeacherCardProps> = ({ teacher, index = 0 }) 
             <img
               src={teacher.photo || 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=400&auto=format&fit=crop'}
               alt={teacher.name}
-              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-slate-100 shadow-xs group-hover:border-[#005BAC] transition"
+              className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 shadow-xs group-hover:border-[#005BAC] transition ${
+                isDeputy ? 'border-amber-300' : 'border-slate-100'
+              }`}
             />
-            <div className="absolute -bottom-1 -right-1 bg-[#FFD54F] text-[#003875] p-1 rounded-full shadow-xs" title="ครูผู้สอน">
+            <div className={`absolute -bottom-1 -right-1 p-1 rounded-full shadow-xs ${
+              isDeputy ? 'bg-amber-500 text-white' : 'bg-[#FFD54F] text-[#003875]'
+            }`} title={isDeputy ? 'ฝ่ายบริหารสถานศึกษา' : 'ครูผู้สอน'}>
               <Award className="w-3.5 h-3.5" />
             </div>
           </div>
@@ -58,12 +68,16 @@ export const TeacherCard: React.FC<TeacherCardProps> = ({ teacher, index = 0 }) 
               {teacher.name}
             </h3>
             <div className="flex flex-wrap items-center gap-1.5 my-1">
-              <span className="text-[10px] font-bold text-[#005BAC] bg-blue-50 px-2 py-0.5 rounded-md">
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                isDeputy ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'text-[#005BAC] bg-blue-50'
+              }`}>
                 {teacher.academicStanding || 'ครู'}
               </span>
               {teacher.position && (
-                <span className="text-[10px] font-semibold text-slate-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-md">
-                  สายชั้น {teacher.position}
+                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${
+                  isDeputy ? 'text-amber-900 bg-amber-50 border border-amber-300 font-bold' : 'text-slate-700 bg-amber-50 border border-amber-200'
+                }`}>
+                  {isDeputy ? `ตำแหน่ง ${teacher.position}` : `สายชั้น ${teacher.position}`}
                 </span>
               )}
             </div>

@@ -865,7 +865,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "id": "t-deputy-1",
     "name": "นางสาวอำพา ยะไม",
     "position": "รองผู้อำนวยการโรงเรียน",
-    "academicStanding": "ครูชำนาญการพิเศษ",
+    "academicStanding": "รองผู้อำนวยการวิทยฐานะชำนาญการพิเศษ",
     "photo": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop",
     "bio": "รองผู้อำนวยการโรงเรียนวัดบางโฉลงใน วิทยฐานะชำนาญการพิเศษ รับผิดชอบกลุ่มบริหารงานวิชาการและแผนงาน",
     "email": "ampa.y@bangchalong.ac.th",
@@ -886,7 +886,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "id": "t-deputy-2",
     "name": "นางสาวสีจันทร์ สามงามพุ่ม",
     "position": "รองผู้อำนวยการโรงเรียน",
-    "academicStanding": "ครูชำนาญการ",
+    "academicStanding": "รองผู้อำนวยการวิทยฐานะชำนาญการ",
     "photo": "https://images.unsplash.com/photo-1580894732413-802c676d0811?q=80&w=400&auto=format&fit=crop",
     "bio": "รองผู้อำนวยการโรงเรียนวัดบางโฉลงใน วิทยฐานะชำนาญการ รับผิดชอบกลุ่มบริหารงานทั่วไปและบริหารงานบุคคล",
     "email": "seejan.s@bangchalong.ac.th",
@@ -1616,7 +1616,8 @@ export const INITIAL_RESOURCES: Resource[] = [
 ];
 
 export const STANDARD_ACADEMIC_CATEGORIES = [
-  "รองผู้อำนวยการ",
+  "รองผู้อำนวยการวิทยฐานะชำนาญการพิเศษ",
+  "รองผู้อำนวยการวิทยฐานะชำนาญการ",
   "ครูชำนาญการพิเศษ",
   "ครูชำนาญการ",
   "ครู",
@@ -1658,15 +1659,24 @@ export const isTeacherDeputyDirector = (teacher?: Teacher | null): boolean => {
 export const getTeacherAcademicCategory = (teacher?: Teacher | null): TeacherAcademicCategory => {
   if (!teacher) return "ครู";
 
-  // Deputy Director has highest priority for classification
-  if (isTeacherDeputyDirector(teacher)) {
-    return "รองผู้อำนวยการ";
-  }
-
   const rawStanding = normalizeStanding(teacher.academicStanding);
   const rawPosition = normalizeStanding(teacher.position);
-  
+  const rawName = normalizeStanding(teacher.name);
   const target = rawStanding || rawPosition;
+
+  // Deputy Director has highest priority for classification
+  if (isTeacherDeputyDirector(teacher)) {
+    if (
+      target.includes("ชำนาญการพิเศษ") || 
+      rawStanding.includes("ชำนาญการพิเศษ") || 
+      rawStanding === "รองผู้อำนวยการวิทยฐานะชำนาญการพิเศษ" ||
+      teacher.id === "t-deputy-1" ||
+      rawName.includes("อำพา")
+    ) {
+      return "รองผู้อำนวยการวิทยฐานะชำนาญการพิเศษ";
+    }
+    return "รองผู้อำนวยการวิทยฐานะชำนาญการ";
+  }
 
   if (
     target === "ครูชำนาญการพิเศษ" || 
