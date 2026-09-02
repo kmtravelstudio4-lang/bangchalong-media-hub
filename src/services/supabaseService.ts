@@ -684,6 +684,36 @@ export async function upsertPaEvaluationToSupabase(evalRecord: PaEvaluationRecor
   }
 }
 
+export async function deletePaEvaluationFromSupabase(evalId: string): Promise<boolean> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return false;
+
+  try {
+    const { error } = await supabase.from('pa_evaluations').delete().eq('id', evalId);
+    if (error) throw error;
+    broadcastMutation('pa_evaluations', 'DELETE', null, evalId);
+    return true;
+  } catch (err) {
+    console.error('Supabase delete PA evaluation error:', err);
+    return false;
+  }
+}
+
+export async function clearAllPaEvaluationsFromSupabase(): Promise<boolean> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return false;
+
+  try {
+    const { error } = await supabase.from('pa_evaluations').delete().neq('id', '0');
+    if (error) throw error;
+    broadcastMutation('pa_evaluations', 'DELETE', null, 'all');
+    return true;
+  } catch (err) {
+    console.error('Supabase clear all PA evaluations error:', err);
+    return false;
+  }
+}
+
 /**
  * ----------------------------------------------------------------------
  * 6. EXAM QUESTIONS DATA SERVICE (คลังข้อสอบ)

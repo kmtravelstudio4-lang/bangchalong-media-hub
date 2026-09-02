@@ -58,6 +58,8 @@ import {
   deleteCommitteeMemberFromSupabase,
   fetchPaEvaluationsFromSupabase,
   upsertPaEvaluationToSupabase,
+  deletePaEvaluationFromSupabase,
+  clearAllPaEvaluationsFromSupabase,
   fetchExamQuestionsFromSupabase,
   upsertExamQuestionToSupabase,
   deleteExamQuestionFromSupabase,
@@ -198,6 +200,8 @@ interface AppContextType {
   updateCommitteeMember: (id: string, updated: Partial<PaCommitteeMember>) => Promise<void>;
   deleteCommitteeMember: (id: string) => Promise<void>;
   savePaEvaluation: (evaluation: Omit<PaEvaluationRecord, 'id' | 'updatedAt'>) => Promise<void>;
+  clearTeacherEvaluation: (teacherId: string, committeeId?: string) => Promise<void>;
+  clearAllTeacherEvaluations: () => Promise<void>;
   toggleTeacherDocChecked: (teacherId: string, committeeMember: PaCommitteeMember, feedback?: string) => Promise<void>;
   toggleTeacherVideoChecked: (teacherId: string, committeeMember: PaCommitteeMember, feedback?: string) => Promise<void>;
   getTeacherEvaluations: (teacherId: string) => PaEvaluationRecord[];
@@ -327,7 +331,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem(STORAGE_KEYS.EVALUATIONS);
       if (!saved) return INITIAL_PA_EVALUATIONS;
       const parsed = JSON.parse(saved);
-      return Array.isArray(parsed) ? parsed : INITIAL_PA_EVALUATIONS;
+      if (!Array.isArray(parsed)) return INITIAL_PA_EVALUATIONS;
+      // Filter out old mock evaluations
+      return parsed.filter((e: any) => !e.id?.startsWith("eval_t-1_") && !e.id?.startsWith("eval_t-2_") && !e.id?.startsWith("eval_t-3_") && !e.id?.startsWith("eval_t-7_"));
     } catch {
       return INITIAL_PA_EVALUATIONS;
     }
@@ -1248,6 +1254,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     await upsertPaEvaluationToSupabase(record);
+  };
+
+  const clearTeacherEvaluation = async (teacherId: string, committeeId?: string) => {
+    setPaEvaluations(prev => {
+      let next: PaEvaluationRecord[];
+      if (committeeId) {
+        next = prev.filter(e => !(e.teacherId === teacherId && e.committeeId === committeeId));
+      } else {
+        next = prev.filter(e => e.teacherId !== teacherId);
+      }
+      try {
+        localStorage.setItem(STORAGE_KEYS.EVALUATIONS, JSON.stringify(next));
+      } catch (err) {
+        console.warn("Failed to save evaluations to local storage:", err);
+      }
+      return next;
+    });
+
+    if (committeeId) {
+      await deletePaEvaluationFromSupabase(`eval_${teacherId}_${committeeId}`);
+    }
+  };
+
+  const clearAllTeacherEvaluations = async () => {
+    setPaEvaluations([]);
+    try {
+      localStorage.setItem(STORAGE_KEYS.EVALUATIONS, JSON.stringify([]));
+    } catch (err) {
+      console.warn("Failed to clear evaluations in local storage:", err);
+    }
+    await clearAllPaEvaluationsFromSupabase();
   };
 
   const toggleTeacherDocChecked = async (teacherId: string, committeeMember: PaCommitteeMember, feedback?: string) => {
