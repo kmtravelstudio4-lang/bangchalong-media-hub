@@ -1272,9 +1272,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return next;
     });
 
-    if (committeeId) {
-      await deletePaEvaluationFromSupabase(`eval_${teacherId}_${committeeId}`);
-    }
+    await deletePaEvaluationFromSupabase(teacherId, committeeId);
   };
 
   const clearAllTeacherEvaluations = async () => {

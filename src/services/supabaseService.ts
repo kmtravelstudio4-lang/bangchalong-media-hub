@@ -684,13 +684,26 @@ export async function upsertPaEvaluationToSupabase(evalRecord: PaEvaluationRecor
   }
 }
 
-export async function deletePaEvaluationFromSupabase(evalId: string): Promise<boolean> {
+export async function deletePaEvaluationFromSupabase(teacherId: string, committeeId?: string): Promise<boolean> {
   const supabase = getSupabaseClient();
   if (!supabase) return false;
 
   try {
-    const { error } = await supabase.from('pa_evaluations').delete().eq('id', evalId);
-    if (error) throw error;
+    const evalId = committeeId ? 'eval_' + teacherId + '_' + committeeId : 'eval_' + teacherId;
+    
+    // Delete by eval ID or composite teacher_id + committee_member_id
+    let query = supabase.from('pa_evaluations').delete();
+    if (committeeId) {
+      query = query.or('id.eq.' + evalId + ',and(teacher_id.eq.' + teacherId + ',committee_member_id.eq.' + committeeId + ')');
+    } else {
+      query = query.or('teacher_id.eq.' + teacherId);
+    }
+
+    const { error } = await query;
+    if (error) {
+      console.warn('Supabase delete evaluation query error, trying fallback delete by id:', error);
+      await supabase.from('pa_evaluations').delete().eq('id', evalId);
+    }
     broadcastMutation('pa_evaluations', 'DELETE', null, evalId);
     return true;
   } catch (err) {

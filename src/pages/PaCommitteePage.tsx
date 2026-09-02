@@ -136,6 +136,8 @@ export const PaCommitteePage: React.FC = () => {
   const [evalOverallComment, setEvalOverallComment] = useState('');
   const [isSavingEval, setIsSavingEval] = useState(false);
   const [saveSuccessNotice, setSaveSuccessNotice] = useState(false);
+  const [clearingTeacherId, setClearingTeacherId] = useState<string | null>(null);
+  const [clearSuccessToast, setClearSuccessToast] = useState<string | null>(null);
 
   // Quick evaluation modal for single teacher
   const [evalModalTeacher, setEvalModalTeacher] = useState<Teacher | null>(null);
@@ -316,20 +318,28 @@ export const PaCommitteePage: React.FC = () => {
     );
     if (!confirmClear) return;
 
-    await clearTeacherEvaluation(teacher.id, currentCommitteeMember.id);
-    
-    // If big inspect modal is currently open for this teacher, reset inputs
-    if (bigInspectTeacher?.id === teacher.id) {
-      setEvalDocFeedback('');
-      setEvalVideoFeedback('');
-      setEvalOverallStatus('passed');
-      setEvalScore(85);
-      setEvalOverallComment('');
-      setSaveSuccessNotice(false);
-    }
-    // If quick modal is open, close it
-    if (evalModalTeacher?.id === teacher.id) {
-      setEvalModalTeacher(null);
+    setClearingTeacherId(teacher.id);
+    try {
+      await clearTeacherEvaluation(teacher.id, currentCommitteeMember.id);
+      
+      // If big inspect modal is currently open for this teacher, reset inputs
+      if (bigInspectTeacher?.id === teacher.id) {
+        setEvalDocFeedback('');
+        setEvalVideoFeedback('');
+        setEvalOverallStatus('passed');
+        setEvalScore(85);
+        setEvalOverallComment('');
+        setSaveSuccessNotice(false);
+      }
+      // If quick modal is open, close it
+      if (evalModalTeacher?.id === teacher.id) {
+        setEvalModalTeacher(null);
+      }
+
+      setClearSuccessToast('ล้างคะแนนและผลการตรวจของ "' + teacher.name + '" เรียบร้อยแล้ว');
+      setTimeout(() => setClearSuccessToast(null), 3500);
+    } finally {
+      setClearingTeacherId(null);
     }
   };
 
@@ -996,6 +1006,18 @@ export const PaCommitteePage: React.FC = () => {
       {/* Main Evaluator Dashboard Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-6">
 
+        {clearSuccessToast && (
+          <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 px-4 py-3 rounded-2xl text-xs font-bold flex items-center justify-between shadow-sm animate-in fade-in duration-200">
+            <div className="flex items-center space-x-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>{clearSuccessToast}</span>
+            </div>
+            <button onClick={() => setClearSuccessToast(null)} className="text-emerald-600 hover:text-emerald-900 p-1">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {/* Workspace Tab Switcher */}
         <div className="bg-white rounded-3xl p-2.5 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
@@ -1319,13 +1341,15 @@ export const PaCommitteePage: React.FC = () => {
                               <span>{evalRec?.overallScore ? 'แก้ไขคะแนน' : 'ให้คะแนน'}</span>
                             </button>
 
-                            {evalRec && (
+                            {(evalRec && (evalRec.overallScore !== undefined || evalRec.docChecked || evalRec.videoChecked || (evalRec.overallStatus && evalRec.overallStatus !== 'pending') || evalRec.overallComment)) && (
                               <button
+                                type="button"
+                                disabled={clearingTeacherId === teacher.id}
                                 onClick={() => handleClearTeacherEvaluation(teacher)}
                                 className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs py-2 px-2.5 rounded-xl transition flex items-center space-x-1 shadow-2xs"
                                 title="ล้างคะแนนและผลการตรวจของครูท่านนี้"
                               >
-                                <RotateCcw className="w-3.5 h-3.5 text-rose-500" />
+                                <RotateCcw className={`w-3.5 h-3.5 text-rose-500 ${clearingTeacherId === teacher.id ? 'animate-spin' : ''}`} />
                                 <span className="hidden sm:inline">ล้างคะแนน</span>
                               </button>
                             )}
@@ -1755,7 +1779,21 @@ export const PaCommitteePage: React.FC = () => {
                 />
 
                 <div className="flex items-center space-x-2 shrink-0">
+                  {paEvaluations.some(e => e.teacherId === bigInspectTeacher.id && e.committeeId === currentCommitteeMember.id && (e.overallScore !== undefined || e.docChecked || e.videoChecked || (e.overallStatus && e.overallStatus !== 'pending') || e.overallComment)) && (
+                    <button
+                      type="button"
+                      disabled={clearingTeacherId === bigInspectTeacher.id}
+                      onClick={() => handleClearTeacherEvaluation(bigInspectTeacher)}
+                      className="bg-rose-950/80 hover:bg-rose-900 text-rose-200 border border-rose-700 font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center space-x-1.5"
+                      title="ล้างคะแนนและผลการตรวจของครูท่านนี้"
+                    >
+                      <RotateCcw className={`w-3.5 h-3.5 text-rose-400 ${clearingTeacherId === bigInspectTeacher.id ? 'animate-spin' : ''}`} />
+                      <span>ล้างคะแนน</span>
+                    </button>
+                  )}
+
                   <button
+                    type="button"
                     onClick={handleSaveEvaluationInBigModal}
                     disabled={isSavingEval}
                     className="bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-md flex items-center space-x-1.5"
@@ -1967,14 +2005,15 @@ export const PaCommitteePage: React.FC = () => {
               </div>
 
               <div className="pt-2 flex items-center justify-between">
-                {paEvaluations.some(e => e.teacherId === evalModalTeacher.id && e.committeeId === currentCommitteeMember.id) ? (
+                {paEvaluations.some(e => e.teacherId === evalModalTeacher.id && e.committeeId === currentCommitteeMember.id && (e.overallScore !== undefined || e.docChecked || e.videoChecked || (e.overallStatus && e.overallStatus !== 'pending') || e.overallComment)) ? (
                   <button
                     type="button"
+                    disabled={clearingTeacherId === evalModalTeacher.id}
                     onClick={() => handleClearTeacherEvaluation(evalModalTeacher)}
                     className="px-3.5 py-2.5 rounded-xl text-xs font-bold bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 transition flex items-center space-x-1.5"
                     title="ล้างคะแนนและผลการตรวจของครูท่านนี้"
                   >
-                    <RotateCcw className="w-3.5 h-3.5 text-rose-600" />
+                    <RotateCcw className={`w-3.5 h-3.5 text-rose-600 ${clearingTeacherId === evalModalTeacher.id ? 'animate-spin' : ''}`} />
                     <span>ล้างคะแนน</span>
                   </button>
                 ) : <div />}
