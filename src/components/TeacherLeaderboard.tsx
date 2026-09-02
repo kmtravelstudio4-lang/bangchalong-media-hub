@@ -52,7 +52,7 @@ export const TeacherLeaderboard: React.FC = () => {
       });
       
       const allTimeCount = teacherRes.length;
-      const totalDownloads = teacherRes.reduce((sum, r) => sum + (r.downloads || 0), 0) || teacher.totalDownloads || 0;
+      const totalDownloads = teacherRes.reduce((sum, r) => sum + (r.downloads || 0), 0);
       const totalViews = teacherRes.reduce((sum, r) => sum + (r.views || 0), 0);
 
       const realWeeklyRes = teacherRes.filter(r => {

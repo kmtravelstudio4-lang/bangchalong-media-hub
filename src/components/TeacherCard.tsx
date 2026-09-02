@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Teacher } from '../types';
 import { useApp } from '../context/AppContext';
 import { motion } from 'motion/react';
@@ -10,7 +10,24 @@ interface TeacherCardProps {
 }
 
 export const TeacherCard: React.FC<TeacherCardProps> = ({ teacher, index = 0 }) => {
-  const { viewTeacherPublications, setSelectedTeacher } = useApp();
+  const { viewTeacherPublications, setSelectedTeacher, resources } = useApp();
+
+  const teacherResources = useMemo(() => {
+    return resources.filter(r => {
+      const matchId = r.teacherId && r.teacherId === teacher.id;
+      const matchName = Boolean(
+        r.teacherName &&
+        teacher.name &&
+        (r.teacherName.trim().toLowerCase() === teacher.name.trim().toLowerCase() ||
+         r.teacherName.includes(teacher.name) ||
+         teacher.name.includes(r.teacherName))
+      );
+      return matchId || matchName;
+    });
+  }, [resources, teacher.id, teacher.name]);
+
+  const realResourcesCount = teacherResources.length;
+  const realTotalDownloads = teacherResources.reduce((sum, r) => sum + (r.downloads || 0), 0);
 
   return (
     <motion.div
@@ -65,7 +82,7 @@ export const TeacherCard: React.FC<TeacherCardProps> = ({ teacher, index = 0 }) 
         <div className="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100 mb-5 text-center">
           <div>
             <div className="text-lg font-bold text-[#005BAC] font-prompt">
-              {teacher.resourcesCount || 0}
+              {realResourcesCount}
             </div>
             <div className="text-[11px] text-slate-500 flex items-center justify-center">
               <BookOpen className="w-3 h-3 mr-1 text-[#005BAC]" /> ผลงานสื่อการสอน
@@ -73,7 +90,7 @@ export const TeacherCard: React.FC<TeacherCardProps> = ({ teacher, index = 0 }) 
           </div>
           <div className="border-l border-slate-200">
             <div className="text-lg font-bold text-[#005BAC] font-prompt">
-              {(teacher.totalDownloads || 0).toLocaleString()}
+              {realTotalDownloads.toLocaleString()}
             </div>
             <div className="text-[11px] text-slate-500 flex items-center justify-center">
               <Download className="w-3 h-3 mr-1 text-[#005BAC]" /> จำนวนดาวน์โหลดรวม
