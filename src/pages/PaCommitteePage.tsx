@@ -47,13 +47,15 @@ import {
   PlayCircle,
   Star,
   Users,
-  Flame,
-  ArrowRight,
-  Key,
+  Folder,
   CheckCircle,
-  ShieldAlert,
+  XCircle,
+  Volume2,
+  Target,
+  Key,
+  Flame,
   Zap,
-  Target
+  ArrowRight
 } from 'lucide-react';
 import { 
   getYouTubeId,
@@ -1199,7 +1201,7 @@ export const PaCommitteePage: React.FC = () => {
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="p-1 text-slate-400 hover:text-amber-600"
-                                      title="เปิดดูคลิปใน YouTube"
+                                      title="เปิดดูคลิปใน YouTube / Drive"
                                     >
                                       <ExternalLink className="w-3.5 h-3.5" />
                                     </a>
@@ -1217,6 +1219,27 @@ export const PaCommitteePage: React.FC = () => {
                                   </button>
                                 </div>
                               </div>
+
+                              {/* 3. Folder Link */}
+                              {teacher.paFolderUrl && (
+                                <div className="flex items-center justify-between p-2 rounded-xl bg-amber-50/70 border border-amber-200/70 text-xs">
+                                  <div className="flex items-center space-x-2 truncate">
+                                    <Folder className="w-4 h-4 text-amber-600 shrink-0" />
+                                    <span className="font-bold text-amber-900">3. โฟลเดอร์รวมไฟล์</span>
+                                  </div>
+                                  
+                                  <a
+                                    href={teacher.paFolderUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-[11px] transition flex items-center space-x-1 shadow-xs"
+                                    title="เปิดโฟลเดอร์ Google Drive รวมไฟล์เอกสารทั้งหมด"
+                                  >
+                                    <ExternalLink className="w-3 h-3" />
+                                    <span>เปิดดูโฟลเดอร์</span>
+                                  </a>
+                                </div>
+                              )}
 
                               {/* 1-Click Fast Approve Option if not yet complete */}
                               {(!docOk || !vidOk) && (
@@ -1467,6 +1490,21 @@ export const PaCommitteePage: React.FC = () => {
                   <span>เอกสารเดี่ยว</span>
                 </button>
               </div>
+
+              {/* Folder Link Quick Action */}
+              {bigInspectTeacher.paFolderUrl && (
+                <a
+                  href={bigInspectTeacher.paFolderUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hidden sm:inline-flex items-center px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs font-bold transition shadow-xs"
+                  title="เปิดโฟลเดอร์ Google Drive รวมไฟล์ทั้งหมด"
+                >
+                  <Folder className="w-3.5 h-3.5 mr-1.5" />
+                  <span>เปิดโฟลเดอร์รวมไฟล์</span>
+                  <ExternalLink className="w-3 h-3 ml-1 opacity-75" />
+                </a>
+              )}
 
               {/* Prev / Next buttons */}
               <div className="flex items-center space-x-1">

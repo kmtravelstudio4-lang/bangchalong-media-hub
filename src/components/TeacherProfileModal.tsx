@@ -27,6 +27,7 @@ import {
   EyeOff,
   Lock,
   ShieldCheck,
+  Folder,
   Check
 } from 'lucide-react';
 import { ImageUploadCompressor } from './ImageUploadCompressor';
@@ -71,6 +72,7 @@ export const TeacherProfileModal: React.FC = () => {
     paYear: '2569',
     paVideoUrl: '',
     paDocumentUrl: '',
+    paFolderUrl: '',
     password: ''
   });
 
@@ -110,6 +112,7 @@ export const TeacherProfileModal: React.FC = () => {
         paYear: currentTeacher.paYear || '2569',
         paVideoUrl: currentTeacher.paVideoUrl || '',
         paDocumentUrl: currentTeacher.paDocumentUrl || '',
+        paFolderUrl: currentTeacher.paFolderUrl || '',
         password: currentPass
       });
       setConfirmPassword(currentPass);
@@ -127,11 +130,12 @@ export const TeacherProfileModal: React.FC = () => {
   // Filter teacher's own submitted resources
   const myResources = resources.filter(r => r.teacherId === currentTeacher.id);
 
-  // Determine if PA is fully submitted (Challenge Title + Video Link)
-  const isPaDone = Boolean(form.paChallengeTitle.trim() && form.paVideoUrl.trim());
+  // Determine if PA is fully submitted (Challenge Title + any material: Video, Doc, or Folder)
+  const isPaDone = Boolean(form.paChallengeTitle.trim() && (form.paVideoUrl.trim() || form.paDocumentUrl.trim() || form.paFolderUrl.trim()));
   const hasChallenge = Boolean(form.paChallengeTitle.trim());
   const hasVideo = Boolean(form.paVideoUrl.trim());
   const hasDocument = Boolean(form.paDocumentUrl.trim());
+  const hasFolder = Boolean(form.paFolderUrl.trim());
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,7 +157,7 @@ export const TeacherProfileModal: React.FC = () => {
     setSaving(true);
     setSuccessMsg(null);
 
-    const calculatedStatus: 'completed' | 'pending' = (form.paChallengeTitle.trim() && form.paVideoUrl.trim()) ? 'completed' : 'pending';
+    const calculatedStatus: 'completed' | 'pending' = (form.paChallengeTitle.trim() && (form.paVideoUrl.trim() || form.paDocumentUrl.trim() || form.paFolderUrl.trim())) ? 'completed' : 'pending';
 
     try {
       await updateCurrentTeacherProfile({
@@ -169,14 +173,15 @@ export const TeacherProfileModal: React.FC = () => {
         paYear: form.paYear.trim() || '2569',
         paVideoUrl: form.paVideoUrl.trim(),
         paDocumentUrl: form.paDocumentUrl.trim(),
+        paFolderUrl: form.paFolderUrl.trim(),
         paStatus: calculatedStatus,
         password: newPass
       });
 
       if (calculatedStatus === 'completed') {
-        setSuccessMsg('บันทึกข้อมูลและรหัสผ่านสำเร็จ! ระบบอัปเดตสถานะเป็น "✅ จัดทำเรียบร้อยแล้ว"');
+        setSuccessMsg('บันทึกข้อมูลและข้อตกลง PA สำเร็จ! ระบบอัปเดตสถานะเป็น "✅ จัดทำเรียบร้อยแล้ว"');
       } else {
-        setSuccessMsg('บันทึกข้อมูลและรหัสผ่านเรียบร้อยแล้ว!');
+        setSuccessMsg('บันทึกข้อมูลเรียบร้อยแล้ว!');
       }
 
       setTimeout(() => setSuccessMsg(null), 4000);
@@ -456,12 +461,11 @@ export const TeacherProfileModal: React.FC = () => {
             <div className="space-y-1">
               <label className="block font-bold text-slate-800 flex items-center space-x-1.5">
                 <Video className="w-4 h-4 text-rose-600" />
-                <span>ลิงก์คลิปวิดีโอ PA / วิดีโอบันทึกการสอน (YouTube / Google Drive) *</span>
+                <span>ลิงก์คลิปวิดีโอ PA / วิดีโอบันทึกการสอน (YouTube / Google Drive)</span>
               </label>
               <div className="flex gap-2">
                 <input
                   type="text"
-                  required
                   placeholder="https://www.youtube.com/watch?v=... หรือ https://drive.google.com/..."
                   value={form.paVideoUrl}
                   onChange={(e) => setForm({ ...form, paVideoUrl: e.target.value })}
@@ -480,7 +484,7 @@ export const TeacherProfileModal: React.FC = () => {
                 )}
               </div>
 
-              {/* YouTube Preview if valid */}
+              {/* YouTube / Drive Preview if valid */}
               {embedUrl && (
                 <div className="mt-2 rounded-xl overflow-hidden aspect-video max-h-48 border border-slate-200 shadow-xs bg-black">
                   <iframe
@@ -519,6 +523,37 @@ export const TeacherProfileModal: React.FC = () => {
                   </a>
                 )}
               </div>
+            </div>
+
+            {/* Field 5: Folder URL (โฟลเดอร์รวมเอกสารและผลงานทั้งหมด) */}
+            <div className="space-y-1">
+              <label className="block font-bold text-slate-800 flex items-center space-x-1.5">
+                <Folder className="w-4 h-4 text-amber-600" />
+                <span>📁 ลิงก์โฟลเดอร์รวมเอกสารและผลงานทั้งหมด (Google Drive Folder)</span>
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="https://drive.google.com/drive/folders/... (โฟลเดอร์รวมไฟล์ทั้งหมด)"
+                  value={form.paFolderUrl}
+                  onChange={(e) => setForm({ ...form, paFolderUrl: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 px-3 text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-[#005BAC]"
+                />
+                {form.paFolderUrl && (
+                  <a
+                    href={form.paFolderUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="bg-amber-50 hover:bg-amber-100 text-amber-800 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1 shrink-0 border border-amber-200"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>เปิดดูโฟลเดอร์</span>
+                  </a>
+                )}
+              </div>
+              <p className="text-[11px] text-slate-400">
+                💡 ลิงก์นี้จะช่วยให้คณะกรรมการและผู้ตรวจประเมินสามารถเข้าดูไฟล์เอกสารประกอบทั้งหมดในโฟลเดอร์ได้ทันที
+              </p>
             </div>
           </form>
         )}

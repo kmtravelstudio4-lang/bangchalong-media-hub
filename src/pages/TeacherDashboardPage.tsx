@@ -35,6 +35,7 @@ import {
   HelpCircle,
   TrendingUp,
   FolderPlus,
+  Folder,
   PlayCircle,
   Zap,
   Check
@@ -97,7 +98,8 @@ export const TeacherDashboardPage: React.FC = () => {
     paChallengeTitle: '',
     paYear: '2569',
     paVideoUrl: '',
-    paDocumentUrl: ''
+    paDocumentUrl: '',
+    paFolderUrl: ''
   });
   const [paFormError, setPaFormError] = useState('');
   const [isSavingPa, setIsSavingPa] = useState(false);
@@ -121,7 +123,8 @@ export const TeacherDashboardPage: React.FC = () => {
         paChallengeTitle: currentTeacher.paChallengeTitle || '',
         paYear: currentTeacher.paYear || '2569',
         paVideoUrl: currentTeacher.paVideoUrl || '',
-        paDocumentUrl: currentTeacher.paDocumentUrl || ''
+        paDocumentUrl: currentTeacher.paDocumentUrl || '',
+        paFolderUrl: currentTeacher.paFolderUrl || ''
       });
     }
   }, [currentTeacher]);
@@ -315,6 +318,7 @@ export const TeacherDashboardPage: React.FC = () => {
 
     const videoUrlTrimmed = paForm.paVideoUrl.trim();
     const docUrlTrimmed = paForm.paDocumentUrl.trim();
+    const folderUrlTrimmed = paForm.paFolderUrl.trim();
 
     // Validate URL formats
     if (videoUrlTrimmed && !isValidUrlString(videoUrlTrimmed)) {
@@ -327,8 +331,13 @@ export const TeacherDashboardPage: React.FC = () => {
       return;
     }
 
+    if (folderUrlTrimmed && !isValidUrlString(folderUrlTrimmed)) {
+      setPaFormError('กรุณาตรวจสอบลิงก์โฟลเดอร์รวมไฟล์อีกครั้ง (รูปแบบ URL ไม่ถูกต้อง ต้องขึ้นต้นด้วย https:// หรือ http://)');
+      return;
+    }
+
     setIsSavingPa(true);
-    const calculatedStatus: 'completed' | 'pending' = (paForm.paChallengeTitle.trim() && videoUrlTrimmed) ? 'completed' : 'pending';
+    const calculatedStatus: 'completed' | 'pending' = (paForm.paChallengeTitle.trim() && (videoUrlTrimmed || docUrlTrimmed || folderUrlTrimmed)) ? 'completed' : 'pending';
 
     try {
       await updateCurrentTeacherProfile({
@@ -336,6 +345,7 @@ export const TeacherDashboardPage: React.FC = () => {
         paYear: paForm.paYear.trim() || '2569',
         paVideoUrl: videoUrlTrimmed,
         paDocumentUrl: docUrlTrimmed,
+        paFolderUrl: folderUrlTrimmed,
         paStatus: calculatedStatus
       });
       setIsSavingPa(false);
@@ -1029,6 +1039,39 @@ export const TeacherDashboardPage: React.FC = () => {
                         💡 วางลิงก์ Google Drive โดยตั้งค่าสิทธิ์ให้ "ทุกคนที่มีลิงก์สามารถดูได้"
                       </p>
                     </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="block font-bold text-xs text-slate-700">
+                          4. 📁 ลิงก์โฟลเดอร์รวมเอกสารและผลงานทั้งหมด (Google Drive Folder)
+                        </label>
+                        {paForm.paFolderUrl && isValidUrlString(paForm.paFolderUrl) && (
+                          <a
+                            href={paForm.paFolderUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center text-[11px] font-bold text-amber-800 hover:text-amber-900 bg-amber-100 px-2 py-0.5 rounded-md"
+                            title="ทดสอบเปิดโฟลเดอร์"
+                          >
+                            <ExternalLink className="w-3 h-3 mr-1" />
+                            <span>ทดสอบเปิดโฟลเดอร์</span>
+                          </a>
+                        )}
+                      </div>
+                      <input
+                        type="url"
+                        placeholder="https://drive.google.com/drive/folders/... (โฟลเดอร์รวมไฟล์เอกสารและผลงานทั้งหมด)"
+                        value={paForm.paFolderUrl}
+                        onChange={(e) => {
+                          setPaForm({ ...paForm, paFolderUrl: e.target.value });
+                          if (paFormError) setPaFormError('');
+                        }}
+                        className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-xs text-slate-900 focus:ring-2 focus:ring-[#005BAC] focus:outline-none"
+                      />
+                      <p className="text-[11px] text-slate-500">
+                        💡 วางลิงก์ Google Drive Folder รวมไฟล์ทั้งหมด เพื่อให้กรรมการกดเข้าไปตรวจดูไฟล์ทุกชิ้นได้อย่างครบถ้วน
+                      </p>
+                    </div>
                   </div>
 
                   {paFormError && (
@@ -1076,7 +1119,7 @@ export const TeacherDashboardPage: React.FC = () => {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     
                     {/* Video Link & Player preview */}
                     <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
@@ -1084,11 +1127,11 @@ export const TeacherDashboardPage: React.FC = () => {
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center space-x-2">
                             <Video className="w-4 h-4 text-amber-500" />
-                            <span className="font-bold text-xs text-slate-800">คลิปวิดีโอบันทึกการสอน PA</span>
+                            <span className="font-bold text-xs text-slate-800">คลิปวิดีโอ PA</span>
                           </div>
                           {currentTeacher.paVideoUrl && (
                             <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-md">
-                              ✓ มีลิงก์คลิป
+                              ✓ มีคลิป
                             </span>
                           )}
                         </div>
@@ -1112,14 +1155,14 @@ export const TeacherDashboardPage: React.FC = () => {
 
                       {currentTeacher.paVideoUrl && (
                         <div className="pt-3 border-t border-slate-200/80 mt-3 flex items-center justify-between">
-                          <span className="text-[11px] text-slate-500 truncate max-w-[180px]" title={currentTeacher.paVideoUrl}>
+                          <span className="text-[11px] text-slate-500 truncate max-w-[120px]" title={currentTeacher.paVideoUrl}>
                             {currentTeacher.paVideoUrl}
                           </span>
                           <a
                             href={currentTeacher.paVideoUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold transition shadow-xs"
+                            className="inline-flex items-center px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold transition shadow-xs shrink-0"
                           >
                             <Video className="w-3.5 h-3.5 mr-1" />
                             <span>[เปิดคลิป]</span>
@@ -1135,7 +1178,7 @@ export const TeacherDashboardPage: React.FC = () => {
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center space-x-2">
                             <FileText className="w-4 h-4 text-blue-500" />
-                            <span className="font-bold text-xs text-slate-800">เอกสารรายงานผล PA 1/ส / SAR</span>
+                            <span className="font-bold text-xs text-slate-800">เอกสารรายงาน PA 1/ส</span>
                           </div>
                           {currentTeacher.paDocumentUrl && (
                             <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-md">
@@ -1157,17 +1200,62 @@ export const TeacherDashboardPage: React.FC = () => {
 
                       {currentTeacher.paDocumentUrl && (
                         <div className="pt-3 border-t border-slate-200/80 mt-3 flex items-center justify-between">
-                          <span className="text-[11px] text-slate-500 truncate max-w-[180px]" title={currentTeacher.paDocumentUrl}>
+                          <span className="text-[11px] text-slate-500 truncate max-w-[120px]" title={currentTeacher.paDocumentUrl}>
                             {currentTeacher.paDocumentUrl}
                           </span>
                           <a
                             href={currentTeacher.paDocumentUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center px-3 py-1.5 rounded-xl bg-[#005BAC] hover:bg-[#004584] text-white text-xs font-bold transition shadow-xs"
+                            className="inline-flex items-center px-2.5 py-1.5 rounded-xl bg-[#005BAC] hover:bg-[#004584] text-white text-xs font-bold transition shadow-xs shrink-0"
                           >
                             <FileText className="w-3.5 h-3.5 mr-1" />
                             <span>[เปิดเอกสาร]</span>
+                            <ExternalLink className="w-3 h-3 ml-1 opacity-70" />
+                          </a>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Folder Link preview */}
+                    <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center space-x-2">
+                            <Folder className="w-4 h-4 text-amber-600" />
+                            <span className="font-bold text-xs text-slate-800">โฟลเดอร์รวมไฟล์ผลงาน</span>
+                          </div>
+                          {currentTeacher.paFolderUrl && (
+                            <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-md">
+                              ✓ มีโฟลเดอร์
+                            </span>
+                          )}
+                        </div>
+                        {currentTeacher.paFolderUrl ? (
+                          <div className="space-y-2">
+                            <div className="p-3 bg-white rounded-xl border border-slate-200 text-xs text-slate-700 truncate flex items-center space-x-2">
+                              <Folder className="w-4 h-4 text-amber-600 shrink-0" />
+                              <span className="truncate">{currentTeacher.paFolderUrl}</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-slate-400">ยังไม่มีลิงก์โฟลเดอร์รวมเอกสารและผลงาน</p>
+                        )}
+                      </div>
+
+                      {currentTeacher.paFolderUrl && (
+                        <div className="pt-3 border-t border-slate-200/80 mt-3 flex items-center justify-between">
+                          <span className="text-[11px] text-slate-500 truncate max-w-[120px]" title={currentTeacher.paFolderUrl}>
+                            {currentTeacher.paFolderUrl}
+                          </span>
+                          <a
+                            href={currentTeacher.paFolderUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-2.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition shadow-xs shrink-0"
+                          >
+                            <Folder className="w-3.5 h-3.5 mr-1" />
+                            <span>[เปิดโฟลเดอร์]</span>
                             <ExternalLink className="w-3 h-3 ml-1 opacity-70" />
                           </a>
                         </div>

@@ -161,8 +161,9 @@ export async function fetchTeachersFromSupabase(): Promise<Teacher[] | null> {
       const paChallenge = pa?.challenge_title || pa?.challenge_description || t.pa_challenge_title || t.paChallengeTitle || '';
       const paVideo = pa?.video_url || t.pa_video_url || t.paVideoUrl || '';
       const paDoc = pa?.document_url || t.pa_document_url || t.paDocumentUrl || '';
+      const paFolder = pa?.sar_url || (pa as any)?.folder_url || t.pa_folder_url || t.paFolderUrl || '';
       const paYear = pa?.school_year || t.school_year || t.paYear || '2569';
-      const isCompleted = Boolean(paChallenge && paVideo);
+      const isCompleted = Boolean(paChallenge && (paVideo || paDoc || paFolder));
       const paStatus: 'completed' | 'pending' = isCompleted 
         ? 'completed' 
         : (pa?.status === 'completed' ? 'completed' : ((t.pa_status || t.paStatus) === 'completed' ? 'completed' : 'pending'));
@@ -185,6 +186,7 @@ export async function fetchTeachersFromSupabase(): Promise<Teacher[] | null> {
         paYear: paYear,
         paVideoUrl: paVideo,
         paDocumentUrl: paDoc,
+        paFolderUrl: paFolder,
         paStatus: paStatus,
         password: t.phone || t.employee_code || t.password || '123456',
       };
@@ -223,10 +225,10 @@ export async function upsertTeacherToSupabase(teacher: Teacher): Promise<boolean
     // Synchronize PA Submission to pa_submissions table in Supabase
     const schoolYear = teacher.paYear || '2569';
     const submissionId = `pa-${teacher.id}-${schoolYear}`;
-    const hasPA = Boolean(teacher.paChallengeTitle || teacher.paVideoUrl || teacher.paDocumentUrl);
+    const hasPA = Boolean(teacher.paChallengeTitle || teacher.paVideoUrl || teacher.paDocumentUrl || teacher.paFolderUrl);
 
     if (hasPA) {
-      const isCompleted = Boolean(teacher.paChallengeTitle && teacher.paVideoUrl);
+      const isCompleted = Boolean(teacher.paChallengeTitle && (teacher.paVideoUrl || teacher.paDocumentUrl || teacher.paFolderUrl));
       const paPayload = {
         id: submissionId,
         teacher_id: teacher.id,
@@ -235,6 +237,7 @@ export async function upsertTeacherToSupabase(teacher: Teacher): Promise<boolean
         challenge_description: teacher.paChallengeTitle || '',
         video_url: teacher.paVideoUrl || '',
         document_url: teacher.paDocumentUrl || '',
+        sar_url: teacher.paFolderUrl || '',
         status: isCompleted || teacher.paStatus === 'completed' ? 'completed' : 'draft',
         submitted_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

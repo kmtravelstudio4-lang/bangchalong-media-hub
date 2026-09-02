@@ -26,6 +26,7 @@ import {
   ClipboardCheck,
   MessageSquare,
   Sparkles,
+  Folder,
   ChevronRight
 } from 'lucide-react';
 import { 
@@ -82,11 +83,12 @@ export const PaPage: React.FC = () => {
 
   // Calculate PA Dashboard Statistics
   const totalTeachers = teachers.length;
-  const completedTeachers = teachers.filter(t => t.paStatus === 'completed' || (Boolean(t.paChallengeTitle) && Boolean(t.paVideoUrl)));
-  const pendingTeachers = teachers.filter(t => t.paStatus !== 'completed' && (!t.paChallengeTitle || !t.paVideoUrl));
+  const completedTeachers = teachers.filter(t => t.paStatus === 'completed' || (Boolean(t.paChallengeTitle) && (Boolean(t.paVideoUrl) || Boolean(t.paDocumentUrl) || Boolean(t.paFolderUrl))));
+  const pendingTeachers = teachers.filter(t => !completedTeachers.some(c => c.id === t.id));
   const completionRate = totalTeachers > 0 ? Math.round((completedTeachers.length / totalTeachers) * 100) : 0;
   const totalVideos = teachers.filter(t => Boolean(t.paVideoUrl)).length;
   const totalDocuments = teachers.filter(t => Boolean(t.paDocumentUrl)).length;
+  const totalFolders = teachers.filter(t => Boolean(t.paFolderUrl)).length;
 
   // Committee Review Statistics
   const fullyCommitteeApprovedTeachers = teachers.filter(t => {
@@ -498,9 +500,10 @@ export const PaPage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTeachers.map((teacher) => {
-              const isCompleted = teacher.paStatus === 'completed' || (Boolean(teacher.paChallengeTitle) && Boolean(teacher.paVideoUrl));
+              const isCompleted = teacher.paStatus === 'completed' || (Boolean(teacher.paChallengeTitle) && (Boolean(teacher.paVideoUrl) || Boolean(teacher.paDocumentUrl) || Boolean(teacher.paFolderUrl)));
               const hasVideo = Boolean(teacher.paVideoUrl);
               const hasDoc = Boolean(teacher.paDocumentUrl);
+              const hasFolder = Boolean(teacher.paFolderUrl);
 
               return (
                 <div 
@@ -688,27 +691,45 @@ export const PaPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* PA Document Link & Profile Details */}
-                  <div className="pt-3 flex items-center justify-between border-t border-slate-100 text-xs gap-2">
-                    {hasDoc ? (
-                      <a
-                        href={teacher.paDocumentUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[#005BAC] hover:text-[#003875] hover:underline font-bold text-xs flex items-center space-x-1 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200"
-                      >
-                        <FileText className="w-3.5 h-3.5" />
-                        <span>📄 เอกสาร PA (.pdf)</span>
-                      </a>
-                    ) : (
-                      <span className="text-[11px] text-slate-400 italic">
-                        ยังไม่มีไฟล์เอกสาร PA
-                      </span>
-                    )}
+                  {/* PA Document / Folder Link & Profile Details */}
+                  <div className="pt-3 flex flex-wrap items-center justify-between border-t border-slate-100 text-xs gap-1.5">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {hasDoc && (
+                        <a
+                          href={teacher.paDocumentUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[#005BAC] hover:text-[#003875] hover:underline font-bold text-xs flex items-center space-x-1 bg-blue-50 px-2 py-1 rounded-lg border border-blue-200"
+                          title="เปิดไฟล์เอกสาร PA"
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                          <span>เอกสาร PA</span>
+                        </a>
+                      )}
+
+                      {hasFolder && (
+                        <a
+                          href={teacher.paFolderUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-amber-800 hover:text-amber-950 hover:underline font-bold text-xs flex items-center space-x-1 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200"
+                          title="เปิดโฟลเดอร์รวมไฟล์ผลงานทั้งหมด"
+                        >
+                          <Folder className="w-3.5 h-3.5 text-amber-600" />
+                          <span>โฟลเดอร์รวมไฟล์</span>
+                        </a>
+                      )}
+
+                      {!hasDoc && !hasFolder && (
+                        <span className="text-[11px] text-slate-400 italic">
+                          ยังไม่มีไฟล์เอกสาร
+                        </span>
+                      )}
+                    </div>
 
                     <button
                       onClick={() => setSelectedTeacher(teacher)}
-                      className="bg-slate-100 hover:bg-[#005BAC] hover:text-white text-slate-700 px-3 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1 shrink-0"
+                      className="bg-slate-100 hover:bg-[#005BAC] hover:text-white text-slate-700 px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1 shrink-0"
                     >
                       <span>โปรไฟล์</span>
                       <ExternalLink className="w-3 h-3" />

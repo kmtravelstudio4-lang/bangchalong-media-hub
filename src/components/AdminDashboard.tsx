@@ -248,6 +248,7 @@ export const AdminDashboard: React.FC = () => {
     paStatus: 'pending' as 'completed' | 'pending',
     paVideoUrl: '',
     paDocumentUrl: '',
+    paFolderUrl: '',
     password: '123456'
   });
 
@@ -434,6 +435,7 @@ export const AdminDashboard: React.FC = () => {
       paStatus: 'pending',
       paVideoUrl: '',
       paDocumentUrl: '',
+      paFolderUrl: '',
       password: '123456'
     });
     setIsTeacherModalOpen(true);
@@ -452,9 +454,10 @@ export const AdminDashboard: React.FC = () => {
       subjectId: t.subjectId,
       paChallengeTitle: t.paChallengeTitle || '',
       paYear: t.paYear || '2569',
-      paStatus: (t.paStatus || (t.paChallengeTitle && t.paVideoUrl ? 'completed' : 'pending')) as 'completed' | 'pending',
+      paStatus: (t.paStatus || (t.paChallengeTitle && (t.paVideoUrl || t.paDocumentUrl || t.paFolderUrl) ? 'completed' : 'pending')) as 'completed' | 'pending',
       paVideoUrl: t.paVideoUrl || '',
       paDocumentUrl: t.paDocumentUrl || '',
+      paFolderUrl: t.paFolderUrl || '',
       password: t.password || '123456'
     });
     setIsTeacherModalOpen(true);
@@ -3729,6 +3732,19 @@ export const AdminDashboard: React.FC = () => {
                     placeholder="https://drive.google.com/file/d/..."
                     value={tForm.paDocumentUrl}
                     onChange={(e) => setTForm({ ...tForm, paDocumentUrl: e.target.value })}
+                    className="w-full bg-white border border-slate-300 rounded-xl py-2 px-3 text-xs text-slate-900 focus:ring-2 focus:ring-[#005BAC]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    📁 ลิงก์โฟลเดอร์รวมเอกสารและผลงานทั้งหมด (Google Drive Folder)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="https://drive.google.com/drive/folders/..."
+                    value={tForm.paFolderUrl}
+                    onChange={(e) => setTForm({ ...tForm, paFolderUrl: e.target.value })}
                     className="w-full bg-white border border-slate-300 rounded-xl py-2 px-3 text-xs text-slate-900 focus:ring-2 focus:ring-[#005BAC]"
                   />
                 </div>

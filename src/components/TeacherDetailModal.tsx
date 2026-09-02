@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { ResourceCard } from './ResourceCard';
-import { X, Mail, Facebook, BookOpen, Download, Award, UserCheck, Calendar } from 'lucide-react';
+import { X, Mail, Facebook, BookOpen, Download, Award, UserCheck, Calendar, Folder } from 'lucide-react';
 
 export const TeacherDetailModal: React.FC = () => {
   const { 
@@ -80,6 +80,18 @@ export const TeacherDetailModal: React.FC = () => {
                 >
                   <Download className="w-4 h-4 text-sky-200" />
                   <span>📄 เอกสารข้อตกลง PA</span>
+                </a>
+              )}
+
+              {selectedTeacher.paFolderUrl && (
+                <a
+                  href={selectedTeacher.paFolderUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bg-amber-600 hover:bg-amber-700 text-white font-bold px-3.5 py-1.5 rounded-xl transition flex items-center space-x-1.5 shadow-xs"
+                >
+                  <Folder className="w-4 h-4 text-amber-200" />
+                  <span>📁 โฟลเดอร์รวมไฟล์</span>
                 </a>
               )}
 

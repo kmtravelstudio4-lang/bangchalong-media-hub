@@ -51,6 +51,7 @@ export interface Teacher {
   paYear?: string; // ปีการศึกษา เช่น 2569
   paVideoUrl?: string; // ลิงก์วิดีโอคลิปการสอน / วิดีโอ PA
   paDocumentUrl?: string; // ลิงก์ไฟล์เอกสารข้อตกลง PA
+  paFolderUrl?: string; // ลิงก์รวมโฟลเดอร์ผลงาน / เอกสารทั้งหมด (Google Drive Folder)
   paStatus?: 'completed' | 'pending'; // สถานะการจัดทำ PA (จัดทำเรียบร้อยแล้ว / ยังไม่จัดทำ)
   password?: string; // รหัสผ่านเข้าสู่ระบบของคุณครู (default: 123456)
 }

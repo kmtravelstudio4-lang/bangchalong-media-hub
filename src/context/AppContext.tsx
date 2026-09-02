@@ -713,8 +713,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...(cat && { subjectName: cat.name })
     };
 
-    // Calculate PA status reliably
-    const isPaCompleted = Boolean(newTeacherData.paChallengeTitle && newTeacherData.paVideoUrl);
+    // Calculate PA status reliably (if challenge title + any supporting url provided or marked completed)
+    const isPaCompleted = Boolean(newTeacherData.paChallengeTitle && (newTeacherData.paVideoUrl || newTeacherData.paDocumentUrl || newTeacherData.paFolderUrl));
     newTeacherData.paStatus = isPaCompleted ? 'completed' : (updated.paStatus || newTeacherData.paStatus || 'pending');
 
     setTeachers(prev => {
@@ -895,7 +895,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...(cat && { subjectName: cat.name })
     };
 
-    if (updatedT.paChallengeTitle && updatedT.paVideoUrl) {
+    if (updatedT.paChallengeTitle && (updatedT.paVideoUrl || updatedT.paDocumentUrl || updatedT.paFolderUrl)) {
       updatedT.paStatus = 'completed';
     }
 
