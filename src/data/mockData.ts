@@ -865,7 +865,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "id": "t-deputy-1",
     "name": "นางสาวอำพา ยะไม",
     "position": "รองผู้อำนวยการโรงเรียน",
-    "academicStanding": "รองผู้อำนวยการวิทยฐานะชำนาญการพิเศษ",
+    "academicStanding": "รองผู้อำนวยการชำนาญการพิเศษ",
     "photo": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop",
     "bio": "รองผู้อำนวยการโรงเรียนวัดบางโฉลงใน วิทยฐานะชำนาญการพิเศษ รับผิดชอบกลุ่มบริหารงานวิชาการและแผนงาน",
     "email": "ampa.y@bangchalong.ac.th",
@@ -886,7 +886,7 @@ export const INITIAL_TEACHERS: Teacher[] = [
     "id": "t-deputy-2",
     "name": "นางสาวสีจันทร์ สามงามพุ่ม",
     "position": "รองผู้อำนวยการโรงเรียน",
-    "academicStanding": "รองผู้อำนวยการวิทยฐานะชำนาญการ",
+    "academicStanding": "รองผู้อำนวยการชำนาญการ",
     "photo": "https://images.unsplash.com/photo-1580894732413-802c676d0811?q=80&w=400&auto=format&fit=crop",
     "bio": "รองผู้อำนวยการโรงเรียนวัดบางโฉลงใน วิทยฐานะชำนาญการ รับผิดชอบกลุ่มบริหารงานทั่วไปและบริหารงานบุคคล",
     "email": "seejan.s@bangchalong.ac.th",
@@ -1616,8 +1616,8 @@ export const INITIAL_RESOURCES: Resource[] = [
 ];
 
 export const STANDARD_ACADEMIC_CATEGORIES = [
-  "รองผู้อำนวยการวิทยฐานะชำนาญการพิเศษ",
-  "รองผู้อำนวยการวิทยฐานะชำนาญการ",
+  "รองผู้อำนวยการชำนาญการพิเศษ",
+  "รองผู้อำนวยการชำนาญการ",
   "ครูชำนาญการพิเศษ",
   "ครูชำนาญการ",
   "ครู",
@@ -1669,13 +1669,13 @@ export const getTeacherAcademicCategory = (teacher?: Teacher | null): TeacherAca
     if (
       target.includes("ชำนาญการพิเศษ") || 
       rawStanding.includes("ชำนาญการพิเศษ") || 
-      rawStanding === "รองผู้อำนวยการวิทยฐานะชำนาญการพิเศษ" ||
+      rawStanding === "รองผู้อำนวยการชำนาญการพิเศษ" ||
       teacher.id === "t-deputy-1" ||
       rawName.includes("อำพา")
     ) {
-      return "รองผู้อำนวยการวิทยฐานะชำนาญการพิเศษ";
+      return "รองผู้อำนวยการชำนาญการพิเศษ";
     }
-    return "รองผู้อำนวยการวิทยฐานะชำนาญการ";
+    return "รองผู้อำนวยการชำนาญการ";
   }
 
   if (

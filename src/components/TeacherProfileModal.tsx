@@ -606,8 +606,8 @@ export const TeacherProfileModal: React.FC = () => {
                   onChange={(e) => setForm({ ...form, academicStanding: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 px-3 text-xs font-bold text-[#005BAC]"
                 >
-                  <option value="รองผู้อำนวยการวิทยฐานะชำนาญการพิเศษ">รองผู้อำนวยการวิทยฐานะชำนาญการพิเศษ</option>
-                  <option value="รองผู้อำนวยการวิทยฐานะชำนาญการ">รองผู้อำนวยการวิทยฐานะชำนาญการ</option>
+                  <option value="รองผู้อำนวยการชำนาญการพิเศษ">รองผู้อำนวยการชำนาญการพิเศษ</option>
+                  <option value="รองผู้อำนวยการชำนาญการ">รองผู้อำนวยการชำนาญการ</option>
                   <option value="ครูชำนาญการพิเศษ">ครูชำนาญการพิเศษ</option>
                   <option value="ครูชำนาญการ">ครูชำนาญการ</option>
                   <option value="ครู">ครู</option>

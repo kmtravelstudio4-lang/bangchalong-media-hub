@@ -3548,7 +3548,7 @@ export const AdminDashboard: React.FC = () => {
             </button>
 
             <h2 className="font-prompt font-bold text-slate-900 text-xl mb-6">
-              {editingTeacher ? 'แก้ไขข้อมูลครู' : 'เพิ่มข้อมูลครูผู้สอน'}
+              {editingTeacher ? ((editingTeacher.position?.includes('รองผู้อำนวยการ') || editingTeacher.academicStanding?.includes('รองผู้อำนวยการ')) ? 'แก้ไขข้อมูลรองผู้อำนวยการ' : 'แก้ไขข้อมูลครู') : 'เพิ่มข้อมูลครูผู้สอน'}
             </h2>
 
             <form onSubmit={handleSaveTeacher} className="space-y-4 text-xs">
@@ -3572,6 +3572,8 @@ export const AdminDashboard: React.FC = () => {
                     onChange={(e) => setTForm({ ...tForm, academicStanding: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 px-3 text-xs font-semibold text-[#005BAC]"
                   >
+                    <option value="รองผู้อำนวยการชำนาญการพิเศษ">รองผู้อำนวยการชำนาญการพิเศษ</option>
+                    <option value="รองผู้อำนวยการชำนาญการ">รองผู้อำนวยการชำนาญการ</option>
                     <option value="ครูชำนาญการพิเศษ">ครูชำนาญการพิเศษ</option>
                     <option value="ครูชำนาญการ">ครูชำนาญการ</option>
                     <option value="ครู">ครู</option>
@@ -3588,12 +3590,13 @@ export const AdminDashboard: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">สายชั้น / ตำแหน่ง *</label>
+                  <label className="block font-bold text-slate-700 mb-1">{tForm.position?.includes("รองผู้อำนวยการ") || tForm.academicStanding?.includes("รองผู้อำนวยการ") ? "ตำแหน่ง *" : "สายชั้น / ตำแหน่ง *"}</label>
                   <select
                     value={tForm.position}
                     onChange={(e) => setTForm({ ...tForm, position: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 px-3 text-xs font-semibold text-slate-900"
                   >
+                    <option value="รองผู้อำนวยการโรงเรียน">รองผู้อำนวยการโรงเรียน</option>
                     <option value="-">- (ไม่มีสายชั้น / สายสนับสนุน)</option>
                     <option value="อนุบาล">อนุบาล</option>
                     <option value="อนุบาล 1">อนุบาล 1</option>
