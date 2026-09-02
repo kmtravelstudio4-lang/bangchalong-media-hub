@@ -1594,7 +1594,7 @@ export const INITIAL_RESOURCES: Resource[] = [
   {
     "id": "res-1786963013229",
     "title": "Green Advice Card",
-    "description": "",
+    "description": "Green Advice Card สื่อการสอน",
     "cover": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=600&auto=format&fit=crop",
     "fileUrl": "https://drive.google.com/file/d/13C-rkir30qVCChPHj1Ncsh2hxDxG29Tk/view?usp=share_link",
     "previewUrl": "https://drive.google.com/file/d/13C-rkir30qVCChPHj1Ncsh2hxDxG29Tk/view?usp=share_link",
@@ -1602,28 +1602,37 @@ export const INITIAL_RESOURCES: Resource[] = [
     "fileSize": "2.5 MB",
     "teacherId": "t-1786939848285",
     "teacherName": "นายพงษ์เทพ ยุวะบุตร",
-    "teacherPhoto": "data:image/webp;base64,UklGRuBDAABXRUJQVlA4WAoAAAAgAAAAqgEAfwIASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDgg8kEAANDyAZ0BKqsBgAI+lUSdSyWjpiojUTxJQBKJZW5CtaPscttlkO8KEOCfrS5yD2WmU+zT1LtkFHvK35zzifguRFhHenQb0HjYPuLz4eor43oqby/M5/09rLSphdsyX6paKvw/RG+GT7sIbVtCnTgmNm1YgljonIBrrhfaWysKJeSYugWPdntr43yZ5ovfK7kwjemp1b5Gnv/kI6hrIku6G+0qCxAiawxbAU3Rp2scvQ2er6O2kNqNH+/o/wEgl1Twp7aw/4IalGLTMhsjCq3iI/8VLVxHEUUKw8bOh3VixXZkuUL9gnmgRDo9lBwVW/oyE23OngwnfsCrv/vFnARjzVo4NWyrPvwhBD6oLZTXYE2UPp2VTyxp5JLeYKw94MAwF5pFGutmoVzLuLLr1URIjGl4Ne+GMBH6j9ORuXIiNlTiTPuZNC31IsWByRrW8ncP9QHSc0/O/PBaUWyUT++TOrdIBlxV4Qzh/x2d6oJynfNCIBNmaniFSbWKVN+eI2RKKZ4L0spW88snFbD/+s4AiZ2rFD+0D9YF14uu2wyLAYlXLZAfuqa4W3ZVBIi9cyQSchV0tGTCKqweChIzGBJU0oe37k9gXa8Wwsh/3x98YCdxCPkP0/CbRMx8opRQBtsrDq76f4BwFnK4gdeza2wO11TEmCPbfVPfgpNyXCa3GjzgKLJjlFRbxB9wuxfJXHHyxld9amJ5doch7+CJPOJpHwRTXjMTBqLBV2aKY9UtAcESDTW3DbTgfmRXgnF+h5iNIW4eCDR0L923haKA+lgslE9qx3lMy4e3udLiwvQAmSvV+FtN9EVrkyeIRFT1AXnuI8rMZDhe7vZjb6dDIglraHNry30OJiIlLKEsWfUoEVTkVWuVKhKqJdHJZOy0GXbMZUzlK2ydoWUwD0O6u8BfB/tJNEDje6p5PggSxe9AUjMQL+W+IEquXKk6kTaKbbXLY/wh3amnOqp1pek2tDNiEWbXiOWrg9LfiC/zuQycPIo2B+xuYZfdU1wkgFoF41GluotwnI5/pBQyfUBpIkuSFbRJID88V88IQSQx6umE8IJF6hInWhe24autN2TqxXyFB6kjIl+zPwiLo28OTrCJ/i9mGqNDkd3weRu21nD/v8kLHJxeWpeqDxbQ7rKgV6j3Z+pV4rJFGzuTE7NhYQ03o2BZ8PqUh0MaVSH+UcS2xtIrVVOSZFjASCbCdnQfvVCzWYadc52ItZHMET9YhldwUwm+FtWk1lcvOK+lvEAxyhDexCFR8GErtsGGCsQE/M87K3MLT2y0ACXf6tytBuIcXkbI1PoJrh7nZfZ1wqYOWwOH6buAKn2B/ddF7KbxAQR9crJjdNmNErKz4sHmfsZBgzR4Gm1tHuXUad4boqu0h5HbpWQF8JTFxkqTEHIGUPqYTzCX0tdhaQwMk73Q7y7+JEipH6V7jzuCnieljVxBELlBI4zDKCp+Wqw2zs+JT5M2wN1qUEfqwmKZgE0wLbaRzGjGI7fDCbSOvQxR/qwnDBrWRxOMqz+sc0dGVO93ID1OXo07KEThPEIYo2nu/WpJSdTTLpkghmkTuwAOJSUXvZGApXhFhpBNY5JF+VKOFNldFq7N3m1FQFqmvxEmdcaQ4dqs7od95IsmC3MkR3vs0VGorlbziDqHXcnEj1AP2FEfvGf/SPH/rm8MMX/iyfhUHJVB9wW2acVJ3FTm7HLVShNgDaozkxibbseDUODMGl3NFsxxhMcTzEGmXSIQTWk3tYILlgLuXyTj2R0f7f3SlOQX1Z/Vj2aW5y9/+emkXnE8OpClNopnqHRWhDlrR7/vNn7xqhw8yu5gKzg39qXeLxPxnMAW4ozn755FAesiw7VDMsJYjnfWNLRj9GCQDl5lOGp7OdR3Sw3/TdH+o+NG5kCoqUCTMDkZSojxNfQK7jm2yuMhuOUiMohFd7H85oYRaOqxWH0CbyIAhJyaB0vE11z/13Wejs944fl7uyLczpfHTvYMD3ubV24FLfalEmB0Yh4nZtxNFWCNDbh5pCmomf7YLiMAhjTWOaor45piV1OYSgGYt9WyrCH6ViMx07tpB7F+q/3MQuUxO6Bv+JzeLOGuo+Ls5eWEMg5/DXRjJ1NwDGnGilnlrzG4mCragsBVDm5c5QaxQYpmqbZPszbflrr6M2uUQWq9oeYvykjdTCbzHLm9oasma1Eogm5KxSUEJrs+WOAH2MBYcGfT/5Wp6OFR+LsuIMeIEA9Aiv12CmND+lo++kZP7iwkZ0fQup+LXWi8l45f7guHw6n77Z5A1yVo0Zg2JnW9rhDRXFy6T4ENBj52gUAyTHWM0R5pgAG4C5GZVvVn0iTsLmMG4MyNFW61e1e4MpxiIQ6Ptwm6zhoUlzTJZsaplL++sw9mW0adHCUt84zvBwpU6UQCkNt+qbw5wdQjpuZvIP/OCPPaU0b9C8LWqT1Z7WfNTqnhLhsn8L5XjwzTsq3PZziEnh/uDrPaIqN3U8WbagJMGaOdHaXbV9CEbpPQH6rJPKmkigbP4NPj3YCSNNrutsw1+oCdtVKaL16JGzFTDlqR0N3pyutVf0+B0MNV0Y9vu8OCWDZRclRy7bfq+piDcP7y/7AfcjP4k0Fw58lBUX5eDjZLV9SjNrolBsfGkHPBhbXm18pXGwBnAeWqUMV/3VWDgzyb9u31wQK1areEM5PXm94g32JyF+rs1GEghYflJk+vuUaG9riTU8C9KdT/9j/nTyJHTWSvodLGAh+/HLXt8BXsbiV/fROhq3rRKQgJHd9o2Fm3p6FHmpi9q4SYSwvPjF8LUcsPircFpWDlMxH4sY1DtCQqDvTqqoWurkPbNUtQ5fPRko9KFLSwMBijLeV/I0Mj0I1RxAX0/N2wmD/Bgca8UYeHwNjqbzsrlc49RJtgUINySvdgwrG9sryGxiU0Iwy9QCG37lc4M/dBh1kpSHfdvqrc51SKoRvIBeO1lArs5xzA6cjavuWbBJldiCxElKybNq274/2TzYRfSnomcSWE7blwMK6ohPMgI1/5aFkweOiePzNijBwyJRDXRxbxB/NFEgZ3JxdbI2v3HqENEvoJRsJN97rPFu77e5+WCHG9f5smlciIaZU0RsUiTDpBbwYV1ucmCP59Sl/s5ThK0j8yi/7gVS+aaKy2YMV5isryd0DweAC2KYsvn7BvX/zNgsJ2BKP0Oh2KufL5VDMyvBYga0nJEQDYPqjidCe/gYLIHilOK8Isf7386wa6CBsb2O3TYYkNOabyDm44qoueQxX8Ej+jMTdjp03/ZvokM85m2UOsXg36jaunXJunJAcNMFyzMh0l81PRU+MTj8ZvWWEeDrQnV6FGUmvI5qCaO7WNNr2xmj7PmcQHCjiY0eo9lMKY1Y6CCApoMMBOYCe1pxV1RH4d3RrTUal8crsBOgjalA8jF0nWruhz8q/TxQ1QqrIQo1fMqHFr5UEwy83djJJv/zk/kdc2+qorNcdmCAoTffQcUy9jGp5dRsoG9ezXocK6kowl+t+u/SwwBTGlnc7YhkE0JI8nrn5m/2/DQTjqBqi+/kFrVaqo2NdqyQ3kk4y/GG9VTwDYHrEJNi6H8guOSJnzw2yuHkVnm1xcJ5wqQm14ICc1fDKX/Iuby+e4WjCs+JqJhXwAE+dt332rVyH/JxrYA/TGZ4wUJN+l6lw3kNr1uUm1a2lpg2VQWykaOyxNJ6rYSqxC1qIjMEQcNiP5/3uG9bpxMf2t8ZAUCCIhZY68lVlknGlxbxIBlhhactmNCr6RBRSCRrxwva50fUxmzlZ61GhMU5Q2ajRPbhQtGJFbuqbZP3qn96wcfTyTdXZpDYT0deTatyOfb9hgQUC2wIyGlwpY66BT7jQ5J4hPI0di/zZ2yo7KkM1AYr+Zr9VEUd5oBkMQUb4sQV+fglrv3EG6HP/qd2B9Ev8PzyT+7+mX0zPh55AlYvas8+xseJZmn/XbsfjmKrP9pUqgRvfedTgG5gHMrn1UI9GChEs+N9VvI75/bAAAsSILTiOhnLkE4R13ni9KkOS30FnDvsk8kOjJ+aUj/0CsHFXjbmq/LL6YWFqWpwZkmX0BK65yyuY5j2ebPAU0i2RpmXeTAiiLbaftE4QKyS/c/VqJw8xBspAT58IRHIXv6BTWh5r4o84PAYpp1NV3xGDhpjZR9SEH1gS2nRsmgC0IgMCPauaFrFOtYrg8htxisGjaN6OjQFPq9MTm1s5pQwpPE7bqI7ruLVm9qit5NfE0fC2NlmQqvzpKpdJ6J3VjeLAeCav42rV2tX2Fc7qktWt5XHz4FVNP9DJm4vV6rXdPJMkv6Ml0Urz/pNK8iTcx3gX8kX6G0Y9vqeJ+4V+l1sS4n5mXPag8Cb7iGau3ljNVeVFeAJScexvF913hWwzJIR58XXPUNx5fBKa+Ro7X5GZfUk9DRTvDjIIlKILUMWmX8E9++W2EDRbdvgrP8X3S/FZYKfWIiYdDJwDda9UWtwdOCQsBJm8RO+/Uwqp8ZSvgVnEP1mFSDC6yGpmrLE1RxZ59jIuOHzTd2VD++uuF/H0Cw7wFDq8scoO6JClkHThfD3RRggv6n5J+ZLL6pLUWFIJT5GGbyxtkVXzHUNNMzjvsZc0dVQVeoAzmN9L+6aMupeAaJd0/RhQD8HVMuGi0H0viFtk9uYfutxSap2dG92l5y9REUpR/Uij2JRQvhoAmgvodzMOATdki48VRLX+OMyazww7ji46MY2VkbPJhLB7c1ZaPJ++7pAiyfTb2qYKnlP3nRauXbhAdAjshkpCkkjCji7POxaskI9qX9j6S4jOrUi8mS0qXcQud++v/Nae5FQTUuuoK52V//Fd27CJXaBH1nwQwcrIGkWR5mJNClS0CyZ60fG8h/sXpgh+yc9gI+foq1o+iBGolovbJGWyePs03DRSD8B7pkApz8R0Mbz+/0EoV+KnYvCO5VFrCJbkzGwjxh+a09ebHc68Ey+F9vTrsVMtNCvTOF23PoO95ydTf0KRpnooZknNwL2dktOYTrZQJZpUrJaP/e1OCmNNCp7hOIlhlE7UTZm8UiC8EoUr0GpNTrq0LjGdJ+++1IVIlXvyIB1Cr8lWIeMNB6Zx3YTBNUJlXnTSvh21DYEmmJfcUXyzId2rjSLfl3GQoHqeUffvTZePI1hiZPcQSog10W3be303CbBfMw3Y7LiGojIl7vpMig53Nwk9kuVoRZzi+DsXpPr00ysMptbPSLdxnmOcVLoXRD3bKIjRMnnouHyZL22O2emBgYZDsF9nKTUf4wq3V8A1mq/D0cj4YnNLbo+ldPVMXU9Pd9KRTbRXI6Pla0Md7ZxjsFr/bHMh7BQ+S0id/fzKrhIkAAAD++wkrEjqoheD/wpoTkeHC0+BNe8VQoyWn7LMxIYKsi4z27Pe4M5vNPBge3ASh1LUZ+l1wvBe5Z+XgZzPdENJzPjI1Iq4x4zYJJfZiSau/r2Wd+s4QoqjBnvyLN3n1+Lr9PmBrLXjT36UvTrjD26GVI3yu/8K0fnO82i+/3TtpSRXSOk4UWKOlF66ztkT6cFBQVuSfid4L6Ftv1y+BVz1tGV9R4IMEUPCkBeLqjFJGtAbBfTFYLUCEZr3ti+oknz3nQD2nM+SYISTAdf72K30PxwbnvkAHWf7f3p23A4x0ih67mPKGgdRinJZ4cNY/HCvLDdjySDhsCH8As4GwFLn4jksIATIg4Nf6jfSLWenMMUlABD/kAOC7MED9mV27ZWtpvTZjd2oPNyMCin6p2s7o3HbiA2cOs+m6Msk35oPIZMLP47Cl+DzHPytcqkJzJ6Ho2/0fRaAF12riZkDvNCNt6EPa0TotLVFr36SMudCkdgRyvJbyU/sqa0snCe7gYabKtP/D50tIT6FkkTKpRsIrKrhxbNNszvGBkA+PKq7BHYFjsQPJlQPZ1dhL1XrjVnMrXXrzj081wKPUvHTH3+FIDCHa2dMZ4F7nOl7ruelHFV+GDpMgEEDv9WaikSkxGdk60nc8Z2aUr81PrTwRIV+pAKePxqiPqokD93ocjgbB8ztUpxjRDRYIvH83IBsrBIczNUy6BxlpQj90FkEmtFrqD/pgk7F76TtWi+OLB0VXGtcHs1Ng1NJ51Qj8R9B+DhLT+76JVtBOXAQmdRHR7z0DOXoEN0EAoWeKumNv4DGACYvG8JvKdl3e9Qkxg0ALmDUrDk4zkYzijwKRKqfOayvYOOQIjNqgnldyike9ooSIXbb9h+GYQHxumo7gpGYYJNS5DvzByvPXmZhEdGKy5OO865M4WAVaFJHwSgX9MuX2FROhfJ3kMpnIpopGC6yHtVSgz3vzDbslL5Y3byFBG0KVoUX3c0nInsIVzUdTRFZBLaHbBN3eo4IHJl9QoIRw+HNVnXSsethReme0YIqM2m9aMlIISRvPyBNjtseJFt7TVW9sja9pVcqJvpUOPTWL2a4UIJu/2S3+NQoa9I2N4iC2IHCHQhj8ZQcCKnz6/KGEPFIM59/B9iVrlpCy90h1irkKfsnvqz/0s0LqLKR8HFXS/t5c1DpPSnTaQ7HoCc93EcC8MFkEetEoyxljAGs5tJpYiY6y34qw+UbdiEv0AHWLjlU9h0kDmcQs9UnTcQ1F7AZ8i7eEGHc1HK5xCfUjOQTFZNXQHWO+XaCGjbikpRhmpYBO6ap2jMxtAfTYb2kjCtLjp0RBN5fo+nh0B6M6D9os0rLhITQsnRfBi6lsNOIg+fByfuCx5xXkOBm+g6Q8qC4p/lJFt4ul9jzN25jiGBlwNF/q9/6wkMyybmkk71wamK4cTZfFw1x+/jeRmrUBCPloEMVwysw/96xEY3AZqbrVmsyIKkrs4SxQCvxs3aaOHqNwk3d7xxY2cv9EXsoE21/UMEBMQ6M5JmwGGDw0kQf5mOvKZzhaiUJBRHJ9HdOaZQdF/TisIkXHhV6+/r7T8p+WZAVAwqBFBuI5sK6uJSmTlJsBKBlxbCaveLub4NSVebUCA9cI9nm7jgUfcqUUmvHFKGQ48E8MKuRZGiNtlnuxYl+o8tr0aXbQx+o6Opa2alcWZa8XlFhcfLLkuQnRi1L+dIDWv/auZI4lsUeDKjow7q3vjrvBMKH6CMvd6wwq1zxtPRd/m0MCtNINTto8vP7oWTvC3drEanQEX1wyHV0U8ECTwsE8560l87spWHAHAjS9UY0d+Fbwrj0/uukgOMq8mOskEToJ9EFCvImU0kYJ9TEIlKA2dKKn0zDvw5nDnzpIu8GhQ3iqmi9rZjQHfYuJ/vFC9oTBRqPbcwSBCa5SazpYPh4jQ+tjOz1aCUY5heU2RzMYt1VnYortd2T3S9gEwcsqA1QsaPxym+glvNQ8SMe821g+8Tfd2EXn22qZFwJcDyy+1dalqs2yq4ViiurL2gr8mrIPBaP87+gCxwVOUalLH4tvpcf5SpOqIoqJUZhg5HNv2rf0ogy9XD9r77oJ2hWQRmzK08UbdWvfJ2ZyUOTMZCd4VzXlgtqsUI83rh2pZlB2m66tB+inJIar1orsXEYUg8BS9p8Ms3/VMO9qXyy1t45dfjgpVyvbv9lcPEN4QlpaASmVFpyxZ137s1M10rnjFm5VhtQ+GNfpAsOKvzM8C0O6JplxGuNDn6ZRd1I0BjZbX2QiKFIDaH0wUR7aIorUkzEzZtUE5FDGPQNcqQx2wxKIsJddDdwaS4Q2jCS41mQu7jkCTu7iyVvfTDj7GHt9SKZNxUzGWYNC90K/xRLYNKJVGs/XvGNAmkW2nN8VBE2Gr9aUtzBfoY/zlrgps1x2+CvNZjZoaMN3ycITm756GTEdjCpng5VpKolymJrKEx31PWAN5azksfTOIgqZjAGoEGNahZuP0yNnmXACHPAyZtU3H0+VR8+PETNMxGzciiMid8RZ4HEMvg2+hO+BJHyneYroyyOCOUKY2K+BPnNnrlxijdeUvvLp2GfJGZRiRDdVv062W2IIHNOu2gnYHjF61z6EIEmt0pMhigxr3126CSOmYiUhKolropyPxz7Nh4jWGbPs5w6j95egfBRdh2EUT+0QYz2NtxwFafMLTyBtlQqpW9sipQYhoQDaPI9Ww8aMmg96FjyKYt5YbU78LoC0QJeVyG/lRtOjOhN1dI4zw3iQzPuDxIRCtQZXczDd1kW3njcmc0uf+jj8Z+RG6KCpJAcpWOSupiR0FQBXmPLnm8W6kgkSzuON0Guom2NjvDDrWhQWHqAbuO6x7vqottm2yWwJahGyYrBqYQy2Cw5+fP1BI47IRF/7swLzP1Mpg+KF4kdKdAZa6EZQMLzlrtTgK9WVu21N2utQ8FyDf5i9E9tgryTngybc8NycJzgVVWax0gAY2xERokD1YzrVtsfx9TpK3JVied6DEF/hh8oXG2y56idro+pYv7QNwrmGk4za1JZt3ycfONUmUcQTboeZpoJ1imggX3v7igJo1ovYbsdGaYmiP4Da5mehSv1mKPYzFlDZRLMNJvRGWya23AnemkJDM24fQJRnBmW+wsab6ttsv6sE3ryLy7YZbpq387t6/rgn4/5T8/d/mfpR7RB73v+GggDM1sgsOiuHNTW/fhXjjfiye8pOQPiK1X1ojIUJbZxHrvjehREv/DjmBsyyqBbanaBNpUr7sC04pdvpfJEqZ0iwTKVmPxPeSZPRUEwzejNjr5/uwfK9BYq27XGO9CjcWve1E/ns7LaT0PxtopuYn2iVfwrK9l5QvSScODdIolABnXVQCtB1ICKCyDXFFbi99ZH/X6yvqfHFis3ip+xa2UgZAECqfwsuNoW55v7V6ah8ea43ywj0kRSEB40+exNPorUsG4+uLnZIyC4yaUQCvtxjYHsbErmTP6+OuDMNAAugeD3Ft7oytod67IiXh0XQf7wRXkTUodvbv3U5srYMHk3m43S8U+d4LjV2zdwzII2UovOsjqOfa2WHK+ZqPfDycDhlUmh06R/T/X+tY/TRDWoBnDfqpsUsKIjbOrNngsODfuWvzGmLCNroeNAArJZvPluLr2/crmP1aJmf3BfCEBdXVNo6Aw7YtQrC6F2JCGC0TYaIwE7dwpwbc4KuGlDupapZr+pd7JAH3ZCxQGv+tuwcGHWzd5AaVcC1Y4WgHL11CFiF0aPNrm9h5TYSZLyuSEH+/6Np1dJVwFdjlF6Uwqbp3uDoJFVEMXHjmEtSChh+RxX8CvPys6x+5Hh7O7rml+jhem8jO0fxH/Ilchrec01ETddwWNfwykB+dveT/Ox+tCBmv8dhJoPJSFB/jLzBTnxFRRLHkr/K9rnSzZ9+jFT2YUQf0WTF2y83HNLnA9LzoRigU9CeuWHVmflqlEL/WcocK1p/tXvZxrfMXyQh7TNYNDfH5HXUqG0Oecoiu7WCasUeQ59lwu+92JqrnnlAQx2UjKpv2VbmcjjQcv+4htgBk93dUKCwgxf9fwTmsVsDg3RfjFJZgVP5bEb1gkpqThLmpm3LCghED0DYT7ALJVUxTr6hi2SZCB0zZxmjXqxCyJHo2ZaZsRd1LVN26JYVBYHPUOZweEzpCWvA5gEIcuiuld1WcCoIZWiaEdzEKJReHOXGhQt0big81Wk7mnfN6DXKK+A61Va8fUtt46YGcaekfYMxDS7JWo2KMTLLbrvroUIw3NzOM2XhdXg6Y3ic9TQPCBNYR+ZUpZpfcwaW4wtNn6KXT0PcAaRnN3t/gQJ7h+9eMboTGY7x3BEVjm5iULPeQfqkNR7iwIcny7jiFI+062w7mnIEOfgEHsO1C9dL239SHXp3sR7s4Xi62PC/19WIHkdyTLmruWbx1zHo+PSbt6mITGzOpitvZtuCQPhCTlGriLSc/9Rh59TtdjIZT67Hz31TVjAVhIgLYUQ90oRigpAqBY7tCJtkffvwc4gvAzE0yW5/pfZ1gdEdReBk6nhvuuplZTSytptaSfyIvjrAlXRTL6VVKu0jAABxe1AVOFop0l7jkEN3iMBuvB5hTPcJGeugxnbJc2q/RwC99TC5V1mZZYxvJDLN+wLS7o4TowQ/yrkrGvMN6ywqF7FNqW9MZR1E8qaEkqCfJRoRTrq5KXmkcmugPj6TmzMLo0CNcFAtTe5cZb34gfgXPfEwub7Gs/ehrhjXSbUQN3j4OAO7oQRy4lGBxIg4/QJpJlzgq27uWViwgFoioemkqEaKNlj4brFAo1FUqo2ZF1FJb6xXx1Xza8PQtTljuwUpIWudFYd8xREAWqkIlot43vxhySvLYt2nA91gqtD56/CIFZSFVZU/I8+Kx1GU8nc0AxSx/Fupj2M7dA3NiOd1jbyZ7hlrlHWHX/rlPrz1xtceyIJ5pOxJWA8SWW9nqU6zn/WXbqDUsUKwket2q2+C6M1bbXDnj9w2GfDjj6R3JZFfBJUl7M9E9qeMGVbwo5iUBE0epZIYtduQCmo4nfxJ/btXhi/4OjBZqlRtRfJRixiq0CevIghJ82YajE6ZZ+UrRqkwjwJgPXNvdGVOBmAwPjUhKpi2IejkZhc7FljpgYsDHPtsEDfKK1jFw/+b/me1UJdldkmoX2i0udfd0oEJyJx22pxSIZTA5vXWcbjSuMRuT5XILbGQmzbwyf7jQboHjulnO9q/vfegf4Wk3hb/kTQevw7JMan9XFB6ZMoExoAqZSjJIWX24Cm0QjIPXRxfNsqLrgIJ2OiRkxReP0TqNrkwfgNrAutuvNf4hnTZWhRFjQazw6vNCXl0BGjPqFcv6Ku33Xiv2NR44KEbQB+HS1FbQvEFAb7X10Og2KoCGNpK6hsrqSans6YNn5dKJbRzzPO0XvruwE7Y4DLR3kuLLLe6H98QtZWWoLg5rYhrKVYhOzlg9eW6WCn0bHUzUJBg9AA56X85Kw/f66/QiaW6csVOTZ/q+5lqjBdlZO0VR1P20GPVP7QdJ+rVyTi5+SR8wr2mPSeIupgcY9oVZyJU6HbpBSdYq/+ffPf9dVYiSXG5VXbVjcxc/0CrZyIgVUhVMZegcXdKnwlMW8WFKkBmkm0J/EN0gFM3Dy8kbRnn05CsUkejzxfvkiCqE8BFvv5Rgo2zw4HuDJTYhphrz/ZQzSx+Ao9oGblIJk5eJkDY2RqkbOgvhpthRSmXOup2sbXSbYNeDHAEXnTu3Z3PNw+bxNoX8w3lRZZ4dznCnJnm2RXynISWl08WfjsGOfKNEq84pWumC9ctHzws6dLC1viZnm4XUzncjQONUvKRLpM+tA6cBmZYU40qLr9sZdcrIm2Hsf+Dbknlt6eRyxVM6WAuzdhXHEcR+8i9THmueA7Bh1fClmI3qIRe7Hk+oVqA6X/xZlOgCe0k3uKvK++LOvzrfer/RyWEcX6kmasTOYSDtAxYDOUM77WmsfNtHcyl+qx/48UtYhsYqndgbe2++11B3sHNiz7tyhVsThPQIKG5cP8plyMXSwl2VqK3vbqVe9VzzumeHsM/TCwrCQ6EnKCzr/uawtmf6Iakrj4VAk3wYPA3kCRY4MybyLFUp4OGfoKgxXM9Ch+Sj6YeM0+A8442ZYhUk3TGMxM43HOsjswt2RiCMNP57xA6qDqlV5yJcaVXFBVJZYIAILnYwK/pdiaskgV8ssd56tMjvRrRZDQ6acxLyv1oFsNH2qyKXr08vkEUOqlLyDe0JKcYEV0YIqQeMu1aiS6fzxJ26xf/zR8+JsX3WZzMq8NJPt3icG2+4mfmEqSMtx19heqoGuU92bfSzwQEzaN8SLR6/+8DnYhgo8CTogRpxLNJJ6WGTsTYD3/Fd0MS50YFuj+aqH/+Ti08xsYiQkiuoACfVAgX1RQC2lz14CgHjSVuvnS6LYWP3+pnjv3PHMee91950Eq7CkRwCxhVayojxTw2pe3IglauRrxH+pq7bMLL7HRg2fXIo31OluABDrMRtDfbJ3/lKPkttjQXUWTnEoT/Ffjn6la4e3J2+XjdBnbGYnnHreI2s3lc3gE4Gg1xDpR1QucXFY9NYms4lzRlNAh8wj7ohFCbhzwXBglpiP3V0g+j3Le8l8fLqk0xC4HAARI2u1TQQiKwqKCfoUJGfWpAzSMv6FFmDagaQqxD5QZGJ1oRmw1hY1m2qzKOQWZUPf9MjzY8Tn5a7fSXUaJPyXj0uLDHCAlcCPl59Ubegbj0qXPmmY/C9HTG5DRRYqyCGuxLfkQgrNGMQF9zL3zq7xFI0xYBUtjnsEi+EDurOD3pPGw/FRgqgTDZZ8jCmc2dLKX/oy8/bNRw8OjYsDTH2X9J429/e7GD5rAonNbxN6scwMryo4yLVjbM1osRq3fJpyU11oGib+E2x1FUzNCMoJSYR9Oc6yolTU1bqGtsamt5uaBwH64DEoLvdnjyqalsrUgO6l2tTsb0nrQBpjDvDZjayFZePvn8y8QZJwRhLNNZgcv+CTGtT+LmqutIEcE8rOjurx37OKyz47fiwAhoN9LqYkT/IPrqdCuP8+3Fl5m/iOKYlRRsXYoEGJ1YsoAwiqKmSTTTYWpZl/lE1d6j2s1PfpPVm33dRFGl4c30Mw/VR89aTj+B6kBdrm3RBQS0VCBGKgrTefLldvZAKIqdXVlo0Vy3u497h/1CmSuAX5dSn1P5dBSp2alpCu/jqQl96Nhwdl4pyoBDnCvbTzdI1HxSC1DSZUtGrBoKltAKps0pPkj2HraQAqq7qHVkX8CHHf4flqOe0DgbG66CuH3+wmtKJdYewRBaCzQ/ejuwVclvKrtedmOUwFYk2jq+H80gxweWy6KDngqeMmnsgNR08vZHRRQ1UKrIv5y6W2M7Ofrwatp3HV1giwD3RyumomkjOqu/0Ag85bYVYlQqYM4mrCkA9/Y+1cMyfrkL0EqbkSgaVqxc3XfOsRikT3DIZU5jRXN+xQ08t8FGhpQmEBtH8A3e7ANnpakIsbOTZMk9hdHhNj0DerX7QxNDm7Bki7isQIx6o4LP0+Yj4ZHoDVWBkvTBbShITsngUXnYcU+k2Jdm2GPG2GyMw/hLR/181Kel3jYcDUYIdDCbXJVUtGIkitVW8cWQy4LTkdNNCu3ax4IE/vAPYZnmea/841lvgQlEmlJJvI5HuCjCQZMirKAxnNMTRgDEGpGpSTyvrZaosrZJ18p+RXMlu4SOOZc8Y41Y1lQtmBIkKfsrLPiLMQF8LzuEVk1cgmX5Y+Ch3rhIX7whXFtnn3+LCxpiPEXvSxZS5QF/7hJmVLTOy3gPQf2EuE2rlskg1C9xyMLI2KtUrBqCaZCmJJUmNjULOYydZRu9F1y2WkY788tanFRhSyDWi07M+tCDypyygHRzLiIm5zj1+4q/qzTw87EAJZR1Gg3dbgLDmQN6hTG/Ef1C7FiGFHsAFWhVrEJ6Ft1kqVOefDGoYf3zfEoXL8oTe7iEzn57EFufjQhYeG+olEhYgBimQ05urVnjIiH8OQuQcpXOP9yjqF1aN+T610vIEixVWATK9qth0PoG/++Ze6TvlgU1RkoRQsVZxoOPJ3i4dhUzsIoEhdSK4rN81TP5r5fS8pwkEHUogpQWOKqm7+jW7822jWN9rgtbejPgHVOFFYlGAxxbWLtkHjEHGL6ctOcvBVkJf+uy39ubyp8u+7J9dzT17yNrUkPet8pmyxhT54D5kqaI7x1Vnua99PakB4SVA8QKtvbNwQEEOzgCmr9Kmkc2OE6/Tu+GeXDQsZMo2rVtf/yRbPfB55rEy3pCyhLhWKw0h17ciIEg0ItwRD2y6mahPCA5QZ2BA19jc9iazWWBv+uqAZqojvNpFeEbMiEYs7aJEJDu+dD1EZ6KB6SUXjbw+qXyJjcVa3347bk3hIt8CiV3pXQEmj2SlOt6W5Xfc84zakAvh7PRWI3j89yBunWzvQnGh6wvLs2uSTPgBAPAWqCoyp1OWuVnt6GuLaSi8KVShQweuXBCXuhh5Iv0d9wQoXPNCyH6Di2zjL8RjQ3qSu9h5saztHfke2tT/KT6f9ABxJytbJ41CHpNrXEeKKqv9ZsdLD3+r5xynnscnFnEm5Lxc/DxnMVbD1kX1f4Au+XTnVuhhzoPph7Bwfg4HKJYy/JPJHVS1XAOP1VeyJb2IvXofqFIyLtk5NT39OaT7eYKnYO7+GeL7MZvehVWfL8LwF9z5FLE4iFI9CrFx2Og4N5dLuFT9cqUcgNIIQbhWhrw+inETcf6tQtmI6K/FNlvabpMb8TVIFSu4umHHH2D5eHJ2Sapn58Mn0uNhIXRA8HjR5/izTFLwdAXXitMUWQbq0XOmOImATOBmK46siCATKM0D7uSGDVzwAUDkoA2wDJZ1ertnlVuQVPf7ha0F012RwdmQf4rJFmqh200bguK7OJ9p/wNlqFBAOd3JhRPDNSDALDmvFsDC1geuWoDbV8YkAMsk0QkYXbJJfNngYQ2o3n+fcoiip/8+k6Q9c4IX2Uv46XNxO49DJbh3p2xiL+4IMobMr4UzAeXEXQMHaNTIc0ur1V9uPoPgg3VzPJaPzjJIozSi5F8ZO3lo5jsBWAxCCaWRpi+AnHcclhr8NqzLlGqE4iIU8VEGkOruO+uCw7W4IK1KnT5RxCEsIpCP65L/goJZZbN8VJOxR+rbV4zo5g2AUrI2KCdgpqAIE5pnpFiLojlHr+0HGsxUSg1X4EpIWCxdmeZVix4uokzdS0V72odoyWoyZoYagpWqFCb8VjPybIsCvSs3fmRk2WnQvqGkNI4vPb1gL1iIvHB6IvIGE4fOnOVxA7+ahK3Z1m+9MVTp47edO98WFf86FUIptSllH8y3wbKCWNorIR+geuUvWtwow9oUPyBzukykijP/xGZbKKcuzaa+PAxPevDNcyZMyjXbenIrCykVVZaSqVZ0UybGXG26KH3Vgv5B3QDWBG6BMGf+kRj/EUqcoSp8N1PDlE1hqHEzdUrQTTEVonN52jCPK9XW4IBFQA8chDCXqS3R+jd7G+BxONBPyIQ6JtyerD3mDlxZl/SdirqHkOSPtccnzG2P1sc2kH07cbPX+2mKxDTBgCM6wTBjphOLXRtHM4TRiR0phqW+dxBH0TcUbPUCl3iRY30yIqIHM03o+hZX9Jov0nvF0mPteUQcrx/rF5sjhc2pQLiFEaOpZhBwiSfdX1i/Y8rI94KOPNrypqp1D3S00yz7vsUvJFXxapyvOKvxDEDWRjz7UZnfytNZIiK18J4PYHzOQKNxAxmKtAQK3uFJH83bkv+i8wdc1CMWE9n19cxo5YQwMiVqG37FQTP1K2VFvTtrTU6m9vkKax2JIv89AbjnMUhhWW3nQul8du1t/00gYA4/PIuLNa89AAGXZV75KpFOzvQ2ukowkBpeK2qHo6agDe4L5cYGr5pjYlByM4uIbm4yN5DEVhl/FoaN8JJPZTt65SOvRShu331eQfRlTGN3SBI9yRTVfNCBQhuKohQIB0OAiZQ322GVX+zvyaC4GJMrpyLxNkVxp9B4aBP/sqXw5qOnupLckySqwk5nsdNMh9XaIB+Bm5bllyrHXLHCrG2RymtLp3FtIPf9ZcP3sloCJq8RXG/udegKKB2Wh6DY5L9iFWy+QDQmJFLMQqiEn15+x5hepbxUljCOiqj9z+5PxLaeUdPsjjTZeJ8ZbekPYfxDmS4Q5hqJBOLkJyHl+d9kuPKIT3TiK2P5amW6lFe6nIDgn9hnviXwfup6/jkaXzzkXwUr7tEJ+nu7rwqOXi6J6jhxO8xUfQYl7/G81EqFQ2nOra4GSeWbjUNN4+IQmslUhU2TyuG2oyRxN1O/TOC6Na8UoGvUMhcUX1dG0vcByFhZAJQ8uEoyMcAhR+kgn4at5+4HV/TAMGjEmqAQ22TchIPaQQQRDPPxv7EM0iRPyOe9pau1GuEQxlu8R0DseD5RAhfqhXYKmsJebZy1iE/W/DEJ7L9HGaYHKXJBWbJ4ARc2O3NBSrBOQTBrtjVrFQ9wBOpgTewIF/18Knr2B01v/gzBKo7YoNV/t3oA1FZwimQ8YvQcCeuwbnraCs3IAX7OVIuIj+CpQffh8coQj9LIuQRID+5d6mg0WLSYWko/7EPBRRUVi26Z9ZcRbv9uJ0IopCHolaLN//kWjSBuiliYrqvuetRNvvAKsXQPQZiq99GZGcE+15A8G1KEhBV13LuXzMuxGNY2oo9iyjfs5aMBGQRBGXs8rUQJh8IHlfRxdFzJ4NjK/7uvILClqLQH+60RhiI4bzhmse9gM6TXoobylGo4xD6/uSF4mcN60GeT/4HB7MBYop3jMBX7LzL2uz/+tNj09aV9jZHrrRnRwwLGL2NB7mZ"
+    "teacherPhoto": "https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=400&auto=format&fit=crop",
+    "categoryId": "c1",
+    "gradeLevel": "ป.1",
+    "tags": ["Green Advice", "สื่อการสอน"],
+    "downloads": 0,
+    "rating": 5,
+    "views": 0,
+    "createdAt": "2026-09-01",
+    "updatedAt": "2026-09-01",
+    "featured": false
   }
 ];
 
 export const STANDARD_ACADEMIC_CATEGORIES = [
-  'รองผู้อำนวยการ',
-  'ครูชำนาญการพิเศษ',
-  'ครูชำนาญการ',
-  'ครู',
-  'ครูผู้ช่วย',
-  'ครูอัตราจ้าง',
-  'พี่เลี้ยงเด็กพิการ',
-  'ครูพี่เลี้ยง',
-  'นักการภารโรง',
-  'เจ้าหน้าที่ธุรการ'
+  "รองผู้อำนวยการ",
+  "ครูชำนาญการพิเศษ",
+  "ครูชำนาญการ",
+  "ครู",
+  "ครูผู้ช่วย",
+  "ครูอัตราจ้าง",
+  "พี่เลี้ยงเด็กพิการ",
+  "ครูพี่เลี้ยง",
+  "นักการภารโรง",
+  "เจ้าหน้าที่ธุรการ"
 ] as const;
 
 export type TeacherAcademicCategory = typeof STANDARD_ACADEMIC_CATEGORIES[number];
 
 export const normalizeStanding = (val?: string): string => {
-  if (!val || typeof val !== 'string') return '';
-  return val.trim().replace(/\s+/g, ' ');
+  if (!val || typeof val !== "string") return "";
+  return val.trim().replace(/\s+/g, " ");
 };
 
 /**
@@ -1635,10 +1644,10 @@ export const isTeacherDeputyDirector = (teacher?: Teacher | null): boolean => {
   const rawPosition = normalizeStanding(teacher.position);
   const rawName = normalizeStanding(teacher.name);
   return (
-    rawPosition.includes('รองผู้อำนวยการ') ||
-    rawStanding.includes('รองผู้อำนวยการ') ||
-    rawName.includes('อำพา') ||
-    rawName.includes('ศรีจันทร์')
+    rawPosition.includes("รองผู้อำนวยการ") ||
+    rawStanding.includes("รองผู้อำนวยการ") ||
+    rawName.includes("อำพา") ||
+    rawName.includes("ศรีจันทร์")
   );
 };
 
@@ -1647,91 +1656,80 @@ export const isTeacherDeputyDirector = (teacher?: Teacher | null): boolean => {
  * Every teacher belongs to EXACTLY ONE category. No broad substring matching or overlaps.
  */
 export const getTeacherAcademicCategory = (teacher?: Teacher | null): TeacherAcademicCategory => {
-  if (!teacher) return 'ครู';
+  if (!teacher) return "ครู";
 
   // Deputy Director has highest priority for classification
   if (isTeacherDeputyDirector(teacher)) {
-    return 'รองผู้อำนวยการ';
+    return "รองผู้อำนวยการ";
   }
 
   const rawStanding = normalizeStanding(teacher.academicStanding);
   const rawPosition = normalizeStanding(teacher.position);
   
-  // Prefer academic standing if present, otherwise position
   const target = rawStanding || rawPosition;
 
-  // A. ครูชำนาญการพิเศษ (Exact Match)
   if (
-    target === 'ครูชำนาญการพิเศษ' || 
-    target === 'ชำนาญการพิเศษ' || 
-    target === 'ครูเชี่ยวชาญ' || 
-    target === 'ครูเชี่ยวชาญพิเศษ'
+    target === "ครูชำนาญการพิเศษ" || 
+    target === "ชำนาญการพิเศษ" || 
+    target === "ครูเชี่ยวชาญ" || 
+    target === "ครูเชี่ยวชาญพิเศษ"
   ) {
-    return 'ครูชำนาญการพิเศษ';
+    return "ครูชำนาญการพิเศษ";
   }
 
-  // B. ครูชำนาญการ (Exact Match, must NOT match ชำนาญการพิเศษ)
-  if (target === 'ครูชำนาญการ' || target === 'ชำนาญการ') {
-    return 'ครูชำนาญการ';
+  if (target === "ครูชำนาญการ" || target === "ชำนาญการ") {
+    return "ครูชำนาญการ";
   }
 
-  // D. ครูผู้ช่วย (Exact Match)
-  if (target === 'ครูผู้ช่วย' || target === 'ผู้ช่วย') {
-    return 'ครูผู้ช่วย';
+  if (target === "ครูผู้ช่วย" || target === "ผู้ช่วย") {
+    return "ครูผู้ช่วย";
   }
 
-  // C. ครู (Exact Match, must NOT include ครูผู้ช่วย, ชำนาญการ, อัตราจ้าง, etc.)
   if (
-    target === 'ครู' || 
-    target === 'ครู คศ.1' || 
-    target === 'ครูคศ.1' || 
-    target === 'ครู ค.ศ.1' || 
-    target === 'ครูค.ศ.1' || 
-    target === 'คศ.1' || 
-    target === 'ค.ศ.1'
+    target === "ครู" || 
+    target === "ครู คศ.1" || 
+    target === "ครูคศ.1" || 
+    target === "ครู ค.ศ.1" || 
+    target === "ครูค.ศ.1" || 
+    target === "คศ.1" || 
+    target === "ค.ศ.1"
   ) {
-    return 'ครู';
+    return "ครู";
   }
 
-  // E. ครูอัตราจ้าง (Exact Match)
-  if (target === 'ครูอัตราจ้าง' || target === 'อัตราจ้าง') {
-    return 'ครูอัตราจ้าง';
+  if (target === "ครูอัตราจ้าง" || target === "อัตราจ้าง") {
+    return "ครูอัตราจ้าง";
   }
 
-  // G. ครูพี่เลี้ยง (Exact Match)
-  if (target === 'ครูพี่เลี้ยง') {
-    return 'ครูพี่เลี้ยง';
+  if (target === "ครูพี่เลี้ยง") {
+    return "ครูพี่เลี้ยง";
   }
 
-  // F. พี่เลี้ยงเด็กพิการ (Exact Match)
   if (
-    target === 'พี่เลี้ยงเด็กพิการ' || 
-    target === 'พี่เลี้ยงเด็กพิเศษ' || 
-    target === 'พี่เลี้ยง'
+    target === "พี่เลี้ยงเด็กพิการ" || 
+    target === "พี่เลี้ยงเด็กพิเศษ" || 
+    target === "พี่เลี้ยง"
   ) {
-    return 'พี่เลี้ยงเด็กพิการ';
+    return "พี่เลี้ยงเด็กพิการ";
   }
 
-  // H. นักการภารโรง (Exact Match)
   if (
-    target === 'นักการภารโรง' || 
-    target === 'นักการ' || 
-    target === 'ภารโรง'
+    target === "นักการภารโรง" || 
+    target === "นักการ" || 
+    target === "ภารโรง"
   ) {
-    return 'นักการภารโรง';
+    return "นักการภารโรง";
   }
 
-  // I. เจ้าหน้าที่ธุรการ (Exact Match)
   if (
-    target === 'เจ้าหน้าที่ธุรการ' || 
-    target === 'ธุรการ' || 
-    target === 'เจ้าหน้าที่'
+    target === "เจ้าหน้าที่ธุรการ" || 
+    target === "ธุรการ" || 
+    target === "เจ้าหน้าที่"
   ) {
-    return 'เจ้าหน้าที่ธุรการ';
+    return "เจ้าหน้าที่ธุรการ";
   }
 
-  // Fallback: If position is classroom level without specific standing -> 'ครู'
-  return 'ครู';
+  return "ครู";
 };
 
 /**
@@ -1740,7 +1738,7 @@ export const getTeacherAcademicCategory = (teacher?: Teacher | null): TeacherAca
 export const isTeacherSet1Eligible = (teacher?: Teacher | null): boolean => {
   if (!teacher || isTeacherDeputyDirector(teacher)) return false;
   const category = getTeacherAcademicCategory(teacher);
-  return category === 'ครูชำนาญการพิเศษ' || category === 'ครูชำนาญการ';
+  return category === "ครูชำนาญการพิเศษ" || category === "ครูชำนาญการ";
 };
 
 /**
@@ -1749,7 +1747,7 @@ export const isTeacherSet1Eligible = (teacher?: Teacher | null): boolean => {
 export const isTeacherSet2Eligible = (teacher?: Teacher | null): boolean => {
   if (!teacher || isTeacherDeputyDirector(teacher)) return false;
   const category = getTeacherAcademicCategory(teacher);
-  return category === 'ครู' || category === 'ครูผู้ช่วย';
+  return category === "ครู" || category === "ครูผู้ช่วย";
 };
 
 /**
@@ -1759,11 +1757,11 @@ export const isTeacherSet3Eligible = (teacher?: Teacher | null): boolean => {
   if (!teacher || isTeacherDeputyDirector(teacher)) return false;
   const category = getTeacherAcademicCategory(teacher);
   return (
-    category === 'ครูอัตราจ้าง' ||
-    category === 'พี่เลี้ยงเด็กพิการ' ||
-    category === 'ครูพี่เลี้ยง' ||
-    category === 'นักการภารโรง' ||
-    category === 'เจ้าหน้าที่ธุรการ'
+    category === "ครูอัตราจ้าง" ||
+    category === "พี่เลี้ยงเด็กพิการ" ||
+    category === "ครูพี่เลี้ยง" ||
+    category === "นักการภารโรง" ||
+    category === "เจ้าหน้าที่ธุรการ"
   );
 };
 
@@ -1775,9 +1773,6 @@ export const isTeacherSet4Eligible = (teacher?: Teacher | null): boolean => {
   return isTeacherDeputyDirector(teacher);
 };
 
-/**
- * Single source of truth for committee set classification (1, 2, 3, 4 or null if unassigned/unclassified).
- */
 export const getTeacherCommitteeSetNumber = (teacher?: Teacher | null): 1 | 2 | 3 | 4 | null => {
   if (!teacher) return null;
   if (isTeacherSet4Eligible(teacher)) return 4;

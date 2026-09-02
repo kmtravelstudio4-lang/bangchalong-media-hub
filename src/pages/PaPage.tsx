@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { Teacher, PaCommitteeMember, PaEvaluationRecord } from '../types';
 import { 
@@ -107,14 +107,6 @@ export const PaPage: React.FC = () => {
   });
 
   // Filter teachers based on search query, submission status, and academic standing
-  const deputyDirectors = useMemo(() => {
-    return filteredTeachers.filter(t => isTeacherDeputyDirector(t));
-  }, [filteredTeachers]);
-
-  const regularTeachers = useMemo(() => {
-    return filteredTeachers.filter(t => !isTeacherDeputyDirector(t));
-  }, [filteredTeachers]);
-
   const filteredTeachers = teachers.filter(t => {
     const isCompleted = t.paStatus === 'completed' || (Boolean(t.paChallengeTitle) && Boolean(t.paVideoUrl));
     const evals = getTeacherEvaluations(t.id);
@@ -143,7 +135,23 @@ export const PaPage: React.FC = () => {
     // Search query matching
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
-  
+    return (
+      t.name.toLowerCase().includes(q) || 
+      t.position.toLowerCase().includes(q) || 
+      (t.academicStanding || '').toLowerCase().includes(q) ||
+      (t.subjectName || '').toLowerCase().includes(q) ||
+      (t.paChallengeTitle || '').toLowerCase().includes(q)
+    );
+  });
+
+  const deputyDirectors = useMemo(() => {
+    return filteredTeachers.filter(t => isTeacherDeputyDirector(t));
+  }, [filteredTeachers]);
+
+  const regularTeachers = useMemo(() => {
+    return filteredTeachers.filter(t => !isTeacherDeputyDirector(t));
+  }, [filteredTeachers]);
+
   const renderTeacherPaCard = (teacher: Teacher) => {
     const isDeputy = isTeacherDeputyDirector(teacher);
     const isCompleted = teacher.paStatus === 'completed' || (Boolean(teacher.paChallengeTitle) && (Boolean(teacher.paVideoUrl) || Boolean(teacher.paDocumentUrl) || Boolean(teacher.paFolderUrl)));
@@ -375,15 +383,6 @@ export const PaPage: React.FC = () => {
       </div>
     );
   };
-
-  return (
-      t.name.toLowerCase().includes(q) || 
-      t.position.toLowerCase().includes(q) || 
-      (t.academicStanding || '').toLowerCase().includes(q) ||
-      (t.subjectName || '').toLowerCase().includes(q) ||
-      (t.paChallengeTitle || '').toLowerCase().includes(q)
-    );
-  });
 
   // Group teachers by Academic Standing (วิทยฐานะ) - Single Source of Truth
   const academicStandingsList = STANDARD_ACADEMIC_CATEGORIES.map(cat => ({
