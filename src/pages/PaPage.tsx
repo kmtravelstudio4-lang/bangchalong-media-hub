@@ -35,7 +35,8 @@ import {
   isTeacherAssignedToCommittee, 
   getTeacherCommitteeSetNumber, 
   getTeacherAcademicCategory,
-  STANDARD_ACADEMIC_CATEGORIES 
+  STANDARD_ACADEMIC_CATEGORIES,
+  isTeacherDeputyDirector
 } from '../data/mockData';
 
 export const PaPage: React.FC = () => {
@@ -106,6 +107,14 @@ export const PaPage: React.FC = () => {
   });
 
   // Filter teachers based on search query, submission status, and academic standing
+  const deputyDirectors = useMemo(() => {
+    return filteredTeachers.filter(t => isTeacherDeputyDirector(t));
+  }, [filteredTeachers]);
+
+  const regularTeachers = useMemo(() => {
+    return filteredTeachers.filter(t => !isTeacherDeputyDirector(t));
+  }, [filteredTeachers]);
+
   const filteredTeachers = teachers.filter(t => {
     const isCompleted = t.paStatus === 'completed' || (Boolean(t.paChallengeTitle) && Boolean(t.paVideoUrl));
     const evals = getTeacherEvaluations(t.id);
@@ -134,7 +143,240 @@ export const PaPage: React.FC = () => {
     // Search query matching
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
+  
+  const renderTeacherPaCard = (teacher: Teacher) => {
+    const isDeputy = isTeacherDeputyDirector(teacher);
+    const isCompleted = teacher.paStatus === 'completed' || (Boolean(teacher.paChallengeTitle) && (Boolean(teacher.paVideoUrl) || Boolean(teacher.paDocumentUrl) || Boolean(teacher.paFolderUrl)));
+    const hasVideo = Boolean(teacher.paVideoUrl);
+    const hasDoc = Boolean(teacher.paDocumentUrl);
+    const hasFolder = Boolean(teacher.paFolderUrl);
+
     return (
+      <div 
+        key={teacher.id}
+        className={`bg-white rounded-3xl border p-6 shadow-2xs hover:shadow-md transition space-y-4 flex flex-col justify-between ${
+          isDeputy 
+            ? 'border-amber-300 ring-1 ring-amber-400/30 bg-gradient-to-b from-amber-50/20 to-white' 
+            : isCompleted ? 'border-emerald-200' : 'border-slate-200'
+        }`}
+      >
+        <div className="space-y-4">
+          {/* Teacher Profile & PA Status Header */}
+          <div className="flex items-start space-x-3.5">
+            <img 
+              src={teacher.photo || 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=400&auto=format&fit=crop'} 
+              alt={teacher.name} 
+              className={`w-16 h-16 rounded-2xl object-cover shrink-0 shadow-xs ${isDeputy ? 'border-2 border-amber-400' : 'border-2 border-[#005BAC]/20'}`} 
+            />
+            <div className="min-w-0 flex-1">
+              {isCompleted ? (
+                <span className="inline-flex items-center text-[10px] font-bold text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-2 py-0.5 rounded-full mb-1">
+                  <CheckCircle2 className="w-3 h-3 mr-1 text-emerald-600 shrink-0" />
+                  จัดทำเรียบร้อยแล้ว
+                </span>
+              ) : (
+                <span className="inline-flex items-center text-[10px] font-bold text-amber-800 bg-amber-100/90 border border-amber-300 px-2 py-0.5 rounded-full mb-1">
+                  <Clock className="w-3 h-3 mr-1 text-amber-600 shrink-0" />
+                  ยังไม่จัดทำ
+                </span>
+              )}
+
+              <h3 className="font-prompt font-bold text-slate-900 text-base leading-snug truncate">
+                {teacher.name}
+              </h3>
+              <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${isDeputy ? 'bg-amber-100 text-amber-900 font-extrabold border border-amber-300' : 'text-[#005BAC] bg-blue-50'}`}>
+                  {teacher.academicStanding || 'ครู'}
+                </span>
+                {teacher.position && (
+                  <span className="text-[10px] text-slate-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-md font-semibold">
+                    สายชั้น {teacher.position}
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-slate-500 truncate mt-1">
+                {teacher.subjectName || 'กลุ่มสาระการเรียนรู้'}
+              </p>
+            </div>
+          </div>
+
+          {/* PA Challenge Box (ประเด็นท้าทาย) */}
+          <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 space-y-1.5 text-xs">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="font-bold text-slate-800 flex items-center space-x-1">
+                <Award className="w-3.5 h-3.5 text-[#005BAC]" />
+                <span>ประเด็นท้าทาย PA</span>
+              </span>
+              <span className="text-slate-500 font-semibold">ปี 2569</span>
+            </div>
+            <p className="text-slate-700 italic line-clamp-2 leading-relaxed text-[11px]">
+              {teacher.paChallengeTitle || '(ยังไม่ได้ระบุชื่อประเด็นท้าทาย)'}
+            </p>
+          </div>
+
+          {/* Committee 3-Member Mini Roster Status */}
+          <div className="p-3 bg-slate-50/90 rounded-2xl border border-slate-200 space-y-2 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-slate-800 flex items-center space-x-1 text-[11px]">
+                <ClipboardCheck className="w-3.5 h-3.5 text-emerald-600" />
+                <span>การตรวจรับรองโดยคณะกรรมการ</span>
+              </span>
+              {(() => {
+                const teacherSet = getTeacherCommitteeSetNumber(teacher);
+                const targetComm = teacherSet 
+                  ? paCommitteeMembers.filter(m => (m.setNumber || 1) === teacherSet && isTeacherAssignedToCommittee(teacher, m))
+                  : [];
+                const evals = getTeacherEvaluations(teacher.id);
+                const fullyApproved = targetComm.filter(m => {
+                  const rec = evals.find(e => e.committeeId === m.id);
+                  return rec && rec.docChecked && rec.videoChecked;
+                }).length;
+                return (
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    fullyApproved === targetComm.length && targetComm.length > 0
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-slate-200 text-slate-700'
+                  }`}>
+                    {fullyApproved}/{targetComm.length} ท่าน
+                  </span>
+                );
+              })()}
+            </div>
+
+            {/* Committee Members Micro Indicators */}
+            <div className="grid grid-cols-3 gap-1.5 pt-1">
+              {(() => {
+                const teacherSet = getTeacherCommitteeSetNumber(teacher);
+                const targetComm = teacherSet 
+                  ? paCommitteeMembers.filter(m => (m.setNumber || 1) === teacherSet && isTeacherAssignedToCommittee(teacher, m))
+                  : [];
+                if (targetComm.length === 0) {
+                  return (
+                    <div className="col-span-3 text-center text-[10px] text-slate-400 py-1">
+                      ยังไม่ได้รับมอบหมายคณะกรรมการ
+                    </div>
+                  );
+                }
+                return targetComm.map((member, idx) => {
+                  const evals = getTeacherEvaluations(teacher.id);
+                  const evalRec = evals.find(e => e.committeeId === member.id);
+                  const docOk = evalRec?.docChecked ?? false;
+                  const vidOk = evalRec?.videoChecked ?? false;
+                  const allOk = docOk && vidOk;
+
+                  return (
+                    <div 
+                      key={member.id}
+                      className={`p-1.5 rounded-xl border text-center text-[10px] ${
+                        allOk
+                          ? 'bg-emerald-50/80 border-emerald-200 text-emerald-900'
+                          : docOk || vidOk
+                          ? 'bg-blue-50/80 border-blue-200 text-blue-900'
+                          : 'bg-white border-slate-200 text-slate-500'
+                      }`}
+                    >
+                      <span className="font-bold block truncate text-[9px] text-slate-700">
+                        ท่านที่ {member.order || idx + 1}
+                      </span>
+                      <div className="flex items-center justify-center space-x-1 mt-0.5 font-bold">
+                        <span title={docOk ? 'ตรวจเอกสารแล้ว' : 'ยังไม่ตรวจเอกสาร'} className={docOk ? 'text-emerald-600' : 'text-slate-300'}>
+                          📄{docOk ? '✓' : '×'}
+                        </span>
+                        <span title={vidOk ? 'ตรวจคลิปแล้ว' : 'ยังไม่ตรวจคลิป'} className={vidOk ? 'text-emerald-600' : 'text-slate-300'}>
+                          🎥{vidOk ? '✓' : '×'}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+
+            {/* View Committee Feedback Button */}
+            {(() => {
+              const evals = getTeacherEvaluations(teacher.id);
+              const hasAnyFeedback = evals.some(e => e.docChecked || e.videoChecked || e.overallComment);
+              if (!hasAnyFeedback) return null;
+              return (
+                <button
+                  onClick={() => setCommitteeFeedbackTeacher(teacher)}
+                  className="w-full mt-1.5 py-1.5 px-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-[11px] font-bold flex items-center justify-center space-x-1 transition shadow-2xs"
+                >
+                  <MessageSquare className="w-3 h-3 text-[#005BAC]" />
+                  <span>ดูผลการตรวจ & ข้อเสนอแนะกรรมการ</span>
+                </button>
+              );
+            })()}
+          </div>
+
+          {/* PA Video Clip Button */}
+          <div>
+            {hasVideo ? (
+              <button
+                onClick={() => handleOpenVideo(teacher)}
+                className="w-full bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center space-x-2 shadow-xs group/vid"
+              >
+                <Play className="w-4 h-4 fill-white group-hover/vid:scale-110 transition-transform" />
+                <span>🎬 รับชมคลิปวิดีโอ PA</span>
+              </button>
+            ) : (
+              <div className="bg-slate-100 text-slate-400 py-2 px-3 rounded-xl text-[11px] text-center font-medium flex items-center justify-center space-x-1 border border-slate-200">
+                <Video className="w-3.5 h-3.5 text-slate-400" />
+                <span>⏳ ยังไม่มีคลิปวิดีโอ PA</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* PA Document / Folder Link & Profile Details */}
+        <div className="pt-3 flex flex-wrap items-center justify-between border-t border-slate-100 text-xs gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {hasDoc && (
+              <a
+                href={teacher.paDocumentUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[#005BAC] hover:text-[#003875] hover:underline font-bold text-xs flex items-center space-x-1 bg-blue-50 px-2 py-1 rounded-lg border border-blue-200"
+                title="เปิดไฟล์เอกสาร PA"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>เอกสาร PA</span>
+              </a>
+            )}
+
+            {hasFolder && (
+              <a
+                href={teacher.paFolderUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-amber-800 hover:text-amber-950 hover:underline font-bold text-xs flex items-center space-x-1 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200"
+                title="เปิดโฟลเดอร์รวมไฟล์ผลงานทั้งหมด"
+              >
+                <Folder className="w-3.5 h-3.5 text-amber-600" />
+                <span>โฟลเดอร์รวมไฟล์</span>
+              </a>
+            )}
+
+            {!hasDoc && !hasFolder && (
+              <span className="text-[11px] text-slate-400 italic">
+                ยังไม่มีไฟล์เอกสาร
+              </span>
+            )}
+          </div>
+
+          <button
+            onClick={() => setSelectedTeacher(teacher)}
+            className="bg-slate-100 hover:bg-[#005BAC] hover:text-white text-slate-700 px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1 shrink-0"
+          >
+            <span>โปรไฟล์</span>
+            <ExternalLink className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  return (
       t.name.toLowerCase().includes(q) || 
       t.position.toLowerCase().includes(q) || 
       (t.academicStanding || '').toLowerCase().includes(q) ||
@@ -494,250 +736,65 @@ export const PaPage: React.FC = () => {
         {filteredTeachers.length === 0 ? (
           <div className="bg-white p-12 text-center rounded-3xl border border-dashed border-slate-300 space-y-2">
             <UserCheck className="w-12 h-12 text-slate-300 mx-auto" />
-            <p className="font-bold text-slate-700 text-sm">ไม่พบข้อมูลครูตามเงื่อนไขที่เลือก</p>
+            <p className="font-bold text-slate-700 text-sm">ไม่พบข้อมูลตามเงื่อนไขที่เลือก</p>
             <p className="text-xs text-slate-500">ลองเปลี่ยนตัวกรองสถานะ หรือค้นหาด้วยคำอื่น</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTeachers.map((teacher) => {
-              const isCompleted = teacher.paStatus === 'completed' || (Boolean(teacher.paChallengeTitle) && (Boolean(teacher.paVideoUrl) || Boolean(teacher.paDocumentUrl) || Boolean(teacher.paFolderUrl)));
-              const hasVideo = Boolean(teacher.paVideoUrl);
-              const hasDoc = Boolean(teacher.paDocumentUrl);
-              const hasFolder = Boolean(teacher.paFolderUrl);
-
-              return (
-                <div 
-                  key={teacher.id}
-                  className={`bg-white rounded-3xl border p-6 shadow-2xs hover:shadow-md transition space-y-4 flex flex-col justify-between ${
-                    isCompleted ? 'border-emerald-200' : 'border-slate-200'
-                  }`}
-                >
-                  <div className="space-y-4">
-                    {/* Teacher Profile & PA Status Header */}
-                    <div className="flex items-start space-x-3.5">
-                      <img 
-                        src={teacher.photo || 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=400&auto=format&fit=crop'} 
-                        alt={teacher.name} 
-                        className="w-16 h-16 rounded-2xl object-cover border-2 border-[#005BAC]/20 shrink-0 shadow-xs" 
-                      />
-                      <div className="min-w-0 flex-1">
-                        {isCompleted ? (
-                          <span className="inline-flex items-center text-[10px] font-bold text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-2 py-0.5 rounded-full mb-1">
-                            <CheckCircle2 className="w-3 h-3 mr-1 text-emerald-600 shrink-0" />
-                            จัดทำเรียบร้อยแล้ว
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center text-[10px] font-bold text-amber-800 bg-amber-100/90 border border-amber-300 px-2 py-0.5 rounded-full mb-1">
-                            <Clock className="w-3 h-3 mr-1 text-amber-600 shrink-0" />
-                            ยังไม่จัดทำ
-                          </span>
-                        )}
-
-                        <h3 className="font-prompt font-bold text-slate-900 text-base leading-snug truncate">
-                          {teacher.name}
-                        </h3>
-                        <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
-                          <span className="text-[10px] font-bold text-[#005BAC] bg-blue-50 px-2 py-0.5 rounded-md">
-                            {teacher.academicStanding || 'ครู'}
-                          </span>
-                          {teacher.position && (
-                            <span className="text-[10px] text-slate-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-md font-semibold">
-                              สายชั้น {teacher.position}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-slate-500 truncate mt-1">
-                          {teacher.subjectName || 'กลุ่มสาระการเรียนรู้'}
-                        </p>
-                      </div>
+          <div className="space-y-8">
+            {/* Section 4A: Deputy Directors (รองผู้อำนวยการสถานศึกษา - กรรมการชุดที่ 4) */}
+            {deputyDirectors.length > 0 && (
+              <div className="space-y-4 bg-gradient-to-br from-amber-500/10 via-blue-500/5 to-transparent p-6 sm:p-8 rounded-3xl border border-amber-300/60 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200/80 pb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-400 text-white flex items-center justify-center font-bold shadow-md shrink-0">
+                      <Award className="w-5 h-5" />
                     </div>
-
-                    {/* PA Challenge Box (ประเด็นท้าทาย) */}
-                    <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 space-y-1.5 text-xs">
-                      <div className="flex items-center justify-between text-[11px]">
-                        <span className="font-bold text-slate-800 flex items-center space-x-1">
-                          <Award className="w-3.5 h-3.5 text-[#005BAC]" />
-                          <span>ประเด็นท้าทาย PA</span>
-                        </span>
-                        <span className="text-slate-500 font-semibold text-[10px]">
-                          ปี {teacher.paYear || '2569'}
-                        </span>
-                      </div>
-
-                      {teacher.paChallengeTitle ? (
-                        <p className="text-xs text-slate-800 font-medium leading-relaxed line-clamp-3 bg-white p-2 rounded-xl border border-slate-200">
-                          "{teacher.paChallengeTitle}"
-                        </p>
-                      ) : (
-                        <p className="text-[11px] text-slate-400 italic bg-white p-2 rounded-xl border border-dashed border-slate-200">
-                          (ยังไม่ได้ระบุชื่อประเด็นท้าทาย)
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Committee Members Review Status on Card */}
-                    <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80 space-y-2">
-                      <div className="flex items-center justify-between text-[11px]">
-                        <span className="font-bold text-slate-700 flex items-center space-x-1">
-                          <ClipboardCheck className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>การตรวจรับรองโดยคณะกรรมการ</span>
-                        </span>
-                        {(() => {
-                          const teacherSet = getTeacherCommitteeSetNumber(teacher);
-                          const targetComm = teacherSet 
-                            ? paCommitteeMembers.filter(m => (m.setNumber || 1) === teacherSet && isTeacherAssignedToCommittee(teacher, m))
-                            : [];
-                          const evals = getTeacherEvaluations(teacher.id);
-                          const approvedCount = targetComm.filter(m => {
-                            const e = evals.find(rec => rec.committeeId === m.id);
-                            return e && e.docChecked && e.videoChecked;
-                          }).length;
-                          return (
-                            <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
-                              approvedCount === targetComm.length && targetComm.length > 0
-                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                                : approvedCount > 0
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-slate-200 text-slate-600'
-                            }`}>
-                              {approvedCount}/{targetComm.length} ท่าน
-                            </span>
-                          );
-                        })()}
-                      </div>
-
-                      {/* Committee Members Micro Indicators */}
-                      <div className="grid grid-cols-3 gap-1.5 pt-1">
-                        {(() => {
-                          const teacherSet = getTeacherCommitteeSetNumber(teacher);
-                          const targetComm = teacherSet 
-                            ? paCommitteeMembers.filter(m => (m.setNumber || 1) === teacherSet && isTeacherAssignedToCommittee(teacher, m))
-                            : [];
-                          if (targetComm.length === 0) {
-                            return (
-                              <div className="col-span-3 text-center text-[10px] text-slate-400 py-1">
-                                ยังไม่ได้รับมอบหมายคณะกรรมการ
-                              </div>
-                            );
-                          }
-                          return targetComm.map((member, idx) => {
-                            const evals = getTeacherEvaluations(teacher.id);
-                            const evalRec = evals.find(e => e.committeeId === member.id);
-                            const docOk = evalRec?.docChecked ?? false;
-                            const vidOk = evalRec?.videoChecked ?? false;
-                            const allOk = docOk && vidOk;
-
-                            return (
-                              <div 
-                                key={member.id}
-                                className={`p-1.5 rounded-xl border text-center text-[10px] ${
-                                  allOk
-                                    ? 'bg-emerald-50/80 border-emerald-200 text-emerald-900'
-                                    : docOk || vidOk
-                                    ? 'bg-blue-50/80 border-blue-200 text-blue-900'
-                                    : 'bg-white border-slate-200 text-slate-500'
-                                }`}
-                              >
-                                <span className="font-bold block truncate text-[9px] text-slate-700">
-                                  ท่านที่ {member.order || idx + 1}
-                                </span>
-                                <div className="flex items-center justify-center space-x-1 mt-0.5 font-bold">
-                                  <span title={docOk ? 'ตรวจเอกสารแล้ว' : 'ยังไม่ตรวจเอกสาร'} className={docOk ? 'text-emerald-600' : 'text-slate-300'}>
-                                    📄{docOk ? '✓' : '×'}
-                                  </span>
-                                  <span title={vidOk ? 'ตรวจคลิปแล้ว' : 'ยังไม่ตรวจคลิป'} className={vidOk ? 'text-emerald-600' : 'text-slate-300'}>
-                                    🎥{vidOk ? '✓' : '×'}
-                                  </span>
-                                </div>
-                              </div>
-                            );
-                          });
-                        })()}
-                      </div>
-
-                      {/* View Committee Feedback Button */}
-                      {(() => {
-                        const evals = getTeacherEvaluations(teacher.id);
-                        const hasAnyFeedback = evals.some(e => e.docChecked || e.videoChecked || e.overallComment);
-                        if (!hasAnyFeedback) return null;
-                        return (
-                          <button
-                            onClick={() => setCommitteeFeedbackTeacher(teacher)}
-                            className="w-full mt-1.5 py-1.5 px-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-[11px] font-bold flex items-center justify-center space-x-1 transition shadow-2xs"
-                          >
-                            <MessageSquare className="w-3 h-3 text-[#005BAC]" />
-                            <span>ดูผลการตรวจ & ข้อเสนอแนะกรรมการ</span>
-                          </button>
-                        );
-                      })()}
-                    </div>
-
-                    {/* PA Video Clip Button */}
                     <div>
-                      {hasVideo ? (
-                        <button
-                          onClick={() => handleOpenVideo(teacher)}
-                          className="w-full bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center space-x-2 shadow-xs group/vid"
-                        >
-                          <Play className="w-4 h-4 fill-white group-hover/vid:scale-110 transition-transform" />
-                          <span>🎬 รับชมคลิปวิดีโอ PA</span>
-                        </button>
-                      ) : (
-                        <div className="bg-slate-100 text-slate-400 py-2 px-3 rounded-xl text-[11px] text-center font-medium flex items-center justify-center space-x-1 border border-slate-200">
-                          <Video className="w-3.5 h-3.5 text-slate-400" />
-                          <span>⏳ ยังไม่มีคลิปวิดีโอ PA</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* PA Document / Folder Link & Profile Details */}
-                  <div className="pt-3 flex flex-wrap items-center justify-between border-t border-slate-100 text-xs gap-1.5">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {hasDoc && (
-                        <a
-                          href={teacher.paDocumentUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-[#005BAC] hover:text-[#003875] hover:underline font-bold text-xs flex items-center space-x-1 bg-blue-50 px-2 py-1 rounded-lg border border-blue-200"
-                          title="เปิดไฟล์เอกสาร PA"
-                        >
-                          <FileText className="w-3.5 h-3.5" />
-                          <span>เอกสาร PA</span>
-                        </a>
-                      )}
-
-                      {hasFolder && (
-                        <a
-                          href={teacher.paFolderUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-amber-800 hover:text-amber-950 hover:underline font-bold text-xs flex items-center space-x-1 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200"
-                          title="เปิดโฟลเดอร์รวมไฟล์ผลงานทั้งหมด"
-                        >
-                          <Folder className="w-3.5 h-3.5 text-amber-600" />
-                          <span>โฟลเดอร์รวมไฟล์</span>
-                        </a>
-                      )}
-
-                      {!hasDoc && !hasFolder && (
-                        <span className="text-[11px] text-slate-400 italic">
-                          ยังไม่มีไฟล์เอกสาร
+                      <h3 className="font-prompt font-extrabold text-slate-900 text-lg sm:text-xl flex items-center space-x-2">
+                        <span>คณะผู้บริหารสถานศึกษา / รองผู้อำนวยการโรงเรียน</span>
+                        <span className="text-xs font-bold text-amber-900 bg-amber-200 px-2.5 py-0.5 rounded-full">
+                          {deputyDirectors.length} ท่าน
                         </span>
-                      )}
+                      </h3>
+                      <p className="text-xs text-slate-600 mt-0.5">
+                        ข้อตกลงในการพัฒนางาน ว.PA ประเมินโดย: <strong>คณะกรรมการชุดที่ 4 (ประเมินรองผู้อำนวยการสถานศึกษา)</strong>
+                      </p>
                     </div>
-
-                    <button
-                      onClick={() => setSelectedTeacher(teacher)}
-                      className="bg-slate-100 hover:bg-[#005BAC] hover:text-white text-slate-700 px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1 shrink-0"
-                    >
-                      <span>โปรไฟล์</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </button>
                   </div>
+                  <span className="inline-flex items-center text-xs font-bold text-amber-900 bg-amber-100 border border-amber-300 px-3 py-1 rounded-full w-fit">
+                    🎯 คณะกรรมการชุดที่ 4 ประเมิน
+                  </span>
                 </div>
-              );
-            })}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {deputyDirectors.map((teacher) => renderTeacherPaCard(teacher))}
+                </div>
+              </div>
+            )}
+
+            {/* Section 4B: Regular Teachers & Personnel */}
+            {regularTeachers.length > 0 && (
+              <div className="space-y-4">
+                {deputyDirectors.length > 0 && (
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-3 pt-2">
+                    <div className="flex items-center space-x-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-[#005BAC] text-white flex items-center justify-center font-bold shrink-0">
+                        <Users className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-prompt font-extrabold text-slate-900 text-lg sm:text-xl">
+                        คณะครูผู้สอนและบุคลากรทางการศึกษา
+                      </h3>
+                    </div>
+                    <span className="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
+                      {regularTeachers.length} ท่าน
+                    </span>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {regularTeachers.map((teacher) => renderTeacherPaCard(teacher))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </section>

@@ -253,7 +253,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem(STORAGE_KEYS.TEACHERS);
       if (!saved) return INITIAL_TEACHERS;
       const parsed = JSON.parse(saved);
-      return Array.isArray(parsed) ? parsed : INITIAL_TEACHERS;
+      if (Array.isArray(parsed)) {
+        const existingIds = new Set(parsed.map((t: any) => t.id));
+        const missing = INITIAL_TEACHERS.filter(t => !existingIds.has(t.id));
+        const merged = missing.length > 0 ? [...parsed, ...missing] : parsed;
+        return merged.map(t => {
+          const initial = INITIAL_TEACHERS.find(i => i.id === t.id);
+          if (initial && (t.id === 't-deputy-1' || t.id === 't-deputy-2')) {
+            return { ...initial, ...t, position: initial.position, academicStanding: initial.academicStanding };
+          }
+          return t;
+        });
+      }
+      return INITIAL_TEACHERS;
     } catch {
       return INITIAL_TEACHERS;
     }
@@ -299,7 +311,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem(STORAGE_KEYS.COMMITTEE);
       if (!saved) return INITIAL_PA_COMMITTEE;
       const parsed = JSON.parse(saved);
-      return Array.isArray(parsed) ? parsed : INITIAL_PA_COMMITTEE;
+      if (Array.isArray(parsed)) {
+        const existingIds = new Set(parsed.map((m: any) => m.id));
+        const missing = INITIAL_PA_COMMITTEE.filter(m => !existingIds.has(m.id));
+        return missing.length > 0 ? [...parsed, ...missing] : parsed;
+      }
+      return INITIAL_PA_COMMITTEE;
     } catch {
       return INITIAL_PA_COMMITTEE;
     }
@@ -475,8 +492,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
 
         if (remoteTeachers && remoteTeachers.length > 0) {
-          setTeachers(remoteTeachers);
-          localStorage.setItem(STORAGE_KEYS.TEACHERS, JSON.stringify(remoteTeachers));
+          const existingIds = new Set(remoteTeachers.map((t) => t.id));
+          const missing = INITIAL_TEACHERS.filter(t => !existingIds.has(t.id));
+          const fullTeachers = missing.length > 0 ? [...remoteTeachers, ...missing] : remoteTeachers;
+          setTeachers(fullTeachers);
+          localStorage.setItem(STORAGE_KEYS.TEACHERS, JSON.stringify(fullTeachers));
         }
 
         if (remoteCategories && remoteCategories.length > 0) {
@@ -499,9 +519,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
 
         if (remoteCommittee && remoteCommittee.length > 0) {
-          remoteCommittee.sort((a, b) => a.order - b.order);
-          setPaCommitteeMembers(remoteCommittee);
-          localStorage.setItem(STORAGE_KEYS.COMMITTEE, JSON.stringify(remoteCommittee));
+          const existingIds = new Set(remoteCommittee.map((m) => m.id));
+          const missing = INITIAL_PA_COMMITTEE.filter(m => !existingIds.has(m.id));
+          const fullCommittee = missing.length > 0 ? [...remoteCommittee, ...missing] : remoteCommittee;
+          fullCommittee.sort((a, b) => (a.setNumber || 1) - (b.setNumber || 1) || a.order - b.order);
+          setPaCommitteeMembers(fullCommittee);
+          localStorage.setItem(STORAGE_KEYS.COMMITTEE, JSON.stringify(fullCommittee));
         }
 
         if (remoteEvaluations && remoteEvaluations.length > 0) {
@@ -1117,13 +1140,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     
     if (!found) {
-      if (clean === 'bch1') {
-        const setNum = preferredSetNumber || 1;
+      const setNum = preferredSetNumber || 1;
+      if (clean === 'bch1' || clean === 'ผอ' || clean === 'director') {
         found = paCommitteeMembers.find(m => m.setNumber === setNum && m.order === 1) || paCommitteeMembers.find(m => m.order === 1);
       } else if (clean === 'bch2') {
-        found = paCommitteeMembers.find(m => m.id === 'comm-1-2' || (m.setNumber === 1 && m.order === 2));
+        found = paCommitteeMembers.find(m => (m.setNumber === setNum && m.order === 2) || m.id === `comm-${setNum}-2` || (m.setNumber === 1 && m.order === 2));
       } else if (clean === 'bch3') {
-        found = paCommitteeMembers.find(m => m.id === 'comm-1-3' || (m.setNumber === 1 && m.order === 3));
+        found = paCommitteeMembers.find(m => (m.setNumber === setNum && m.order === 3) || m.id === `comm-${setNum}-3` || (m.setNumber === 1 && m.order === 3));
       } else if (clean === 'bch4') {
         found = paCommitteeMembers.find(m => m.id === 'comm-2-2' || (m.setNumber === 2 && m.order === 2));
       } else if (clean === 'bch5') {

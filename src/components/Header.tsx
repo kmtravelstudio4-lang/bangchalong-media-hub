@@ -197,9 +197,10 @@ export const Header: React.FC = () => {
               <button
                 onClick={() => setIsTeacherLoginOpen(true)}
                 className="flex items-center space-x-1 text-amber-200 hover:text-white px-2 py-0.5 rounded-md hover:bg-white/10 transition font-medium cursor-pointer"
+                title="เข้าสู่ระบบสำหรับคุณครูและรองผู้อำนวยการ"
               >
                 <UserCheck className="w-3.5 h-3.5 text-[#FFD54F]" />
-                <span>สำหรับครู</span>
+                <span>เข้าสู่ระบบ ครู / รอง ผอ.</span>
               </button>
             )}
 
